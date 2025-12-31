@@ -243,6 +243,7 @@ export default function HomePage() {
 
             <div className="nav-links">
               <a href="/tournaments">Tournaments</a>
+              <a href="/tournaments/completed">Completed Events</a>
               {!authLoading && (
                 userType === "player" ? (
                   <a href="/player/dashboard" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>My Dashboard</a>
@@ -289,13 +290,13 @@ export default function HomePage() {
 
               <div className="stats-container" aria-label="Site statistics">
                 <div className="stat-item">
-                  {/* <div className="stat-number">500+</div>
-                  <div className="stat-label">Active Players</div> */}
+                  <div className="stat-number">100+</div>
+                  <div className="stat-label">Active Players</div> 
                 </div>
                 <div className="stat-divider" />
                 <div className="stat-item">
                   <div className="stat-number">50+</div>
-                  <div className="stat-label">Monthly Events</div>
+                  <div className="stat-label">Events</div>
                 </div>
                 <div className="stat-divider" />
                 <div className="stat-item">
@@ -348,14 +349,14 @@ export default function HomePage() {
                 className={mapView === "mumbai" ? "active" : ""}
                 onClick={() => setMapView("mumbai")}
               >
-                🔍 Mumbai
+                Mumbai
               </button>
               <button
                 type="button"
                 className={mapView === "india" ? "active" : ""}
                 onClick={() => setMapView("india")}
               >
-                🇮🇳 All India
+                All India
               </button>
             </div>
 

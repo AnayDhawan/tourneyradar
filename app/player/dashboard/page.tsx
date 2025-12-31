@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase, type Tournament } from "../../../lib/supabase";
 import Footer from "../../../components/Footer";
+import { useToast } from "../../../components/Toast";
 
 type Tab = "registrations" | "wishlist" | "browse";
 
@@ -30,6 +31,7 @@ function formatDate(dateStr: string): string {
 
 export default function PlayerDashboardPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("registrations");
   const [player, setPlayer] = useState<Player | null>(null);
@@ -46,40 +48,40 @@ export default function PlayerDashboardPage() {
 
   const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
-      alert('Passwords do not match!');
+      showToast('Passwords do not match!', 'error');
       return;
     }
     if (newPassword.length < 6) {
-      alert('Password must be at least 6 characters long');
+      showToast('Password must be at least 6 characters long', 'error');
       return;
     }
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
-      alert('Password updated successfully!');
+      showToast('Password updated successfully!', 'success');
       setShowPasswordModal(false);
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: any) {
       console.error('Error:', err);
-      alert('Failed to update password: ' + err.message);
+      showToast('Failed to update password: ' + err.message, 'error');
     }
   };
 
   const handleChangeEmail = async () => {
     if (!newEmail) {
-      alert('Please enter a new email address');
+      showToast('Please enter a new email address', 'error');
       return;
     }
     try {
       const { error } = await supabase.auth.updateUser({ email: newEmail });
       if (error) throw error;
-      alert('Verification email sent to ' + newEmail + '. Please check your inbox to confirm.');
+      showToast('Verification email sent to ' + newEmail + '. Please check your inbox.', 'success');
       setShowEmailModal(false);
       setNewEmail('');
     } catch (err: any) {
       console.error('Error:', err);
-      alert('Failed to update email: ' + err.message);
+      showToast('Failed to update email: ' + err.message, 'error');
     }
   };
 
@@ -308,7 +310,7 @@ export default function PlayerDashboardPage() {
               My Registrations ({registeredTournaments.length})
             </button>
             <button className={activeTab === "wishlist" ? "active" : ""} onClick={() => setActiveTab("wishlist")}>
-              💙 Wishlist ({favoriteTournaments.length})
+              Wishlist ({favoriteTournaments.length})
             </button>
             <button className={activeTab === "browse" ? "active" : ""} onClick={() => setActiveTab("browse")}>
               Browse All
@@ -365,7 +367,7 @@ export default function PlayerDashboardPage() {
             <div>
               {favoriteTournaments.length === 0 ? (
                 <div className="card" style={{ textAlign: "center", padding: "3rem" }}>
-                  <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>💙</div>
+                  <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>♥</div>
                   <h3 className="font-display" style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>
                     No tournaments in wishlist
                   </h3>

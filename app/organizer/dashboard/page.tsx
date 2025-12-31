@@ -7,6 +7,7 @@ import { supabase, type Tournament } from "../../../lib/supabase";
 import { getAnalyticsForTournaments, type AnalyticsEventType } from "../../../lib/analytics";
 import dynamic from "next/dynamic";
 import Footer from "../../../components/Footer";
+import { useToast } from "../../../components/Toast";
 
 const BarChart = dynamic(() => import("recharts").then((m) => m.BarChart), { ssr: false });
 const Bar = dynamic(() => import("recharts").then((m) => m.Bar), { ssr: false });
@@ -42,6 +43,7 @@ function formatDate(dateStr: string): string {
 
 export default function OrganizerDashboardPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [organizer, setOrganizer] = useState<Organizer | null>(null);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -54,40 +56,40 @@ export default function OrganizerDashboardPage() {
 
   const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
-      alert('Passwords do not match!');
+      showToast('Passwords do not match!', 'error');
       return;
     }
     if (newPassword.length < 6) {
-      alert('Password must be at least 6 characters long');
+      showToast('Password must be at least 6 characters long', 'error');
       return;
     }
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
-      alert('Password updated successfully!');
+      showToast('Password updated successfully!', 'success');
       setShowPasswordModal(false);
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: any) {
       console.error('Error:', err);
-      alert('Failed to update password: ' + err.message);
+      showToast('Failed to update password: ' + err.message, 'error');
     }
   };
 
   const handleChangeEmail = async () => {
     if (!newEmail) {
-      alert('Please enter a new email address');
+      showToast('Please enter a new email address', 'error');
       return;
     }
     try {
       const { error } = await supabase.auth.updateUser({ email: newEmail });
       if (error) throw error;
-      alert('Verification email sent to ' + newEmail + '. Please check your inbox to confirm.');
+      showToast('Verification email sent to ' + newEmail + '. Please check your inbox.', 'success');
       setShowEmailModal(false);
       setNewEmail('');
     } catch (err: any) {
       console.error('Error:', err);
-      alert('Failed to update email: ' + err.message);
+      showToast('Failed to update email: ' + err.message, 'error');
     }
   };
 
@@ -173,7 +175,7 @@ export default function OrganizerDashboardPage() {
       setTournaments(tournaments.filter((t) => t.id !== tournamentId));
     } catch (error) {
       console.error("Delete error:", error);
-      alert("Failed to delete tournament");
+      showToast('Failed to delete tournament', 'error');
     }
   }
 

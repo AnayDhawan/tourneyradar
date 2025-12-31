@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "../lib/AuthContext";
 import Footer from "./Footer";
+import ScrollToTop from "./ScrollToTop";
 
 interface BaseLayoutProps {
   children: React.ReactNode;
@@ -43,7 +44,12 @@ export default function BaseLayout({
               </Link>
 
               <div className="nav-links">
-                <Link href="/tournaments" style={{ textDecoration: "none", color: "inherit" }}>Tournaments</Link>
+                <Link href="/tournaments" style={{ textDecoration: "none", color: "inherit" }}>
+                  Tournaments
+                </Link>
+                <Link href="/tournaments/completed" style={{ textDecoration: "none", color: "inherit" }}>
+                  Completed Events
+                </Link>
                 {!authLoading && (
                   userType === "player" ? (
                     <Link href="/player/dashboard" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>
@@ -130,6 +136,7 @@ export default function BaseLayout({
       <main style={{ flex: 1 }}>{children}</main>
 
       <Footer />
+      <ScrollToTop />
     </div>
   );
 }

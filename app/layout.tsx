@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "../lib/AuthContext";
+import { ToastProvider } from "../components/Toast";
 
 export const metadata: Metadata = {
-  title: "TourneyRadar - Discover Chess Tournaments Across India",
+  title: "TourneyRadar | Chess Tournaments across India",
   description: "Find and register for chess tournaments across India. Connect with organizers, track your registrations, and never miss a tournament.",
   keywords: "chess tournaments, chess india, fide tournaments, chess events, tournament registration, indian chess, chess competition",
   authors: [{ name: "TourneyRadar" }],
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
     locale: "en_IN",
     url: "https://tourneyradar.com",
     siteName: "TourneyRadar",
-    title: "TourneyRadar - Chess Tournaments India",
+    title: "TourneyRadar",
     description: "Discover 500+ chess tournaments across India. Find FIDE-rated events, register online, and connect with organizers.",
     images: [
       {
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tourney Radar - Chess Tournaments India",
+    title: "Tourney Radar - Chess Tournaments across India",
     description: "Find chess tournaments across India",
     images: ["/og-image.png"],
   },
@@ -56,7 +57,9 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
       </head>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </AuthProvider>
       </body>
     </html>
   );

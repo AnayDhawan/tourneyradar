@@ -10,6 +10,8 @@ import { use, useEffect, useState } from "react";
 import { supabase, type Tournament } from "../../../lib/supabase";
 import { trackEvent } from "../../../lib/analytics";
 import { useAuth } from "../../../lib/AuthContext";
+import { useToast } from "../../../components/Toast";
+import Breadcrumbs from "../../../components/Breadcrumbs";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -114,6 +116,7 @@ type Player = {
 export default function TournamentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { user: authUser, userType, loading: authLoading } = useAuth();
+  const { showToast } = useToast();
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [similar, setSimilar] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
@@ -225,8 +228,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
       window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`, "_blank");
     } else {
       navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      showToast('Link copied to clipboard!', 'success');
     }
   };
 
@@ -454,7 +456,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                     gap: "0.5rem"
                   }}
                 >
-                  {isFavorited ? "💙 In Wishlist" : "🤍 Add to Wishlist"}
+                  {isFavorited ? "In Wishlist" : "Add to Wishlist"}
                 </button>
                 {isRegistered ? (
                   <button onClick={handlePlayerUnregister} className="btn" style={{ background: "var(--success)", color: "white", border: "none" }}>

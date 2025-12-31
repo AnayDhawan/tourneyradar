@@ -44,28 +44,16 @@ export default function Footer() {
       }}>
         {/* Logo & Tagline */}
         <div>
-          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
-                        <h3 className="font-display" style={{
+          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "right", gap: "0.75rem", marginBottom: "0.5rem" }}>
+            <h3 className="font-display" style={{
               fontSize: "1.5rem",
               fontWeight: 800,
               color: "var(--primary)",
-              margin: 0
+              margin: 0,
+              textAlign: "center"
             }}>
               TourneyRadar
-            </h3>
-            <img 
-              src="/logo.jpg" 
-              alt="TourneyRadar Logo" 
-              style={{ 
-                height: "40px", 
-                width: "40px", 
-                borderRadius: "6px",
-                objectFit: "cover"
-              }} 
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
+            </h3>            
           </Link>
           <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", lineHeight: 1.6 }}>
             Discover chess tournaments across India. Connect with organizers, track your registrations, and never miss a tournament.
@@ -83,6 +71,9 @@ export default function Footer() {
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
             <Link href="/tournaments" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
               Browse Tournaments
+            </Link>
+            <Link href="/tournaments/completed" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
+              Completed Tournaments
             </Link>
             <Link href="/player/login" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
               Player Login

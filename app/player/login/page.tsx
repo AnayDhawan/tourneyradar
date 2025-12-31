@@ -4,16 +4,42 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
+import { useToast } from "../../../components/Toast";
 
 export default function PlayerLoginPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  const handleForgotPassword = async () => {
+    if (!resetEmail) {
+      showToast('Please enter your email address', 'error');
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      showToast('Password reset email sent! Check all email incase the mail is not visible', 'success');
+      setShowForgotPassword(false);
+      setResetEmail("");
+    } catch (err: any) {
+      showToast('Failed to send reset email: ' + err.message, 'error');
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   useEffect(() => {
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -112,7 +138,7 @@ export default function PlayerLoginPage() {
                 />
               </div>
 
-              <div style={{ marginBottom: "1.5rem" }}>
+              <div style={{ marginBottom: "1rem" }}>
                 <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                   Password
                 </label>
@@ -124,6 +150,24 @@ export default function PlayerLoginPage() {
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   placeholder="Enter your password"
                 />
+              </div>
+
+              <div style={{ textAlign: "right", marginBottom: "1.5rem" }}>
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "var(--primary)",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    padding: 0
+                  }}
+                >
+                  Forgot Password?
+                </button>
               </div>
 
               <button
@@ -145,6 +189,68 @@ export default function PlayerLoginPage() {
           </div>
         </div>
       </section>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <>
+          <div 
+            onClick={() => setShowForgotPassword(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 999
+            }}
+          />
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 1000,
+            width: '90%',
+            maxWidth: '400px'
+          }}>
+            <div className="card" style={{ padding: '2rem' }}>
+              <h3 className="font-display" style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-primary)' }}>
+                Reset Password
+              </h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+                Enter your email address and we'll send you a link to reset your password.
+              </p>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <input
+                  type="email"
+                  className="form-input"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder="Enter your email"
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                <button
+                  onClick={() => setShowForgotPassword(false)}
+                  className="btn"
+                  style={{ background: 'var(--surface-elevated)', border: '2px solid var(--border)', color: "var(--text-primary)"}}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleForgotPassword}
+                  disabled={resetLoading}
+                  className="btn btn-primary"
+                  style={{ opacity: resetLoading ? 0.6 : 1 }}
+                >
+                  {resetLoading ? 'Sending...' : 'Send Reset Link'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

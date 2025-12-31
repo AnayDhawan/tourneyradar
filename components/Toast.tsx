@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from "react";
 
 type ToastType = "success" | "error" | "info" | "warning";
 
@@ -26,6 +26,11 @@ export function useToast() {
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const showToast = useCallback((message: string, type: ToastType = "success") => {
     const id = Math.random().toString(36).substring(2, 9);
@@ -70,81 +75,85 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const getIcon = (type: ToastType) => {
     switch (type) {
       case "success":
-        return "✅";
+        return "Success";
       case "error":
-        return "❌";
+        return "Error";
       case "warning":
-        return "⚠️";
+        return "Warning";
       case "info":
-        return "ℹ️";
+        return "Info";
       default:
-        return "📢";
+        return "Notice";
     }
   };
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <style jsx global>{`
-        @keyframes slideIn {
-          from {
-            transform: translateX(100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
-        @keyframes slideOut {
-          from {
-            transform: translateX(0);
-            opacity: 1;
-          }
-          to {
-            transform: translateX(100%);
-            opacity: 0;
-          }
-        }
-      `}</style>
-      <div
-        style={{
-          position: "fixed",
-          top: "1rem",
-          right: "1rem",
-          zIndex: 99999,
-          display: "flex",
-          flexDirection: "column",
-          gap: "0.75rem",
-        }}
-      >
-        {toasts.map((toast) => (
+      {isClient && (
+        <>
+          <style jsx global>{`
+            @keyframes slideIn {
+              from {
+                transform: translateX(100%);
+                opacity: 0;
+              }
+              to {
+                transform: translateX(0);
+                opacity: 1;
+              }
+            }
+            @keyframes slideOut {
+              from {
+                transform: translateX(0);
+                opacity: 1;
+              }
+              to {
+                transform: translateX(100%);
+                opacity: 0;
+              }
+            }
+          `}</style>
           <div
-            key={toast.id}
-            style={getToastStyles(toast.type)}
-            onClick={() => removeToast(toast.id)}
+            style={{
+              position: "fixed",
+              top: "1rem",
+              right: "1rem",
+              zIndex: 99999,
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.75rem",
+            }}
           >
-            <span style={{ fontSize: "1.25rem" }}>{getIcon(toast.type)}</span>
-            <span style={{ flex: 1, fontWeight: 500 }}>{toast.message}</span>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                removeToast(toast.id);
-              }}
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "white",
-                cursor: "pointer",
-                padding: "0.25rem",
-                opacity: 0.7,
-              }}
-            >
-              ✕
-            </button>
+            {toasts.map((toast) => (
+              <div
+                key={toast.id}
+                style={getToastStyles(toast.type)}
+                onClick={() => removeToast(toast.id)}
+              >
+                <span style={{ fontSize: "1.25rem" }}>{getIcon(toast.type)}</span>
+                <span style={{ flex: 1, fontWeight: 500 }}>{toast.message}</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeToast(toast.id);
+                  }}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: "white",
+                    cursor: "pointer",
+                    padding: "0.25rem",
+                    opacity: 0.7,
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
     </ToastContext.Provider>
   );
 }

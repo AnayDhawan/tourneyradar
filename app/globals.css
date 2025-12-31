@@ -1123,3 +1123,25 @@ body > div[style*="position: fixed"][style*="bottom"][style*="left"] {
     justify-content: center;
   }
 }
+
+/* Skeleton Loading Animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Toast Slide Animation */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
