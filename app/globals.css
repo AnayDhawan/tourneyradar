@@ -134,9 +134,11 @@
       color: white;
     }
     
+    /* FIXED: Nav links shown by default on desktop */
     .nav-links {
-      display: none;
+      display: flex;
       gap: 2rem;
+      align-items: center;
       color: rgba(255, 255, 255, 0.9);
       font-weight: 500;
     }
@@ -152,9 +154,9 @@
       color: white;
     }
     
-    /* Mobile Menu Button */
+    /* FIXED: Mobile Menu Button - hidden by default on desktop */
     .mobile-menu-btn {
-      display: block;
+      display: none;
       background: transparent;
       border: none;
       color: white;
@@ -529,17 +531,118 @@
         transform: translateY(0);
       }
     }
-    
-    /* Responsive Breakpoints */
-    @media (min-width: 640px) {
-      .nav-links {
-        display: flex;
-      }
-      
-      .mobile-menu-btn {
-        display: none;
-      }
-    }
+
+/* =============================================
+   MOBILE DRAWER - THE ACTUAL MENU THAT SLIDES IN
+   ============================================= */
+
+.mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99999;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.mobile-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  max-width: 85vw;
+  height: 100%;
+  background: var(--surface);
+  z-index: 100000;
+  padding: 1.5rem;
+  box-shadow: -4px 0 25px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.25s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+
+.mobile-drawer-brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.mobile-drawer-close {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.mobile-drawer-close:hover {
+  background: var(--surface-elevated);
+}
+
+.mobile-drawer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mobile-drawer-nav a {
+  display: block;
+  padding: 1rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.mobile-drawer-nav a:hover {
+  background: var(--surface-elevated);
+  color: var(--primary);
+}
+
+.mobile-drawer-cta {
+  margin-top: 1rem !important;
+  background: var(--primary) !important;
+  color: white !important;
+  text-align: center;
+  font-weight: 600 !important;
+}
+
+.mobile-drawer-cta:hover {
+  background: var(--primary-dark) !important;
+  color: white !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* =============================================
+   RESPONSIVE BREAKPOINTS - SINGLE SOURCE OF TRUTH
+   ============================================= */
     
     @media (min-width: 768px) {
       nav {
@@ -549,7 +652,15 @@
       .hero-content-wrapper {
         padding: 3rem;
       }
+
+      /* Desktop: show nav links, hide hamburger */
+      .nav-links {
+        display: flex !important;
+      }
       
+      .mobile-menu-btn {
+        display: none !important;
+      }
     }
     
     @media (min-width: 1024px) {
@@ -562,17 +673,28 @@
       }
     }
     
-    @media (max-width: 639px) {
+    @media (max-width: 767px) {
+      /* Mobile: hide nav links, show hamburger */
+      .nav-links {
+        display: none !important;
+      }
+      
+      .mobile-menu-btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+      }
+
       .stats-container {
         justify-content: center;
       }
       
-    .chess-knight {
-      width: 150px;
-      height: 150px;
-      right: 5%;
-      bottom: 10%;
-    }
+      .chess-knight {
+        width: 150px;
+        height: 150px;
+        right: 5%;
+        bottom: 10%;
+      }
 
       .btn-group {
         flex-direction: column;
@@ -768,25 +890,6 @@
       justify-content: center !important;
     }
 
-    /* Scrollable tabs wrapper */
-.tabs-scroll-wrapper {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-
-.tabs-scroll-wrapper::-webkit-scrollbar {
-  height: 4px;
-}
-
-.tabs-scroll-wrapper::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.tabs-scroll-wrapper::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 2px;
-}
-
 /* Mobile-only fixes - won't affect desktop */
 @media (max-width: 768px) {
   .tournament-hero {
@@ -831,110 +934,7 @@
     grid-template-columns: 1fr !important;
     gap: 1rem !important;
   }
-}
 
-@media (max-width: 480px) {
-  .hide-on-small {
-    display: none !important;
-  }
-  
-  /* Stack grid layouts on mobile */
-  .tab-content div[style*="grid-template-columns: 160px"] {
-    grid-template-columns: 1fr !important;
-  }
-}
-
-@media (max-width: 360px) {
-  .hide-on-tiny {
-    display: none !important;
-  }
-  
-  .show-on-tiny {
-    display: inline !important;
-  }
-  
-  .tournament-hero {
-    padding: 1rem 0.75rem !important;
-    padding-top: 4.5rem !important;
-  }
-  
-  .view-toggle button {
-    font-size: 0.75rem;
-    padding: 0.5rem 0.6rem;
-  }
-}
-
-/* Leaflet Popup Fixes */
-.leaflet-popup-content-wrapper {
-  background: var(--background) !important;
-  color: var(--text-primary) !important;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
-  border-radius: 12px !important;
-  padding: 4px !important;
-}
-
-.leaflet-popup-content {
-  color: var(--text-primary) !important;
-  margin: 16px !important;
-}
-
-.leaflet-popup-content div {
-  color: var(--text-primary) !important;
-}
-
-.leaflet-popup-tip {
-  background: var(--background) !important;
-}
-
-.leaflet-popup-close-button {
-  color: var(--text-primary) !important;
-  font-size: 24px !important;
-  padding: 8px 12px !important;
-  top: 4px !important;
-  right: 4px !important;
-  width: 32px !important;
-  height: 32px !important;
-  border-radius: 50% !important;
-  background: rgba(0,0,0,0.05) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.leaflet-popup-close-button:hover {
-  color: var(--text-danger) !important;
-  background: rgba(var(--text-danger), 0.1) !important;
-}
-
-/* Hide Next.js dev indicator */
-#__next-build-watcher,
-[data-nextjs-scroll-focus-boundary] {
-  display: none !important;
-}
-
-body > div[style*="position: fixed"][style*="bottom"][style*="left"] {
-  display: none !important;
-}
-
-/* ========================================
-   COMPREHENSIVE MOBILE RESPONSIVENESS
-   ======================================== */
-
-/* Mobile Navigation */
-@media (max-width: 768px) {
-  .nav-links {
-    display: none;
-  }
-  
-  .mobile-menu-btn {
-    display: flex !important;
-  }
-  
-  .nav-container {
-    padding: 0.75rem 1rem;
-  }
-  
-  /* Hero sections */
   .hero-title {
     font-size: 2rem !important;
     line-height: 1.2 !important;
@@ -1010,10 +1010,22 @@ body > div[style*="position: fixed"][style*="bottom"][style*="left"] {
   div[style*="gridTemplateColumns: repeat(auto-fit, minmax(200px"] {
     grid-template-columns: repeat(2, 1fr) !important;
   }
+
+  .nav-container {
+    padding: 0.75rem 1rem;
+  }
 }
 
-/* Small mobile (375px) */
 @media (max-width: 480px) {
+  .hide-on-small {
+    display: none !important;
+  }
+  
+  /* Stack grid layouts on mobile */
+  .tab-content div[style*="grid-template-columns: 160px"] {
+    grid-template-columns: 1fr !important;
+  }
+
   .hero-title {
     font-size: 1.75rem !important;
   }
@@ -1044,8 +1056,25 @@ body > div[style*="position: fixed"][style*="bottom"][style*="left"] {
   }
 }
 
-/* Very small screens (360px) */
 @media (max-width: 360px) {
+  .hide-on-tiny {
+    display: none !important;
+  }
+  
+  .show-on-tiny {
+    display: inline !important;
+  }
+  
+  .tournament-hero {
+    padding: 1rem 0.75rem !important;
+    padding-top: 4.5rem !important;
+  }
+  
+  .view-toggle button {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.6rem;
+  }
+
   .hero-title {
     font-size: 1.5rem !important;
   }
@@ -1058,6 +1087,58 @@ body > div[style*="position: fixed"][style*="bottom"][style*="left"] {
     padding: 0.625rem 1rem !important;
     font-size: 0.875rem !important;
   }
+}
+
+/* Leaflet Popup Fixes */
+.leaflet-popup-content-wrapper {
+  background: var(--background) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
+  border-radius: 12px !important;
+  padding: 4px !important;
+}
+
+.leaflet-popup-content {
+  color: var(--text-primary) !important;
+  margin: 16px !important;
+}
+
+.leaflet-popup-content div {
+  color: var(--text-primary) !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--background) !important;
+}
+
+.leaflet-popup-close-button {
+  color: var(--text-primary) !important;
+  font-size: 24px !important;
+  padding: 8px 12px !important;
+  top: 4px !important;
+  right: 4px !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: rgba(0,0,0,0.05) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: var(--text-danger) !important;
+  background: rgba(var(--text-danger), 0.1) !important;
+}
+
+/* Hide Next.js dev indicator */
+#__next-build-watcher,
+[data-nextjs-scroll-focus-boundary] {
+  display: none !important;
+}
+
+body > div[style*="position: fixed"][style*="bottom"][style*="left"] {
+  display: none !important;
 }
 
 /* Tablet (768px - 1024px) */
@@ -1121,6 +1202,31 @@ body > div[style*="position: fixed"][style*="bottom"][style*="left"] {
   
   footer div[style*="display: flex"][style*="gap: 1rem"] {
     justify-content: center;
+  }
+
+  footer > div:first-child > div {
+    text-align: left !important;
+  }
+  
+  footer h3,
+  footer h4,
+  footer p,
+  footer a {
+    text-align: left !important;
+  }
+  
+  footer div[style*="display: flex"] {
+    justify-content: flex-start !important;
+  }
+  
+  /* Align footer links to the left */
+  footer div[style*="flexDirection: column"] {
+    align-items: flex-start !important;
+  }
+  
+  /* Copyright stays centered */
+  footer > div:last-child {
+    text-align: center !important;
   }
 }
 

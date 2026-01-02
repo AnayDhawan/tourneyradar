@@ -85,6 +85,9 @@ function KnightSvg() {
 export default function HomePage() {
   const { user, userType, loading: authLoading } = useAuth();
   const [mapView, setMapView] = useState<MapView>("mumbai");
+  
+  // ========== MOBILE MENU STATE - THIS IS THE FIX ==========
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -117,6 +120,12 @@ export default function HomePage() {
 
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
+
+  // ========== LOCK BODY SCROLL WHEN MENU OPEN ==========
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -232,8 +241,62 @@ export default function HomePage() {
     return { center: [22.9734, 78.6569] as [number, number], zoom: 5 };
   }, [mapView]);
 
+  // Helper to get dashboard link
+  const getDashboardLink = () => {
+    if (userType === "player") return { href: "/player/dashboard", label: "My Dashboard" };
+    if (userType === "organizer") return { href: "/organizer/dashboard", label: "Organizer Dashboard" };
+    if (userType === "admin") return { href: "/admin/dashboard", label: "Admin Panel" };
+    return { href: "/player/login", label: "Player Login" };
+  };
+
+  const dashboard = getDashboardLink();
+
   return (
     <>
+      {/* ========== MOBILE MENU OVERLAY - THIS IS THE FIX ========== */}
+      {mobileMenuOpen && (
+        <div 
+          className="mobile-overlay"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <div 
+            className="mobile-drawer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mobile-drawer-header">
+              <span className="mobile-drawer-brand font-display">TourneyRadar</span>
+              <button 
+                className="mobile-drawer-close"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close menu"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </button>
+            </div>
+            
+            <nav className="mobile-drawer-nav">
+              <Link href="/tournaments" onClick={() => setMobileMenuOpen(false)}>
+                Tournaments
+              </Link>
+              <Link href="/tournaments/completed" onClick={() => setMobileMenuOpen(false)}>
+                Completed Events
+              </Link>
+              {!authLoading && (
+                <Link 
+                  href={dashboard.href} 
+                  className="mobile-drawer-cta"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {dashboard.label}
+                </Link>
+              )}
+            </nav>
+          </div>
+        </div>
+      )}
+
       <section className="hero-bg">
         <nav className="glass">
           <div className="nav-container">
@@ -257,7 +320,12 @@ export default function HomePage() {
               )}
             </div>
 
-            <button className="mobile-menu-btn" aria-label="Menu">
+            {/* ========== HAMBURGER BUTTON WITH onClick - THIS IS THE FIX ========== */}
+            <button 
+              className="mobile-menu-btn" 
+              aria-label="Open menu"
+              onClick={() => setMobileMenuOpen(true)}
+            >
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
                 <path d="M4 7h16M4 12h16M4 17h16" stroke="white" strokeWidth="2" strokeLinecap="round" />
               </svg>
