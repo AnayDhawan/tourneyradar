@@ -167,6 +167,10 @@ export default function HomePage() {
         .select("*")
         .eq("status", "published")
         .order("date", { ascending: true });
+      
+      // Filter to only show upcoming tournaments (date >= today)
+      const today = new Date().toISOString().split('T')[0];
+      const upcomingTournaments = data?.filter(t => t.date >= today) || [];
 
       if (cancelled) return;
 
@@ -177,7 +181,7 @@ export default function HomePage() {
         return;
       }
 
-      setTournaments((data ?? []) as Tournament[]);
+      setTournaments(upcomingTournaments as Tournament[]); // ← CHANGED: Use upcomingTournaments instead of data
       setLoading(false);
     }
 

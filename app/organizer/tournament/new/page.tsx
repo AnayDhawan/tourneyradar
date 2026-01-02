@@ -56,6 +56,9 @@ export default function NewTournamentPage() {
   const [organizer, setOrganizer] = useState<Organizer | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [showPrizeTemplate, setShowPrizeTemplate] = useState(false);
+  const [showScheduleTemplate, setShowScheduleTemplate] = useState(false);
+  
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -73,13 +76,13 @@ export default function NewTournamentPage() {
     entry_fee: "",
     prize_pool: "",
     prize_distribution: '{"1st Place": "₹20,000", "2nd Place": "₹15,000", "3rd Place": "₹10,000"}',
-    amenities: "Parking, Food, AC Hall",
+    amenities: "Parking; Food; AC Hall",
     organizer_name: "",
     organizer_phone: "",
     organizer_email: "",
     whatsapp_group: "",
     registration_link: "",
-    rules: "Valid ID required, No electronic devices, FIDE rules apply",
+    rules: "Valid ID required; No electronic devices; FIDE rules apply",
     schedule: '[{"round": "Round 1", "time": "9:00 AM"}, {"round": "Round 2", "time": "11:00 AM"}]',
   });
 
@@ -137,6 +140,22 @@ export default function NewTournamentPage() {
   function updateField<K extends keyof FormData>(field: K, value: FormData[K]) {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert("Template copied! Paste it in ChatGPT/Claude along with your PDF.");
+  };
+
+  const validateJSON = (jsonString: string, fieldName: string): boolean => {
+    if (!jsonString.trim()) return true; // Allow empty
+    try {
+      JSON.parse(jsonString);
+      return true;
+    } catch (e) {
+      alert(`Invalid JSON in ${fieldName}. Please check the format.`);
+      return false;
+    }
+  };
 
   function validateStep1(): boolean {
     if (!formData.name.trim()) {
@@ -236,6 +255,14 @@ export default function NewTournamentPage() {
     e.preventDefault();
     setError(null);
 
+    // Validate JSON fields
+    if (!validateJSON(formData.prize_distribution, "Prize Distribution")) {
+      return;
+    }
+    if (!validateJSON(formData.schedule, "Schedule")) {
+      return;
+    }
+
     if (!validateStep3()) return;
     if (!organizer || !pdfFile) return;
 
@@ -260,28 +287,43 @@ export default function NewTournamentPage() {
       // 3. Get coordinates from state
       const coords = getCoordinatesFromState(formData.state);
 
-      // 4. Parse JSON fields
-      let prizeDistribution = {};
+      // 4. Parse JSON fields with validation
+      let prizeDistribution: any = {};
       try {
-        prizeDistribution = JSON.parse(formData.prize_distribution || "{}");
-      } catch {
-        prizeDistribution = {};
+        const prizeStr = formData.prize_distribution.trim();
+        if (prizeStr) {
+          prizeDistribution = JSON.parse(prizeStr);
+          console.log("Prize Distribution being sent to Supabase:");
+          console.log(JSON.stringify(prizeDistribution, null, 2));
+        }
+      } catch (e) {
+        console.error("Prize distribution parse error:", e);
+        setError("Invalid prize distribution JSON format");
+        setSubmitting(false);
+        return;
       }
 
       let schedule: any[] = [];
       try {
-        schedule = JSON.parse(formData.schedule || "[]");
-      } catch {
-        schedule = [];
+        const schedStr = formData.schedule.trim();
+        if (schedStr) {
+          schedule = JSON.parse(schedStr);
+          console.log("Parsed schedule:", schedule);
+        }
+      } catch (e) {
+        console.error("Schedule parse error:", e);
+        setError("Invalid schedule JSON format");
+        setSubmitting(false);
+        return;
       }
 
       const rules = formData.rules
-        .split(",")
+        .split(";")
         .map((r) => r.trim())
         .filter((r) => r.length > 0);
 
       const amenities = formData.amenities
-        .split(",")
+        .split(";")
         .map((a) => a.trim())
         .filter((a) => a.length > 0);
 
@@ -329,6 +371,86 @@ export default function NewTournamentPage() {
       setSubmitting(false);
     }
   }
+
+  const prizeTemplate = `Please extract the COMPLETE prize distribution from this tournament PDF including:
+- ALL prize categories (Open, Female, Veteran Male, Veteran Female, Differently Abled, etc.)
+- ALL rating categories (Unrated, 1400-1499, 1500-1599, 1600-1699, 1700-1799, 1800-1899, etc.)
+- ALL age categories (U07, U09, U11, U13, U15, etc.)
+- Exact prize amounts for each position
+- Any trophies mentioned
+- Age eligibility criteria for each category
+
+Format it EXACTLY like this structure (include ALL categories from the PDF):
+
+{
+  "Open_Prizes": {
+    "1st": "₹20,000 + Trophy",
+    "2nd": "₹15,000 + Trophy",
+    "3rd": "₹10,000 + Trophy",
+    "4th": "₹9,000 + Trophy",
+    "5th": "₹8,000 + Trophy",
+    "6th": "₹7,000",
+    "7th": "₹6,000",
+    "8th_to_30th": "₹5,000 each"
+  },
+  "Female_Prizes": {
+    "description": "Born before 01.01.2010",
+    "1st_to_5th": "₹4,250 each"
+  },
+  "Veteran_Male": {
+    "description": "Born before 01.01.1970",
+    "1st_to_5th": "₹4,250 each"
+  },
+  "Veteran_Female": {
+    "description": "Born before 01.01.1975",
+    "1st_to_5th": "₹4,250 each"
+  },
+  "Differently_Abled": {
+    "1st_to_8th": "₹4,250 each"
+  },
+  "Rating_Category_Prizes": {
+    "Unrated": { "1st_to_5th": "₹4,250 each" },
+    "1400_to_1499": { "1st_to_5th": "₹4,250 each" },
+    "1500_to_1599": { "1st_to_5th": "₹4,250 each" },
+    "1600_to_1699": { "1st_to_5th": "₹4,250 each" },
+    "1700_to_1799": { "1st_to_3rd": "₹4,250 each" },
+    "1800_to_1899": { "1st_to_3rd": "₹4,250 each" }
+  },
+  "Age_Category_Trophies": {
+    "U07": "Girls 5 + Boys 5 (Born after 01.01.2018)",
+    "U09": "Girls 5 + Boys 5 (Born after 01.01.2016)",
+    "U11": "Girls 5 + Boys 5 (Born after 01.01.2014)",
+    "U13": "Girls 5 + Boys 5 (Born after 01.01.2012)",
+    "U15": "Girls 5 + Boys 5 (Born after 01.01.2010)"
+  }
+}
+
+IMPORTANT: Return ONLY the complete JSON with all categories filled in. No explanation, no markdown, just the JSON.`;
+
+  const scheduleTemplate = `Please extract the COMPLETE tournament schedule from this PDF including:
+- ALL rounds (1, 2, 3... through the final round)
+- Prize distribution ceremony
+- Exact times and dates for each round
+- Any breaks or special events
+
+Format it as a JSON array like this:
+
+[
+  { "round": 1, "time": "09:30 AM, 23-Dec-2025" },
+  { "round": 2, "time": "02:00 PM, 23-Dec-2025" },
+  { "round": 3, "time": "09:30 AM, 24-Dec-2025" },
+  { "round": 4, "time": "02:00 PM, 24-Dec-2025" },
+  { "round": 5, "time": "09:30 AM, 25-Dec-2025" },
+  { "round": 6, "time": "02:00 PM, 25-Dec-2025" },
+  { "round": 7, "time": "09:30 AM, 26-Dec-2025" },
+  { "round": 8, "time": "02:00 PM, 26-Dec-2025" },
+  { "round": 9, "time": "09:30 AM, 27-Dec-2025" },
+  { "round": 10, "time": "02:00 PM, 27-Dec-2025" },
+  { "round": 11, "time": "09:30 AM, 28-Dec-2025" },
+  { "round": "Prize Distribution", "time": "02:00 PM, 28-Dec-2025" }
+]
+
+IMPORTANT: Return ONLY the complete JSON array with all rounds. No explanation, no markdown, just the JSON array.`;
 
   if (loading) {
     return (
@@ -655,7 +777,7 @@ export default function NewTournamentPage() {
 
                     <div>
                       <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
-                        Prize Distribution (JSON, optional)
+                        Prize Distribution (JSON, *)
                       </label>
                       <textarea
                         className="form-input"
@@ -665,18 +787,92 @@ export default function NewTournamentPage() {
                         placeholder='{"1st Place": "₹20,000", "2nd Place": "₹15,000"}'
                         style={{ resize: "vertical", fontFamily: "monospace", fontSize: "0.875rem" }}
                       />
+                      
+                      {/* AI Helper - Collapsible */}
+                      <details style={{ marginTop: "0.5rem" }}>
+                        <summary style={{ 
+                          cursor: "pointer", 
+                          fontSize: "0.875rem", 
+                          color: "var(--primary)", 
+                          fontWeight: 600,
+                          padding: "0.5rem 0"
+                        }}>
+                          🤖 Need help? Use AI to format from PDF
+                        </summary>
+                        <div style={{ 
+                          marginTop: "0.5rem", 
+                          padding: "0.75rem", 
+                          background: "var(--surface-elevated)", 
+                          borderRadius: "6px",
+                          fontSize: "0.75rem",
+                          lineHeight: 1.6,
+                          border: "1px solid var(--border)"
+                        }}>
+                          <p style={{ marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                            1. Copy template below<br/>
+                            2. Go to ChatGPT or Claude<br/>
+                            3. Paste template + upload your PDF<br/>
+                            4. Copy AI response and paste above
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setShowPrizeTemplate(!showPrizeTemplate)}
+                            style={{
+                              fontSize: "0.75rem",
+                              padding: "0.5rem 0.75rem",
+                              background: "var(--primary)",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "6px",
+                              cursor: "pointer"
+                            }}
+                          >
+                            {showPrizeTemplate ? "Hide Template" : "Show Template"}
+                          </button>
+                          {showPrizeTemplate && (
+                            <>
+                              <pre style={{
+                                marginTop: "0.5rem",
+                                padding: "0.5rem",
+                                background: "var(--surface)",
+                                borderRadius: "4px",
+                                fontSize: "0.65rem",
+                                overflow: "auto",
+                                maxHeight: "200px",
+                                border: "1px solid var(--border)"
+                              }}>{prizeTemplate}</pre>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(prizeTemplate)}
+                                style={{
+                                  marginTop: "0.5rem",
+                                  fontSize: "0.75rem",
+                                  padding: "0.5rem 0.75rem",
+                                  background: "var(--primary)",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "6px",
+                                  cursor: "pointer"
+                                }}
+                              >
+                                📋 Copy Template
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </details>
                     </div>
 
                     <div>
                       <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
-                        Amenities (comma-separated)
+                        Amenities (semicolon-separated)
                       </label>
                       <input
                         type="text"
                         className="form-input"
                         value={formData.amenities}
                         onChange={(e) => updateField("amenities", e.target.value)}
-                        placeholder="Parking, Food, AC Hall, WiFi"
+                        placeholder="Parking; Food; AC Hall; WiFi"
                       />
                     </div>
                   </div>
@@ -729,7 +925,7 @@ export default function NewTournamentPage() {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                       <div>
                         <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
-                          WhatsApp Group Link (optional)
+                          WhatsApp Group Link *
                         </label>
                         <input
                           type="url"
@@ -742,7 +938,7 @@ export default function NewTournamentPage() {
 
                       <div>
                         <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
-                          Registration Link (optional)
+                          Registration Link *
                         </label>
                         <input
                           type="url"
@@ -774,21 +970,21 @@ export default function NewTournamentPage() {
 
                     <div>
                       <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
-                        Rules (comma-separated)
+                        Rules (semicolon-separated) *
                       </label>
                       <textarea
                         className="form-input"
                         rows={2}
                         value={formData.rules}
                         onChange={(e) => updateField("rules", e.target.value)}
-                        placeholder="Valid ID required, No electronic devices, FIDE rules apply"
+                        placeholder="Valid ID required; No electronic devices; FIDE rules apply"
                         style={{ resize: "vertical" }}
                       />
                     </div>
 
                     <div>
                       <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
-                        Schedule (JSON array, optional)
+                        Schedule (JSON array, *)
                       </label>
                       <textarea
                         className="form-input"
@@ -798,6 +994,80 @@ export default function NewTournamentPage() {
                         placeholder='[{"round": "Round 1", "time": "9:00 AM"}]'
                         style={{ resize: "vertical", fontFamily: "monospace", fontSize: "0.875rem" }}
                       />
+                      
+                      {/* AI Helper - Collapsible */}
+                      <details style={{ marginTop: "0.5rem" }}>
+                        <summary style={{ 
+                          cursor: "pointer", 
+                          fontSize: "0.875rem", 
+                          color: "var(--primary)", 
+                          fontWeight: 600,
+                          padding: "0.5rem 0"
+                        }}>
+                          🤖 Need help? Use AI to format from PDF
+                        </summary>
+                        <div style={{ 
+                          marginTop: "0.5rem", 
+                          padding: "0.75rem", 
+                          background: "var(--surface-elevated)", 
+                          borderRadius: "6px",
+                          fontSize: "0.75rem",
+                          lineHeight: 1.6,
+                          border: "1px solid var(--border)"
+                        }}>
+                          <p style={{ marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                            1. Copy template below<br/>
+                            2. Go to ChatGPT or Claude<br/>
+                            3. Paste template + upload your PDF<br/>
+                            4. Copy AI response and paste above
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setShowScheduleTemplate(!showScheduleTemplate)}
+                            style={{
+                              fontSize: "0.75rem",
+                              padding: "0.5rem 0.75rem",
+                              background: "var(--primary)",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "6px",
+                              cursor: "pointer"
+                            }}
+                          >
+                            {showScheduleTemplate ? "Hide Template" : "Show Template"}
+                          </button>
+                          {showScheduleTemplate && (
+                            <>
+                              <pre style={{
+                                marginTop: "0.5rem",
+                                padding: "0.5rem",
+                                background: "var(--surface)",
+                                borderRadius: "4px",
+                                fontSize: "0.65rem",
+                                overflow: "auto",
+                                maxHeight: "200px",
+                                border: "1px solid var(--border)"
+                              }}>{scheduleTemplate}</pre>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(scheduleTemplate)}
+                                style={{
+                                  marginTop: "0.5rem",
+                                  fontSize: "0.75rem",
+                                  padding: "0.5rem 0.75rem",
+                                  background: "var(--primary)",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "6px",
+                                  cursor: "pointer"
+                                }}
+                              >
+                                📋 Copy Template
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </details>
                     </div>
                   </div>
                 )}

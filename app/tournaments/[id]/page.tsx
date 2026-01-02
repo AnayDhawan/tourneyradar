@@ -376,6 +376,11 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
               <button onClick={() => handleShare("whatsapp")} className="btn" style={{ background: "rgba(255,255,255,0.2)", color: "white", border: "1px solid rgba(255,255,255,0.3)" }}>
                 Share on WhatsApp
               </button>
+              <a href={tournament.pdf} target="_blank" rel="noopener noreferrer" style={{color: "var(--text-primary)", textDecoration: "none"}}>
+                <button className="btn" style={{ background: "rgba(255,255,255,0.2)", color: "white", border: "1px solid rgba(255,255,255,0.3)" }}>
+                  Download PDF
+                </button>
+              </a>
               <button onClick={() => handleShare("copy")} className="btn" style={{ background: "rgba(255,255,255,0.2)", color: "white", border: "1px solid rgba(255,255,255,0.3)" }}>
                 {copied ? "Copied!" : "Copy Link"}
               </button>
@@ -535,27 +540,236 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
 
               {activeTab === "prizes" && (
                 <div>
-                  <h2 className="font-display" style={{ fontSize: "1.75rem", fontWeight: 700, marginBottom: "1.5rem", color: "var(--text-primary)" }}>
+                  <h2 className="font-display" style={{ fontSize: "1.75rem", fontWeight: 700, marginBottom: "2rem", color: "var(--text-primary)" }}>
                     Prize Distribution
                   </h2>
-                  <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-                    <div style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginBottom: "0.5rem" }}>Total Prize Pool</div>
-                    <div style={{ fontSize: "3rem", fontWeight: 800, color: "var(--primary)" }}>{tournament.prize_pool}</div>
+                  
+                  {/* Total Prize Pool Banner */}
+                  <div style={{
+                    textAlign: "center",
+                    padding: "2.5rem",
+                    background: "linear-gradient(135deg, var(--primary) 0%, #6366f1 100%)",
+                    borderRadius: "16px",
+                    marginBottom: "2.5rem",
+                    boxShadow: "0 8px 24px rgba(99, 102, 241, 0.2)"
+                  }}>
+                    <p style={{ 
+                      fontSize: "0.875rem", 
+                      color: "rgba(255, 255, 255, 0.9)", 
+                      marginBottom: "0.5rem",
+                      textTransform: "uppercase",
+                      letterSpacing: "1.5px",
+                      fontWeight: 600
+                    }}>
+                      Total Prize Pool
+                    </p>
+                    <h2 style={{ 
+                      fontSize: "3.5rem", 
+                      fontWeight: 800, 
+                      color: "white",
+                      margin: 0,
+                      textShadow: "0 2px 10px rgba(0, 0, 0, 0.2)"
+                    }}>
+                      {tournament.prize_pool}
+                    </h2>
                   </div>
 
-                  {tournament.prize_distribution && (
-                    <div style={{ display: "grid", gap: "1rem" }}>
-                      {Object.entries(tournament.prize_distribution).map(([position, amount]) => (
-                        <div key={position} style={{ display: "flex", justifyContent: "space-between", padding: "1rem", background: "var(--surface-elevated)", borderRadius: "12px" }}>
-                          <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{position}</span>
-                          <span style={{ fontWeight: 700, color: "var(--primary)" }}>{String(amount)}</span>
+                  {/* Prize Display - Handles both flat and nested structures */}
+                  {tournament.prize_distribution && typeof tournament.prize_distribution === 'object' && (() => {
+                    const prizeData = tournament.prize_distribution;
+                    
+                    // Check if this is a nested structure (has category wrappers)
+                    const hasCategories = Object.keys(prizeData).some(key => 
+                      typeof prizeData[key] === 'object' && 
+                      !key.match(/^\d/) && 
+                      key.includes('_')
+                    );
+
+                    if (hasCategories) {
+                      // NESTED STRUCTURE: Has category wrappers (Open_Prizes, Female_Prizes, etc.)
+                      return (
+                        <div style={{ display: "grid", gap: "1.5rem" }}>
+                          {Object.entries(prizeData)
+                            .filter(([category, prizes]) => {
+                              // Hide empty categories
+                              if (!prizes) return false;
+                              if (typeof prizes === 'object' && Object.keys(prizes).length === 0) return false;
+                              return true;
+                            })
+                            .map(([category, prizes]) => (
+                            <div 
+                              key={category}
+                              style={{
+                                background: "var(--surface-elevated)",
+                                padding: "1.5rem",
+                                borderRadius: "12px",
+                                border: "2px solid var(--border)"
+                              }}
+                            >                           
+                              <h4 style={{ 
+                                fontSize: "1.25rem", 
+                                fontWeight: 700, 
+                                color: "var(--text-primary)",
+                                marginBottom: "1rem",
+                                textTransform: "capitalize",
+                                borderBottom: "2px solid var(--border)",
+                                paddingBottom: "0.75rem"
+                              }}>
+                                {category.replace(/_/g, " ")}
+                              </h4>
+                              
+                              {typeof prizes === 'object' && prizes !== null ? (
+                                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                                  {Object.entries(prizes as Record<string, any>).map(([position, amount]) => {
+                                    // Check if amount is itself an object (triple nesting case)
+                                    const isNestedObject = typeof amount === 'object' && amount !== null;
+                                    
+                                    return (
+                                      <div key={position} style={{ marginBottom: isNestedObject ? "1rem" : "0" }}>
+                                        {isNestedObject ? (
+                                          // Triple nesting: show sub-category with its prizes
+                                          <div>
+                                            <div style={{
+                                              fontSize: "0.875rem",
+                                              fontWeight: 600,
+                                              color: "var(--text-primary)",
+                                              marginBottom: "0.5rem",
+                                              paddingLeft: "1rem",
+                                              borderLeft: "3px solid var(--primary)"
+                                            }}>
+                                              {position.replace(/_/g, " ")}
+                                            </div>
+                                            <div style={{ paddingLeft: "1rem" }}>
+                                              {Object.entries(amount as Record<string, any>).map(([subPos, subAmount]) => (
+                                                <div
+                                                  key={subPos}
+                                                  style={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    alignItems: "center",
+                                                    padding: "0.625rem 1rem",
+                                                    background: "var(--surface)",
+                                                    borderRadius: "8px",
+                                                    border: "1px solid var(--border)",
+                                                    marginBottom: "0.5rem"
+                                                  }}
+                                                >
+                                                  <span style={{
+                                                    color: "var(--text-secondary)",
+                                                    fontSize: "0.875rem",
+                                                    fontWeight: 500
+                                                  }}>
+                                                    {subPos === 'description' ? '📋' : '🏆'} {subPos.replace(/_/g, " ")}
+                                                  </span>
+                                                  <span style={{
+                                                    color: "var(--primary)",
+                                                    fontWeight: 700,
+                                                    fontSize: "1rem"
+                                                  }}>
+                                                    {String(subAmount)}
+                                                  </span>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          // Normal case: just show position and amount
+                                          <div
+                                            style={{
+                                              display: "flex",
+                                              justifyContent: "space-between",
+                                              alignItems: "center",
+                                              padding: "0.875rem 1rem",
+                                              background: "var(--surface)",
+                                              borderRadius: "8px",
+                                              border: "1px solid var(--border)"
+                                            }}
+                                          >
+                                            <span style={{
+                                              color: "var(--text-secondary)",
+                                              fontSize: "0.9375rem",
+                                              fontWeight: 500
+                                            }}>
+                                              {position === 'description' ? '📋' : '🏆'} {position.replace(/_/g, " ")}
+                                            </span>
+                                            <span style={{
+                                              color: "var(--primary)",
+                                              fontWeight: 700,
+                                              fontSize: "1.0625rem"
+                                            }}>
+                                              {String(amount)}
+                                            </span>
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              ) : (
+                                <p style={{ color: "var(--text-secondary)" }}>{String(prizes)}</p>
+                              )}
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      );
+                    } else {
+                      // FLAT STRUCTURE: Just positions (1st, 2nd, 3rd, etc.)
+                      return (
+                        <div style={{
+                          background: "var(--surface-elevated)",
+                          padding: "1.5rem",
+                          borderRadius: "12px",
+                          border: "2px solid var(--border)"
+                        }}>
+                          <h4 style={{ 
+                            fontSize: "1.25rem", 
+                            fontWeight: 700, 
+                            color: "var(--text-primary)",
+                            marginBottom: "1rem",
+                            borderBottom: "2px solid var(--border)",
+                            paddingBottom: "0.75rem"
+                          }}>
+                            Prize Breakdown
+                          </h4>
+                          
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                            {Object.entries(prizeData).map(([position, amount]) => (
+                              <div 
+                                key={position}
+                                style={{ 
+                                  display: "flex", 
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                  padding: "0.875rem 1rem",
+                                  background: "var(--surface)",
+                                  borderRadius: "8px",
+                                  border: "1px solid var(--border)"
+                                }}
+                              >
+                                <span style={{ 
+                                  color: "var(--text-secondary)",
+                                  fontSize: "0.9375rem",
+                                  fontWeight: 500
+                                }}>
+                                  🏆 {position.replace(/_/g, " ")}
+                                </span>
+                                <span style={{ 
+                                  color: "var(--primary)", 
+                                  fontWeight: 700,
+                                  fontSize: "1.0625rem"
+                                }}>
+                                  {String(amount)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+                  })()}
                 </div>
               )}
-
+              
               {activeTab === "venue" && (
                 <div>
                   <h2 className="font-display" style={{ fontSize: "1.75rem", fontWeight: 700, marginBottom: "1.5rem", color: "var(--text-primary)" }}>

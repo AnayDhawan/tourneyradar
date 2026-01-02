@@ -28,7 +28,7 @@ export default function CompletedTournamentsPage() {
       const { data, error: queryError } = await supabase
         .from("tournaments")
         .select("*, organizers(id, name, verified_badge)")
-        .eq("status", "completed")
+        .eq("status", "published")
         .order("date", { ascending: false });
 
       if (queryError) {
@@ -38,7 +38,13 @@ export default function CompletedTournamentsPage() {
         return;
       }
 
-      setTournaments(data ?? []);
+      // Filter to show past tournaments (date < today) OR status = completed
+      const today = new Date().toISOString().split('T')[0];
+      const completedData = (data ?? []).filter(t => 
+        t.status === "completed" || t.date < today
+      );
+
+      setTournaments(completedData);
       setLoading(false);
     }
 
