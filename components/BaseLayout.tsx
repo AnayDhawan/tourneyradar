@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
-import { useAuth } from "../lib/AuthContext";
-import Footer from "./Footer";
-import ScrollToTop from "./ScrollToTop";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface BaseLayoutProps {
   children: React.ReactNode;
@@ -19,8 +18,6 @@ export default function BaseLayout({
   heroTitle = "",
   heroDescription = ""
 }: BaseLayoutProps) {
-  const { user, userType, loading: authLoading } = useAuth();
-
   useEffect(() => {
     // Apply saved theme or default to system
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
@@ -37,47 +34,7 @@ export default function BaseLayout({
     <div style={{ background: "var(--background)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {showHero ? (
         <section className="hero-bg" style={{ minHeight: "40vh", display: "flex", flexDirection: "column" }}>
-          <nav className="glass">
-            <div className="nav-container">
-              <Link href="/" className="nav-brand font-display" style={{ textDecoration: "none" }}>
-                TourneyRadar
-              </Link>
-
-              <div className="nav-links">
-                <Link href="/tournaments" style={{ textDecoration: "none", color: "inherit" }}>
-                  Tournaments
-                </Link>
-                <Link href="/tournaments/completed" style={{ textDecoration: "none", color: "inherit" }}>
-                  Completed Events
-                </Link>
-                {!authLoading && (
-                  userType === "player" ? (
-                    <Link href="/player/dashboard" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>
-                      My Dashboard
-                    </Link>
-                  ) : userType === "organizer" ? (
-                    <Link href="/organizer/dashboard" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>
-                      Organizer Dashboard
-                    </Link>
-                  ) : userType === "admin" ? (
-                    <Link href="/admin/dashboard" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>
-                      Admin Panel
-                    </Link>
-                  ) : (
-                    <Link href="/player/login" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>
-                      Player Login
-                    </Link>
-                  )
-                )}
-              </div>
-
-              <button className="mobile-menu-btn" aria-label="Menu">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <path d="M4 7h16M4 12h16M4 17h16" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
-            </div>
-          </nav>
+          <Navigation isHero={true} />
 
           {heroTitle && (
             <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
@@ -95,42 +52,7 @@ export default function BaseLayout({
           )}
         </section>
       ) : (
-        <nav className="glass" style={{ position: "sticky", top: 0, zIndex: 100 }}>
-          <div className="nav-container">
-            <Link href="/" className="nav-brand font-display" style={{ textDecoration: "none" }}>
-              TourneyRadar
-            </Link>
-
-            <div className="nav-links">
-              <Link href="/tournaments" style={{ textDecoration: "none", color: "inherit" }}>Tournaments</Link>
-              {!authLoading && (
-                userType === "player" ? (
-                  <Link href="/player/dashboard" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>
-                    My Dashboard
-                  </Link>
-                ) : userType === "organizer" ? (
-                  <Link href="/organizer/dashboard" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>
-                    Organizer Dashboard
-                  </Link>
-                ) : userType === "admin" ? (
-                  <Link href="/admin/dashboard" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>
-                    Admin Panel
-                  </Link>
-                ) : (
-                  <Link href="/player/login" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>
-                    Player Login
-                  </Link>
-                )
-              )}
-            </div>
-
-            <button className="mobile-menu-btn" aria-label="Menu">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                <path d="M4 7h16M4 12h16M4 17h16" stroke="white" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
-          </div>
-        </nav>
+        <Navigation isHero={false} />
       )}
 
       <main style={{ flex: 1 }}>{children}</main>
