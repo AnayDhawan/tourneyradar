@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "../../../../lib/supabase";
-import { getCoordinatesFromState, INDIAN_STATES } from "../../../../lib/geocoding";
+import { getCoordinatesFromState, geocodeAddress, INDIAN_STATES } from "../../../../lib/geocoding";
 
 type Organizer = {
   id: string;
@@ -284,8 +284,31 @@ export default function NewTournamentPage() {
 
       const pdfUrl = urlData.publicUrl;
 
-      // 3. Get coordinates from state
-      const coords = getCoordinatesFromState(formData.state);
+      // 3. Get exact venue coordinates using Google Maps Geocoding API
+      let coords = { lat: 0, lng: 0 };
+
+      // Build full address for best geocoding results
+      const fullAddress = `${formData.venue_name}, ${formData.venue_address}, ${formData.location}, ${formData.state}, India`;
+      console.log("🗺️ Geocoding venue address:", fullAddress);
+
+      // Try to get exact coordinates from Google Maps
+      const geocodedCoords = await geocodeAddress(fullAddress);
+
+      if (geocodedCoords) {
+        // Success - use exact venue coordinates
+        coords = geocodedCoords;
+        console.log("✅ Using precise venue coordinates:", coords);
+      } else {
+        // Fallback - use state center if geocoding fails
+        coords = getCoordinatesFromState(formData.state);
+        console.warn("⚠️ Geocoding failed, using state center coordinates as fallback");
+        
+        // Show warning but don't block submission
+        setError("Warning: Could not get exact venue location. Using approximate coordinates. Make sure your Google Maps API key is set up correctly.");
+        
+        // Clear error after 5 seconds
+        setTimeout(() => setError(null), 5000);
+      }
 
       // 4. Parse JSON fields with validation
       let prizeDistribution: any = {};

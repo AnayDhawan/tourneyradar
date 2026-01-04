@@ -46,11 +46,7 @@ export default function TournamentsPage() {
         return;
       }
 
-      // Filter to only show upcoming tournaments (date >= today)
-      const today = new Date().toISOString().split('T')[0];
-      const upcomingData = (data ?? []).filter(t => t.date >= today);
-
-      setTournaments(upcomingData as Tournament[]);
+      setTournaments((data ?? []) as Tournament[]);
       setLoading(false);
     }
 

@@ -208,8 +208,11 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
         .or(`state.eq.${tournamentData.state},category.eq.${tournamentData.category}`)
         .limit(3);
 
+      const today = new Date().toISOString().split('T')[0];
+      const upcomingSimilar = similarData?.filter(t => t.date >= today).slice(0, 3) || [];
+
       if (!cancelled) {
-        setSimilar((similarData ?? []) as Tournament[]);
+        setSimilar(upcomingSimilar);
         setLoading(false);
       }
     }
