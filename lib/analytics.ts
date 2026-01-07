@@ -2,12 +2,22 @@ import { supabase } from "./supabase";
 
 export type AnalyticsEventType = "view" | "pdf_download" | "registration_click" | "whatsapp_click";
 
-export async function trackEvent(tournamentId: string, eventType: AnalyticsEventType): Promise<void> {
+export async function trackEvent(tournamentId: string, eventType: AnalyticsEventType, tournamentName?: string): Promise<void> {
   try {
+    // Track in Supabase
     await supabase.from("tournament_analytics").insert({
       tournament_id: tournamentId,
       event_type: eventType,
     });
+
+    // Track in Google Analytics (if available)
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', eventType, {
+        tournament_id: tournamentId,
+        tournament_name: tournamentName || 'Unknown',
+        event_category: 'tournament',
+      });
+    }
   } catch (error) {
     console.error("Failed to track event:", error);
   }

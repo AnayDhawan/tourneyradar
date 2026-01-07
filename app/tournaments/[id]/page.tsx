@@ -166,7 +166,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
       setTournament(tournamentData as Tournament);
 
       // Track view event
-      trackEvent(id, "view");
+      trackEvent(id, "view", tournamentData.name);
 
       // Check if player is logged in and their registration/favorite status
       const { data: { user } } = await supabase.auth.getUser();
@@ -237,10 +237,10 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
 
   const handleRegister = () => {
     if (tournament?.registration_link) {
-      trackEvent(id, "registration_click");
+      trackEvent(id, "registration_click", tournament.name);
       window.open(tournament.registration_link, "_blank");
     } else if (tournament?.whatsapp_group) {
-      trackEvent(id, "whatsapp_click");
+      trackEvent(id, "whatsapp_click", tournament.name);
       window.open(tournament.whatsapp_group, "_blank");
     }
     // Show confirmation modal
