@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { supabase } from "./supabase";
 
-type UserType = "player" | "organizer" | "admin" | null;
+type UserType = "player" | "admin" | null;
 
 type Player = {
   id: string;
@@ -14,14 +14,6 @@ type Player = {
   rating?: number;
 };
 
-type Organizer = {
-  id: string;
-  name: string;
-  email: string;
-  organization?: string;
-  phone?: string;
-  tier?: string;
-};
 
 type Admin = {
   id: string;
@@ -30,7 +22,7 @@ type Admin = {
 };
 
 type AuthContextType = {
-  user: Player | Organizer | Admin | null;
+  user: Player | Admin | null;
   userType: UserType;
   loading: boolean;
   logout: () => Promise<void>;
@@ -46,7 +38,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<Player | Organizer | Admin | null>(null);
+  const [user, setUser] = useState<Player | Admin | null>(null);
   const [userType, setUserType] = useState<UserType>(null);
   const [loading, setLoading] = useState(true);
 
@@ -72,24 +64,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (player && !playerError) {
           setUser(player as Player);
           setUserType("player");
-          setLoading(false);
-          return;
-        }
-      } catch (err) {
-        // Ignore 406 errors, continue checking other tables
-      }
-
-      // Check if organizer (handle 406 gracefully)
-      try {
-        const { data: organizer, error: organizerError } = await supabase
-          .from("organizers")
-          .select("*")
-          .eq("auth_user_id", session.user.id)
-          .maybeSingle();
-
-        if (organizer && !organizerError) {
-          setUser(organizer as Organizer);
-          setUserType("organizer");
           setLoading(false);
           return;
         }

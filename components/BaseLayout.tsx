@@ -32,17 +32,15 @@ export default function BaseLayout({
     }
   }, []);
 
-  // Lock body scroll when menu is open
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileMenuOpen]);
 
   const getDashboardLink = () => {
-    if (userType === "player") return { href: "/player/dashboard", label: "My Dashboard" };
-    if (userType === "organizer") return { href: "/organizer/dashboard", label: "Organizer Dashboard" };
+    if (userType === "player") return { href: "/player/wishlist", label: "My Wishlist" };
     if (userType === "admin") return { href: "/admin/dashboard", label: "Admin Panel" };
-    return { href: "/player/login", label: "Player Login" };
+    return { href: "/player/login", label: "Login" };
   };
 
   const dashboard = getDashboardLink();

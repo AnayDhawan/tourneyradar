@@ -9,11 +9,15 @@ export type Tournament = {
   id: string
   name: string
   location: string
+  city?: string
   state: string
+  country?: string
+  country_code?: string
   lat: number
   lng: number
   category: string
   date: string
+  end_date?: string
   pdf: string
   entry_fee: string
   prize_pool: string
@@ -29,9 +33,15 @@ export type Tournament = {
   organizer_email: string | null
   whatsapp_group: string | null
   registration_link: string | null
+  source?: string
+  source_id?: string
+  source_url?: string
+  external_link?: string
   rules: string[]
   amenities: string[]
   prize_distribution: any
   schedule: any[]
   status: string
+  created_at?: string
+  scraped_at?: string
 }

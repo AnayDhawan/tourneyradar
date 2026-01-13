@@ -56,10 +56,10 @@ export default function Footer() {
             </h3>            
           </Link>
           <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", lineHeight: 1.6 }}>
-            Discover chess tournaments across India. Connect with organizers, track your registrations, and never miss a tournament.
+            Discover chess tournaments worldwide. The free, open-source global chess tournament aggregator.
           </p>
           <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", marginTop: "1rem" }}>
-            Made with ❤️ for Indian Chess Community
+            Free & Open Source
           </p>
         </div>
 
@@ -75,14 +75,11 @@ export default function Footer() {
             <Link href="/tournaments/completed" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
               Completed Tournaments
             </Link>
-            <Link href="/player/login" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
-              Player Login
-            </Link>
-            <Link href="/organizer/login" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
-              Organizer Login
+            <Link href="/about" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
+              About
             </Link>
             <Link href="/contact" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
-              Contact Us
+              Contact
             </Link>
           </div>
         </div>
@@ -93,11 +90,8 @@ export default function Footer() {
             Legal
           </h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            <Link href="/terms" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
-              Terms of Service
-            </Link>
-            <Link href="/privacy" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
-              Privacy Policy
+            <Link href="/legal" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
+              Legal & Privacy
             </Link>
           </div>
         </div>
@@ -187,7 +181,7 @@ export default function Footer() {
               </a>
               {/* Email */}
               <a
-                href="mailto:dhawansanay@gmail.com"
+                href="mailto:help@tourneyradar.com"
                 style={{
                   width: "40px",
                   height: "40px",
@@ -208,7 +202,7 @@ export default function Footer() {
               </a>
               {/* Instagram placeholder */}
               <a
-                href="#"
+                href="https://www.instagram.com/tourneyradar/"
                 style={{
                   width: "40px",
                   height: "40px",

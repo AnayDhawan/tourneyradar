@@ -79,7 +79,7 @@ export default function PlayerLoginPage() {
         throw new Error("No player account found. Please register first.");
       }
 
-      router.push("/player/dashboard");
+      router.push("/player/wishlist");
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {

@@ -31,10 +31,13 @@ export default function TournamentsPage() {
       setLoading(true);
       setError(null);
 
+      const today = new Date().toISOString().split('T')[0];
+      
       const { data, error: queryError } = await supabase
         .from("tournaments")
         .select("*, organizers(id, name)")
         .eq("status", "published")
+        .gte("date", today)
         .order("date", { ascending: true });
 
       if (cancelled) return;
@@ -64,16 +67,23 @@ export default function TournamentsPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Safe string check helper
+  const safeIncludes = (str: string | null | undefined, search: string): boolean => {
+    return str?.toLowerCase().includes(search.toLowerCase()) ?? false;
+  };
+
   // Filter tournaments by search
-  const filteredTournaments = tournaments.filter(t => {
+  const filteredTournaments = tournaments.filter((t: any) => {
     if (!debouncedSearch) return true;
     const query = debouncedSearch.toLowerCase();
     return (
-      t.name.toLowerCase().includes(query) ||
-      t.location.toLowerCase().includes(query) ||
-      t.state.toLowerCase().includes(query) ||
-      t.organizer_name?.toLowerCase().includes(query) ||
-      (t as any).organizers?.name?.toLowerCase().includes(query)
+      safeIncludes(t.name, query) ||
+      safeIncludes(t.location, query) ||
+      safeIncludes(t.city, query) ||
+      safeIncludes(t.state, query) ||
+      safeIncludes(t.country, query) ||
+      safeIncludes(t.organizer_name, query) ||
+      safeIncludes(t.organizers?.name, query)
     );
   });
 
@@ -81,7 +91,7 @@ export default function TournamentsPage() {
     <BaseLayout 
       showHero 
       heroTitle={<>Upcoming <span className="highlight">Tournaments</span></>}
-      heroDescription="Browse all upcoming chess tournaments across India. Find the perfect event to showcase your skills."
+      heroDescription="Browse over-the-board chess tournaments from around the world. Data sourced from Chess-Results.com."
     >
       <section className="tournament-section">
         <div className="section-container">
@@ -199,7 +209,7 @@ export default function TournamentsPage() {
 
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-secondary)", fontSize: "0.9375rem" }}>
                       <span>Location:</span>
-                      <span>{tournament.location}, {tournament.state}</span>
+                      <span>{tournament.city || tournament.location || 'Unknown'}{tournament.country_code ? `, ${tournament.country_code}` : (tournament.state ? `, ${tournament.state}` : '')}</span>
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.9375rem" }}>

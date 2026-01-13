@@ -24,7 +24,7 @@ const MarkerClusterGroup = dynamic(
   { ssr: false },
 );
 
-type MapView = "mumbai" | "india";
+type MapView = "europe" | "world";
 
 type FilterState = {
   search: string;
@@ -84,7 +84,7 @@ function KnightSvg() {
 
 export default function HomePage() {
   const { user, userType, loading: authLoading } = useAuth();
-  const [mapView, setMapView] = useState<MapView>("mumbai");
+  const [mapView, setMapView] = useState<MapView>("europe");
   
   // ========== MOBILE MENU STATE - THIS IS THE FIX ==========
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -106,15 +106,23 @@ export default function HomePage() {
   const [markerIcon, setMarkerIcon] = useState<import("leaflet").DivIcon | null>(null);
 
   useEffect(() => {
-    // Detect system theme preference
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const theme = prefersDark ? "dark" : "light";
-    document.documentElement.setAttribute("data-theme", theme);
+    // Check for saved theme preference first
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      document.documentElement.setAttribute("data-theme", savedTheme);
+    } else {
+      // Fall back to system preference
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
+    }
 
-    // Listen for system theme changes
+    // Listen for system theme changes (only applies if theme is 'system' or not set)
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (e: MediaQueryListEvent) => {
-      document.documentElement.setAttribute("data-theme", e.matches ? "dark" : "light");
+      const currentTheme = localStorage.getItem('theme');
+      if (!currentTheme || currentTheme === 'system') {
+        document.documentElement.setAttribute("data-theme", e.matches ? "dark" : "light");
+      }
     };
     mediaQuery.addEventListener("change", handleChange);
 
@@ -133,18 +141,28 @@ export default function HomePage() {
     async function setupMarkerIcon() {
       const L = await import("leaflet");
       const icon = L.divIcon({
-        className: "custom-marker",
+        className: "tournament-marker",
         html: `
-          <div style="position: relative; width: 40px; height: 40px;">
-            <div style="position: absolute; width: 40px; height: 40px; background: #2563EB; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);"></div>
-            <svg style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px;" viewBox="0 0 24 24" fill="white">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          <div style="
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+              <path d="M19 22H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3l2-3h4l2 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2z"/>
+              <circle cx="12" cy="13" r="4" fill="white" stroke="white"/>
             </svg>
           </div>
         `,
-        iconSize: [40, 40],
-        iconAnchor: [20, 40],
-        popupAnchor: [0, -40],
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32],
       });
       if (!cancelled) setMarkerIcon(icon);
     }
@@ -239,18 +257,19 @@ export default function HomePage() {
   }, [filters, tournaments]);
 
   const mapConfig = useMemo(() => {
-    if (mapView === "mumbai") {
-      return { center: [19.076, 72.8777] as [number, number], zoom: 11 };
+    if (mapView === "europe") {
+      // Europe view
+      return { center: [48.8566, 2.3522] as [number, number], zoom: 4 };
     }
-    return { center: [22.9734, 78.6569] as [number, number], zoom: 5 };
+    // World view
+    return { center: [30, 0] as [number, number], zoom: 2 };
   }, [mapView]);
 
   // Helper to get dashboard link
   const getDashboardLink = () => {
-    if (userType === "player") return { href: "/player/dashboard", label: "My Dashboard" };
-    if (userType === "organizer") return { href: "/organizer/dashboard", label: "Organizer Dashboard" };
+    if (userType === "player") return { href: "/player/wishlist", label: "My Wishlist" };
     if (userType === "admin") return { href: "/admin/dashboard", label: "Admin Panel" };
-    return { href: "/player/login", label: "Player Login" };
+    return { href: "/player/login", label: "Login" };
   };
 
   const dashboard = getDashboardLink();
@@ -312,19 +331,10 @@ export default function HomePage() {
               <a href="/tournaments">Tournaments</a>
               <a href="/tournaments/completed">Completed Events</a>
               {!authLoading && (
-                userType === "player" ? (
-                  <a href="/player/dashboard" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>My Dashboard</a>
-                ) : userType === "organizer" ? (
-                  <a href="/organizer/dashboard" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>Organizer Dashboard</a>
-                ) : userType === "admin" ? (
-                  <a href="/admin/dashboard" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>Admin Panel</a>
-                ) : (
-                  <a href="/player/login" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>Player Login</a>
-                )
+                <a href={dashboard.href} className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>{dashboard.label}</a>
               )}
             </div>
 
-            {/* ========== HAMBURGER BUTTON WITH onClick - THIS IS THE FIX ========== */}
             <button 
               className="mobile-menu-btn" 
               aria-label="Open menu"
@@ -341,39 +351,42 @@ export default function HomePage() {
           <div className="hero-container">
             <div className="hero-content">
               <h1 className="hero-title font-display">
-                Find Chess <span className="highlight">Tournaments <br />in India</span>
+                Discover Chess <span className="highlight">Tournaments<br />Worldwide</span>
               </h1>
 
               <p className="hero-description">
-                Discover, register, and compete in chess tournaments across India. Connect with players,
-                track ratings, and elevate your game.
+                A free, open-source platform aggregating over-the-board chess tournaments 
+                from around the world. Find your next event.
               </p>
 
               <div className="btn-group">
                 <a href="/tournaments" className="btn btn-primary">
                   Explore Tournaments
                 </a>
-                {!authLoading && !user && (
-                  <a href="/player/register" className="btn btn-outline">
-                    Create Free Account 
-                  </a>
-                )}
+                <a 
+                  href="https://github.com/AnayDhawan/tourneyradar" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline"
+                >
+                  View on GitHub
+                </a>
               </div>
 
               <div className="stats-container" aria-label="Site statistics">
                 <div className="stat-item">
-                  <div className="stat-number">100+</div>
-                  <div className="stat-label">Active Players</div> 
+                  <div className="stat-number">{tournaments.length}</div>
+                  <div className="stat-label">Upcoming Events</div> 
                 </div>
                 <div className="stat-divider" />
                 <div className="stat-item">
-                  <div className="stat-number">50+</div>
-                  <div className="stat-label">Events</div>
+                  <div className="stat-number">{new Set(tournaments.map(t => t.country_code || t.country).filter(Boolean)).size}</div>
+                  <div className="stat-label">Countries</div>
                 </div>
                 <div className="stat-divider" />
                 <div className="stat-item">
-                  <div className="stat-number">25+</div>
-                  <div className="stat-label">Cities Covered</div>
+                  <div className="stat-number">{tournaments.filter(t => t.lat && t.lng).length}</div>
+                  <div className="stat-label">On Map</div>
                 </div>
               </div>
             </div>
@@ -411,24 +424,24 @@ export default function HomePage() {
                 Live Tournament Map
               </h3>
               <p style={{ color: "var(--text-secondary)", marginTop: "0.25rem" }}>
-                View tournaments on an interactive map. Click markers for details and PDF downloads.
+                Click any marker for details.
               </p>
             </div>
 
             <div className="view-toggle" style={{ marginBottom: "1.25rem" }}>
               <button
                 type="button"
-                className={mapView === "mumbai" ? "active" : ""}
-                onClick={() => setMapView("mumbai")}
+                className={mapView === "europe" ? "active" : ""}
+                onClick={() => setMapView("europe")}
               >
-                Mumbai
+                Europe
               </button>
               <button
                 type="button"
-                className={mapView === "india" ? "active" : ""}
-                onClick={() => setMapView("india")}
+                className={mapView === "world" ? "active" : ""}
+                onClick={() => setMapView("world")}
               >
-                All India
+                World
               </button>
             </div>
 
@@ -445,44 +458,31 @@ export default function HomePage() {
                     .map((t) => (
                       <Marker key={t.id} position={[t.lat, t.lng]} icon={markerIcon ?? undefined}>
                         <Popup>
-                          <div style={{ minWidth: 240 }}>
-                            <div style={{ fontWeight: 800, color: "var(--text-primary)", marginBottom: 6 }}>
+                          <div style={{ minWidth: 220, padding: "4px" }}>
+                            <div style={{ fontWeight: 700, color: "#1a1a1a", marginBottom: 8, fontSize: 14, lineHeight: 1.3 }}>
                               {t.name}
                             </div>
-                            <div style={{ color: "var(--text-secondary)", fontSize: 14 }}>
-                              {t.location}, {t.state}
+                            <div style={{ color: "#666", fontSize: 13, marginBottom: 4 }}>
+                              📍 {t.city || t.location}{t.country_code ? `, ${t.country_code}` : ''}
                             </div>
-                            <div style={{ marginTop: 10, fontSize: 14, color: "var(--text-muted)" }}>
-                             <span style={{ fontWeight: 700, color: "var(--text-primary)" }}> Date: {formatDate(t.date)}</span>
+                            <div style={{ color: "#666", fontSize: 13, marginBottom: 12 }}>
+                              📅 {formatDate(t.date)}
                             </div>
-                            <div style={{ marginTop: 4, fontSize: 14, color: "var(--text-muted)" }}>
-                             <span style={{ fontWeight: 700, color: "var(--text-primary)" }}> Prize: {t.prize_pool}</span>
-                            </div>
-                            <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-                              <a
-                                href={`/tournaments/${t.id}`}
-                                className="btn btn-primary"
-                                style={{ padding: "0.5rem 0.9rem", borderRadius: 10, fontSize: 14, color: "#e3e5e9ff"}}
-                              >
-                                View Details
-                              </a>
-                              <a
-                                href={t.pdf}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn"
-                                style={{
-                                  padding: "0.5rem 0.9rem",
-                                  borderRadius: 10,
-                                  fontSize: 14,
-                                  background: "transparent",
-                                  border: "2px solid var(--border)",
-                                  color: "var(--text-primary)",
-                                }}
-                              >
-                                Download PDF
-                              </a>
-                            </div>
+                            <a
+                              href={`/tournaments/${t.id}`}
+                              style={{
+                                display: "inline-block",
+                                background: "#3b82f6",
+                                color: "white",
+                                padding: "6px 14px",
+                                borderRadius: 6,
+                                fontSize: 13,
+                                fontWeight: 600,
+                                textDecoration: "none"
+                              }}
+                            >
+                              View Details →
+                            </a>
                           </div>
                         </Popup>
                       </Marker>
@@ -635,7 +635,6 @@ export default function HomePage() {
                         <th>Location</th>
                         <th>Date</th>
                         <th>Category</th>
-                        <th>Entry Fee</th>
                         <th>Action</th>
                       </tr>
                     </thead>
@@ -658,7 +657,6 @@ export default function HomePage() {
                           <td>
                             <span className="badge">{t.category}</span>
                           </td>
-                          <td style={{ fontWeight: 800, color: "var(--primary)" }}>{t.entry_fee}</td>
                           <td>
                             <Link
                               href={`/tournaments/${t.id}`}
