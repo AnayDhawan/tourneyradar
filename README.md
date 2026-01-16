@@ -6,22 +6,22 @@
 
 ## A website displaying upcoming chess tournaments worldwide on an interactive map
 
-## 🌍 About
+## About
 
 TourneyRadar is a free, open-source platform that aggregates over-the-board chess tournaments from around the world. We automatically scrape tournament data from [Chess-Results.com](https://chess-results.com) and display them on an interactive map.
 
 **Live Site:** [tourneyradar.com](https://tourneyradar.com)
 
-## ✨ Features
+## Features
 
-- 🗺️ Interactive world map with tournament markers
-- 🔍 Search and filter tournaments by location, category, date
-- 📊 200+ tournaments from 16+ countries
-- 🔄 Automated daily scraping from Chess-Results
-- 📱 Fully responsive design
-- 🌙 Dark/Light mode support
+- Interactive world map with tournament markers
+- Search and filter tournaments by location, category, date
+- 200+ tournaments from 16+ countries
+- Automated daily scraping from Chess-Results
+- Fully responsive design
+- Dark/Light mode support
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
@@ -32,7 +32,7 @@ TourneyRadar is a free, open-source platform that aggregates over-the-board ches
 - **Geocoding:** [Google Maps API](https://developers.google.com/maps)
 - **Deployment:** [Vercel](https://vercel.com/)
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -83,7 +83,7 @@ The scraper will:
 - Geocode locations using Google Maps API
 - Save to Supabase
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 tourneyradar/
@@ -99,7 +99,7 @@ tourneyradar/
 └── public/               # Static assets
 ```
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -109,16 +109,16 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📊 Data Sources
+## Data Sources
 
 Tournament data is scraped from:
 - [Chess-Results.com](https://chess-results.com) - The world's largest chess tournament database
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [echecsfrance](https://github.com/TheRealOwenRees/echecsfrance) - Inspiration for the project
 - [Chess-Results.com](https://chess-results.com) - Tournament data source
