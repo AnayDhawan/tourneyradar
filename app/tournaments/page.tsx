@@ -212,11 +212,6 @@ export default function TournamentsPage() {
                       <span>{tournament.city || tournament.location || 'Unknown'}{tournament.country_code ? `, ${tournament.country_code}` : (tournament.state ? `, ${tournament.state}` : '')}</span>
                     </div>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.9375rem" }}>
-                      <span>Fee:</span>
-                      <span style={{ fontWeight: 700, color: "var(--primary)" }}>{tournament.entry_fee}</span>
-                    </div>
-
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-secondary)", fontSize: "0.9375rem" }}>
                       <span>Prize:</span>
                       <span>{tournament.prize_pool}</span>

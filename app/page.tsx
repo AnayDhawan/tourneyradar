@@ -29,7 +29,6 @@ type MapView = "europe" | "world";
 type FilterState = {
   search: string;
   category: string;
-  maxEntryFee: string;
   state: string;
   fideRated: "all" | "yes" | "no";
   startDate: string;
@@ -48,11 +47,6 @@ function formatDate(dateStr: string): string {
 
 function normalizeString(v: unknown): string {
   return String(v ?? "").trim();
-}
-
-function parseEntryFee(v: unknown): number {
-  const n = Number(String(v ?? "").replace(/[^0-9.]/g, ""));
-  return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
 }
 
 function isWithinDateRange(dateStr: string, start: string, end: string): boolean {
@@ -96,7 +90,6 @@ export default function HomePage() {
   const [filters, setFilters] = useState<FilterState>({
     search: "",
     category: "All",
-    maxEntryFee: "",
     state: "All",
     fideRated: "all",
     startDate: "",
@@ -221,7 +214,6 @@ export default function HomePage() {
 
   const filtered = useMemo(() => {
     const search = filters.search.trim().toLowerCase();
-    const maxFee = filters.maxEntryFee.trim() ? Number(filters.maxEntryFee) : null;
 
     return tournaments.filter((t) => {
       const name = normalizeString(t.name);
@@ -246,11 +238,6 @@ export default function HomePage() {
       if (filters.fideRated === "no" && t.fide_rated) return false;
 
       if (!isWithinDateRange(t.date, filters.startDate, filters.endDate)) return false;
-
-      if (maxFee !== null && Number.isFinite(maxFee)) {
-        const fee = parseEntryFee(t.entry_fee);
-        if (fee > maxFee) return false;
-      }
 
       return true;
     });
@@ -530,16 +517,6 @@ export default function HomePage() {
               </div>
 
               <div className="filter-group">
-                <label>Max Entry Fee</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={filters.maxEntryFee}
-                  onChange={(e) => setFilters((p) => ({ ...p, maxEntryFee: e.target.value }))}
-                />
-              </div>
-
-              <div className="filter-group">
                 <label>State</label>
                 <select
                   className="form-select"
@@ -604,7 +581,6 @@ export default function HomePage() {
                     setFilters({
                       search: "",
                       category: "All",
-                      maxEntryFee: "",
                       state: "All",
                       fideRated: "all",
                       startDate: "",
