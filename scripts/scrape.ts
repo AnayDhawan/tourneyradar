@@ -58,20 +58,91 @@ function parseDate(str: string): { start: string; end: string } | null {
   return null;
 }
 
+// ========== CATEGORY DETECTION ==========
+// Detect tournament category from tournament NAME
+// DEFAULT: Rapid (most common worldwide)
+// Only Classical or Blitz if explicitly mentioned
+function detectCategory(name: string): 'Classical' | 'Rapid' | 'Blitz' {
+  const n = (name || '').toLowerCase();
+  
+  // Check for Blitz keywords
+  if (
+    n.includes('blitz') || 
+    n.includes('bullet') || 
+    n.includes('lightning') ||
+    n.includes('speed chess')
+  ) {
+    return 'Blitz';
+  }
+  
+  // Check for Classical keywords - ONLY if explicitly mentioned
+  if (
+    n.includes('classical') || 
+    n.includes('standard') || 
+    n.includes('long play') ||
+    n.includes('klassisch') ||    // German
+    n.includes('classique') ||    // French
+    n.includes('clásico') ||      // Spanish
+    n.includes('classico')        // Italian/Portuguese
+  ) {
+    return 'Classical';
+  }
+  
+  // Check for Rapid keywords
+  if (
+    n.includes('rapid') || 
+    n.includes('schnell') ||      // German
+    n.includes('rapide') ||       // French
+    n.includes('rápido') ||       // Spanish
+    n.includes('active') ||
+    n.includes('semi-rapid') ||
+    n.includes('semirapid')
+  ) {
+    return 'Rapid';
+  }
+  
+  // DEFAULT: Rapid (most common format worldwide)
+  return 'Rapid';
+}
+
 // ========== COUNTRY CODES ==========
 const COUNTRY_CODES: Record<string, string> = {
-  // Existing
-  'USA': 'US', 'GER': 'DE', 'FRA': 'FR', 'ENG': 'GB', 'RUS': 'RU', 'ESP': 'ES',
-  'ITA': 'IT', 'NED': 'NL', 'POL': 'PL', 'IND': 'IN', 'AUT': 'AT', 'SUI': 'CH',
-  'CZE': 'CZ', 'HUN': 'HU', 'SWE': 'SE', 'NOR': 'NO', 'DEN': 'DK', 'FIN': 'FI',
-  'POR': 'PT', 'GRE': 'GR', 'TUR': 'TR', 'UKR': 'UA', 'SRB': 'RS', 'CRO': 'HR',
-  'SVK': 'SK', 'ROU': 'RO', 'BUL': 'BG', 'BEL': 'BE', 'ARG': 'AR', 'BRA': 'BR',
-  'CHN': 'CN', 'JPN': 'JP', 'KOR': 'KR', 'AUS': 'AU', 'CAN': 'CA', 'MEX': 'MX',
-  // New additions
-  'GEO': 'GE', 'ARM': 'AM', 'AZE': 'AZ', 'LTU': 'LT', 'LAT': 'LV', 'EST': 'EE',
-  'BLR': 'BY', 'ISR': 'IL', 'SLO': 'SI', 'COL': 'CO', 'PER': 'PE', 'CHI': 'CL',
-  'CUB': 'CU', 'NZL': 'NZ', 'PHI': 'PH', 'INA': 'ID', 'VIE': 'VN', 'MAS': 'MY',
-  'SGP': 'SG', 'RSA': 'ZA', 'EGY': 'EG', 'MAR': 'MA', 'TUN': 'TN',
+  // Europe
+  'GER': 'DE', 'FRA': 'FR', 'ESP': 'ES', 'ENG': 'GB', 'ITA': 'IT',
+  'POL': 'PL', 'NED': 'NL', 'RUS': 'RU', 'UKR': 'UA', 'AUT': 'AT',
+  'SUI': 'CH', 'CZE': 'CZ', 'HUN': 'HU', 'SWE': 'SE', 'NOR': 'NO',
+  'DEN': 'DK', 'FIN': 'FI', 'BEL': 'BE', 'POR': 'PT', 'GRE': 'GR',
+  'TUR': 'TR', 'SRB': 'RS', 'CRO': 'HR', 'SLO': 'SI', 'SVK': 'SK',
+  'ROU': 'RO', 'BUL': 'BG', 'GEO': 'GE', 'ARM': 'AM', 'AZE': 'AZ',
+  'LTU': 'LT', 'LAT': 'LV', 'EST': 'EE', 'BLR': 'BY', 'MDA': 'MD',
+  'MKD': 'MK', 'BIH': 'BA', 'MNE': 'ME', 'ALB': 'AL', 'ISL': 'IS',
+  'IRL': 'IE', 'SCO': 'GB', 'WLS': 'GB',
+  
+  // Americas
+  'USA': 'US', 'CAN': 'CA', 'MEX': 'MX', 'ARG': 'AR', 'BRA': 'BR',
+  'COL': 'CO', 'PER': 'PE', 'CHI': 'CL', 'VEN': 'VE', 'ECU': 'EC',
+  'URU': 'UY', 'PAR': 'PY', 'BOL': 'BO', 'CUB': 'CU', 'PUR': 'PR',
+  'CRC': 'CR', 'PAN': 'PA', 'DOM': 'DO',
+  
+  // Asia
+  'IND': 'IN', 'CHN': 'CN', 'JPN': 'JP', 'KOR': 'KR', 'PHI': 'PH',
+  'INA': 'ID', 'VIE': 'VN', 'MAS': 'MY', 'SGP': 'SG', 'THA': 'TH',
+  'MYA': 'MM', 'BAN': 'BD', 'SRI': 'LK', 'PAK': 'PK', 'IRI': 'IR',
+  'IRQ': 'IQ', 'UAE': 'AE', 'KSA': 'SA', 'QAT': 'QA', 'KUW': 'KW',
+  'BRN': 'BH', 'JOR': 'JO', 'LBN': 'LB', 'SYR': 'SY', 'UZB': 'UZ',
+  'KAZ': 'KZ', 'MGL': 'MN',
+  
+  // Africa
+  'RSA': 'ZA', 'EGY': 'EG', 'MAR': 'MA', 'TUN': 'TN', 'ALG': 'DZ',
+  'NGR': 'NG', 'KEN': 'KE', 'UGA': 'UG', 'ZIM': 'ZW', 'ZAM': 'ZM',
+  'BOT': 'BW', 'NAM': 'NA', 'GHA': 'GH', 'CIV': 'CI', 'SEN': 'SN',
+  'CMR': 'CM', 'ANG': 'AO', 'ETH': 'ET',
+  
+  // Oceania
+  'AUS': 'AU', 'NZL': 'NZ', 'FIJ': 'FJ',
+  
+  // Middle East
+  'ISR': 'IL',
 };
 
 function getCountryCode(fed: string): string {
@@ -196,12 +267,12 @@ async function getLinks(browser: Browser, fed: string): Promise<string[]> {
 // ========== MAIN ==========
 async function main() {
   console.log('\n' + '═'.repeat(60));
-  console.log('  TourneyRadar Scraper v7');
+  console.log('  TourneyRadar Scraper v8 - WORLDWIDE EXPANSION');
   console.log('═'.repeat(60));
   console.log('\n  Features:');
-  console.log('    ✓ Skips tournaments already in database');
-  console.log('    ✓ Geocodes with Google Maps API');
-  console.log('    ✓ Maximum 200 tournaments\n');
+  console.log('    ✓ 60+ countries worldwide');
+  console.log('    ✓ Smart category detection (Rapid default)');
+  console.log('    ✓ Maximum 500 tournaments\n');
 
   console.log('  Loading existing tournaments from DB...');
   const { data: existing } = await supabase
@@ -224,18 +295,31 @@ async function main() {
   try {
     console.log('Phase 1: Collecting links...\n');
     const feds = [
-      // Major chess nations
-      'USA', 'RUS', 'CHN', 'IND', 'GER', 'FRA', 'ESP', 'ENG', 'ITA', 'POL',
-      // Europe
-      'NED', 'AUT', 'SUI', 'CZE', 'HUN', 'SWE', 'NOR', 'DEN', 'FIN', 'BEL',
-      'POR', 'GRE', 'TUR', 'UKR', 'SRB', 'CRO', 'SLO', 'SVK', 'ROU', 'BUL',
-      'ISR', 'GEO', 'ARM', 'AZE', 'LTU', 'LAT', 'EST', 'BLR',
-      // Americas
-      'CAN', 'MEX', 'ARG', 'BRA', 'COL', 'PER', 'CHI', 'CUB',
-      // Asia-Pacific
-      'JPN', 'KOR', 'AUS', 'NZL', 'PHI', 'INA', 'VIE', 'MAS', 'SGP',
-      // Others
-      'RSA', 'EGY', 'MAR', 'TUN'
+      // ========== EUROPE (40+) ==========
+      'GER', 'FRA', 'ESP', 'ENG', 'ITA', 'POL', 'NED', 'RUS', 'UKR',
+      'AUT', 'SUI', 'CZE', 'HUN', 'SWE', 'NOR', 'DEN', 'FIN', 'BEL',
+      'POR', 'GRE', 'TUR', 'SRB', 'CRO', 'SLO', 'SVK', 'ROU', 'BUL',
+      'GEO', 'ARM', 'AZE', 'LTU', 'LAT', 'EST', 'BLR', 'MDA', 'MKD',
+      'BIH', 'MNE', 'ALB', 'ISL', 'IRL', 'SCO', 'WLS',
+      
+      // ========== AMERICAS (18) ==========
+      'USA', 'CAN', 'MEX', 'ARG', 'BRA', 'COL', 'PER', 'CHI', 'VEN',
+      'ECU', 'URU', 'PAR', 'BOL', 'CUB', 'PUR', 'CRC', 'PAN', 'DOM',
+      
+      // ========== ASIA (27) ==========
+      'IND', 'CHN', 'JPN', 'KOR', 'PHI', 'INA', 'VIE', 'MAS', 'SGP',
+      'THA', 'MYA', 'BAN', 'SRI', 'PAK', 'IRI', 'IRQ', 'UAE', 'KSA',
+      'QAT', 'KUW', 'BRN', 'JOR', 'LBN', 'SYR', 'UZB', 'KAZ', 'MGL',
+      
+      // ========== AFRICA (18) ==========
+      'RSA', 'EGY', 'MAR', 'TUN', 'ALG', 'NGR', 'KEN', 'UGA', 'ZIM',
+      'ZAM', 'BOT', 'NAM', 'GHA', 'CIV', 'SEN', 'CMR', 'ANG', 'ETH',
+      
+      // ========== OCEANIA (3) ==========
+      'AUS', 'NZL', 'FIJ',
+      
+      // ========== MIDDLE EAST ==========
+      'ISR',
     ];
     const allLinks: string[] = [];
 
@@ -324,9 +408,8 @@ async function main() {
         lat: t.lat,
         lng: t.lng,
         status: 'published',
-        category: 'Classical',
+        category: detectCategory(t.name),
         format: 'Swiss',
-        entry_fee: '0',
         fide_rated: true,
         scraped_at: new Date().toISOString()
       }, { onConflict: 'id' });
