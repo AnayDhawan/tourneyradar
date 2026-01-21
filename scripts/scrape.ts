@@ -289,7 +289,7 @@ async function main() {
   });
 
   const tournaments: ScrapedTournament[] = [];
-  const MAX = 500;
+  const MAX = 1500;
   const seen = new Set<string>();
 
   try {

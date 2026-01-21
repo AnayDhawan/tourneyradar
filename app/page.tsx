@@ -362,17 +362,17 @@ export default function HomePage() {
 
               <div className="stats-container" aria-label="Site statistics">
                 <div className="stat-item">
-                  <div className="stat-number">{tournaments.length}</div>
+                  <div className="stat-number">{loading ? 100 : tournaments.length}</div>
                   <div className="stat-label">Upcoming Events</div> 
                 </div>
                 <div className="stat-divider" />
                 <div className="stat-item">
-                  <div className="stat-number">{new Set(tournaments.map(t => t.country_code || t.country).filter(Boolean)).size}</div>
+                  <div className="stat-number">{loading ? "20+" : new Set(tournaments.map(t => t.country_code || t.country).filter(Boolean)).size}</div>
                   <div className="stat-label">Countries</div>
                 </div>
                 <div className="stat-divider" />
                 <div className="stat-item">
-                  <div className="stat-number">{tournaments.filter(t => t.lat && t.lng).length}</div>
+                  <div className="stat-number">{loading ? 99 : tournaments.filter(t => t.lat && t.lng).length}</div>
                   <div className="stat-label">On Map</div>
                 </div>
               </div>

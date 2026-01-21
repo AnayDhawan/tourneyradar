@@ -19,7 +19,6 @@ export type Tournament = {
   date: string
   end_date?: string
   pdf: string
-  entry_fee: string
   prize_pool: string
   fide_rated: boolean
   description: string
