@@ -10,23 +10,25 @@ export const metadata: Metadata = {
     default: "TourneyRadar | Find Chess Tournaments Worldwide",
     template: "%s | TourneyRadar"
   },
-  description: "Discover over-the-board chess tournaments worldwide. Free, open-source platform aggregating 200+ FIDE-rated tournaments from Chess-Results. Interactive map, filters by country, date, and format.",
+  description: "Discover over-the-board chess tournaments worldwide. Free, open-source platform with 500+ FIDE-rated tournaments from 40+ countries. Interactive map, filters by format, country, and date.",
   keywords: [
     "chess tournaments",
-    "FIDE tournaments", 
-    "chess events",
-    "over the board chess",
+    "FIDE tournaments",
     "OTB chess",
+    "over the board chess",
+    "chess events",
     "chess competitions",
     "chess tournament finder",
     "chess tournament map",
-    "classical chess",
+    "classical chess tournaments",
     "rapid chess tournaments",
     "blitz chess tournaments",
     "chess-results",
     "find chess tournaments near me",
     "international chess tournaments",
-    "chess tournament calendar"
+    "chess tournament calendar",
+    "FIDE rated tournaments",
+    "chess tournament registration"
   ],
   authors: [{ name: "TourneyRadar", url: "https://www.tourneyradar.com" }],
   creator: "TourneyRadar",
@@ -48,27 +50,27 @@ export const metadata: Metadata = {
     url: "https://www.tourneyradar.com",
     siteName: "TourneyRadar",
     title: "TourneyRadar | Find Chess Tournaments Worldwide",
-    description: "Discover over-the-board chess tournaments worldwide. Interactive map with 200+ tournaments from 40+ countries. Free and open-source.",
+    description: "Discover 500+ chess tournaments from 40+ countries on an interactive map. Free, open-source, no signup required.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "TourneyRadar - Chess Tournament Finder"
+        alt: "TourneyRadar - Find Chess Tournaments Worldwide"
       }
     ]
   },
   twitter: {
     card: "summary_large_image",
     title: "TourneyRadar | Find Chess Tournaments Worldwide",
-    description: "Discover over-the-board chess tournaments worldwide. Interactive map with 200+ tournaments.",
+    description: "Discover 500+ chess tournaments from 40+ countries. Free & open-source.",
     images: ["/og-image.png"],
   },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
       { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
     ],
     apple: [
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
@@ -89,17 +91,24 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <meta name="theme-color" content="#3b82f6" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-        {/* Favicon links for maximum browser compatibility */}
+        {/* FAVICON - Must be first for Google to pick up */}
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon-96x96.png" type="image/png" sizes="96x96" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+        
+        {/* Fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+        
+        {/* Leaflet CSS */}
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        
+        {/* Theme */}
+        <meta name="theme-color" content="#3b82f6" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
       </head>
       <body>
         <AuthProvider>

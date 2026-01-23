@@ -1,12 +1,10 @@
-# TourneyRadar Robots.txt
+# TourneyRadar
 User-agent: *
 Allow: /
 
-# Sitemap
-Sitemap: https://tourneyradar.com/sitemap.xml
+# Sitemaps
+Sitemap: https://www.tourneyradar.com/sitemap.xml
 
-# Disallow admin and private areas
-Disallow: /admin/
+# Disallow
 Disallow: /api/
-Disallow: /player/dashboard
-Disallow: /organizer/dashboard
+Disallow: /admin/

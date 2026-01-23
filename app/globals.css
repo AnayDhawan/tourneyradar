@@ -1251,3 +1251,73 @@ body > div[style*="position: fixed"][style*="bottom"][style*="left"] {
     opacity: 1;
   }
 }
+
+/* ===== Map Skeleton Loading ===== */
+.map-skeleton {
+  height: 550px;
+  background: var(--surface);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+/* ===== Category Badges Enhanced ===== */
+.category-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.category-badge.classical {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+.category-badge.rapid {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+.category-badge.blitz {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+/* ===== Filter Results ===== */
+.filter-results {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: var(--surface-elevated);
+  border-radius: 8px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* ===== Popup Content ===== */
+.popup-content h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: #1a1a2e;
+}
+
+.popup-content p {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+  color: #4a4a5a;
+}
+
+.popup-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  color: #3b82f6;
+  font-weight: 500;
+}
