@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import BaseLayout from "../../components/BaseLayout";
+import BaseLayout from "@/components/BaseLayout";
 
 export default function LegalPage() {
   return (

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AuthProvider } from "../lib/AuthContext";
-import { ToastProvider } from "../components/Toast";
+import { AuthProvider } from "@/lib/AuthContext";
+import { ToastProvider } from "@/components/Toast";
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { QueryProvider } from "./providers";
 

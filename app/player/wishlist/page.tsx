@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../../lib/supabase";
-import { useAuth } from "../../../lib/AuthContext";
-import Footer from "../../../components/Footer";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/lib/AuthContext";
+import Footer from "@/components/Footer";
 
 type WishlistTournament = {
   id: string;

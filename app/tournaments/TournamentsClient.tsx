@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useState, useMemo, useEffect } from "react";
-import BaseLayout from "../../components/BaseLayout";
-import TournamentCardSkeleton from "../../components/TournamentCardSkeleton";
-import { getCountdown, isNewTournament } from "../../lib/countdown";
+import BaseLayout from "@/components/BaseLayout";
+import TournamentCardSkeleton from "@/components/TournamentCardSkeleton";
+import { getCountdown, isNewTournament } from "@/lib/countdown";
 
 interface Tournament {
   id: string;
