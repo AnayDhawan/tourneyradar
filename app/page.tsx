@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { unstable_cache } from 'next/cache';
 import HomePageClient from './HomePageClient';
-import { generateOrganizationJsonLd, generateWebsiteJsonLd } from './lib/metadata';
+import { generateOrganizationJsonLd, generateWebsiteJsonLd } from '@/app/lib/metadata';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://htohprkfygyzvgzijvnd.supabase.co";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0b2hwcmtmeWd5enZnemlqdm5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2NDY3MDMsImV4cCI6MjA4MjIyMjcwM30.4TYIhteDvauPVtWbWp_Dql3VgJcYsdhgYq65Z6kGDfA";
