@@ -19,13 +19,9 @@ interface Tournament {
   category?: string;
   fide_rated?: boolean;
   source_url?: string;
+  external_link?: string;
   organizer_name?: string;
   created_at?: string;
-  organizers?: {
-    id: string;
-    name: string;
-    verified_badge?: boolean;
-  };
 }
 
 interface Props {
@@ -67,8 +63,7 @@ export default function TournamentsClient({ initialTournaments }: Props) {
         safeIncludes(t.city, query) ||
         safeIncludes(t.state, query) ||
         safeIncludes(t.country, query) ||
-        safeIncludes(t.organizer_name, query) ||
-        safeIncludes(t.organizers?.name, query)
+        safeIncludes(t.organizer_name, query)
       );
     });
   }, [initialTournaments, debouncedSearch]);
@@ -191,35 +186,9 @@ export default function TournamentsClient({ initialTournaments }: Props) {
 
                     <div style={{ fontSize: "0.875rem" }}>
                       <span style={{ color: "var(--text-secondary)" }}>By: </span>
-                      {tournament.organizers?.id ? (
-                        <Link 
-                          href={`/organizers/${tournament.organizers.id}`}
-                          style={{ 
-                            color: "var(--primary)", 
-                            textDecoration: "none", 
-                            fontWeight: 600,
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "0.25rem"
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {tournament.organizers.name}
-                          {tournament.organizers.verified_badge && (
-                            <span style={{ 
-                              color: "#3b82f6",
-                              fontSize: "1rem",
-                              lineHeight: 1 
-                            }}>
-                              Verified
-                            </span>
-                          )}
-                        </Link>
-                      ) : (
-                        <span style={{ color: "var(--text-secondary)" }}>
-                          {tournament.organizer_name || "Unknown"}
-                        </span>
-                      )}
+                      <span style={{ color: "var(--text-secondary)" }}>
+                        {tournament.organizer_name || "Unknown"}
+                      </span>
                     </div>
                   </div>
 

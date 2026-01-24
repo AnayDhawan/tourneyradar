@@ -1,11 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import { unstable_cache } from 'next/cache';
 import HomePageClient from './HomePageClient';
+import { generateOrganizationJsonLd, generateWebsiteJsonLd } from './lib/metadata';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://htohprkfygyzvgzijvnd.supabase.co";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0b2hwcmtmeWd5enZnemlqdm5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2NDY3MDMsImV4cCI6MjA4MjIyMjcwM30.4TYIhteDvauPVtWbWp_Dql3VgJcYsdhgYq65Z6kGDfA";
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const getCachedTournaments = unstable_cache(
   async () => {
@@ -75,32 +76,18 @@ export default async function HomePage() {
     getCachedStats()
   ]);
   
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'TourneyRadar',
-    description: 'Find chess tournaments worldwide on an interactive map',
-    url: 'https://www.tourneyradar.com',
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: 'https://www.tourneyradar.com/tournaments?search={search_term_string}'
-      },
-      'query-input': 'required name=search_term_string'
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'TourneyRadar',
-      url: 'https://www.tourneyradar.com'
-    }
-  };
+  const websiteJsonLd = generateWebsiteJsonLd();
+  const organizationJsonLd = generateOrganizationJsonLd();
   
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
       />
       <HomePageClient 
         initialTournaments={tournaments} 

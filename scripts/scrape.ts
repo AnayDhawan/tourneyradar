@@ -264,15 +264,42 @@ async function getLinks(browser: Browser, fed: string): Promise<string[]> {
   }
 }
 
+// ========== SCRAPER CONFIGURATION ==========
+const SCRAPER_CONFIG = {
+  // Top 10 chess countries - prioritize these
+  top10: ['IND', 'RUS', 'USA', 'GER', 'CHN', 'FRA', 'ESP', 'NED', 'ENG', 'POL'],
+  
+  // Target tournament counts
+  targets: {
+    top10: 100,    // 100 tournaments per top 10 country
+    tier2: 50,     // 50 tournaments per tier 2 country
+    others: 25,    // 25 tournaments per other country
+  },
+  
+  // Tier 2 countries (strong chess nations)
+  tier2: [
+    'ITA', 'AUT', 'SUI', 'CZE', 'HUN', 'SWE', 'NOR', 'DEN', 'UKR',
+    'ARG', 'BRA', 'AUS', 'ISR', 'TUR', 'GRE', 'SRB', 'CRO', 'ROU',
+  ],
+  
+  // Maximum total tournaments to scrape
+  maxTotal: 2000,
+  
+  // Concurrency settings
+  concurrentPages: 5,
+  delayBetweenRequests: 150,
+};
+
 // ========== MAIN ==========
 async function main() {
   console.log('\n' + '═'.repeat(60));
-  console.log('  TourneyRadar Scraper v8 - WORLDWIDE EXPANSION');
+  console.log('  TourneyRadar Scraper v9 - GLOBAL COVERAGE');
   console.log('═'.repeat(60));
-  console.log('\n  Features:');
-  console.log('    ✓ 60+ countries worldwide');
-  console.log('    ✓ Smart category detection (Rapid default)');
-  console.log('    ✓ Maximum 500 tournaments\n');
+  console.log('\n  Configuration:');
+  console.log(`    ✓ Top 10 countries: ${SCRAPER_CONFIG.top10.length} (target: ${SCRAPER_CONFIG.targets.top10} each)`);
+  console.log(`    ✓ Tier 2 countries: ${SCRAPER_CONFIG.tier2.length} (target: ${SCRAPER_CONFIG.targets.tier2} each)`);
+  console.log(`    ✓ Maximum total: ${SCRAPER_CONFIG.maxTotal} tournaments`);
+  console.log('    ✓ Smart category detection (Rapid default)\n');
 
   console.log('  Loading existing tournaments from DB...');
   const { data: existing } = await supabase
@@ -285,50 +312,56 @@ async function main() {
 
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
   });
 
   const tournaments: ScrapedTournament[] = [];
-  const MAX = 1500;
+  const MAX = SCRAPER_CONFIG.maxTotal;
   const seen = new Set<string>();
 
   try {
-    console.log('Phase 1: Collecting links...\n');
+    console.log('Phase 1: Collecting links from federations...\n');
+    
+    // Prioritized federation list
     const feds = [
-      // ========== EUROPE (40+) ==========
-      'GER', 'FRA', 'ESP', 'ENG', 'ITA', 'POL', 'NED', 'RUS', 'UKR',
-      'AUT', 'SUI', 'CZE', 'HUN', 'SWE', 'NOR', 'DEN', 'FIN', 'BEL',
-      'POR', 'GRE', 'TUR', 'SRB', 'CRO', 'SLO', 'SVK', 'ROU', 'BUL',
+      // ========== TOP 10 PRIORITY ==========
+      ...SCRAPER_CONFIG.top10,
+      
+      // ========== TIER 2 ==========
+      ...SCRAPER_CONFIG.tier2,
+      
+      // ========== EUROPE ==========
+      'FIN', 'BEL', 'POR', 'SLO', 'SVK', 'BUL',
       'GEO', 'ARM', 'AZE', 'LTU', 'LAT', 'EST', 'BLR', 'MDA', 'MKD',
       'BIH', 'MNE', 'ALB', 'ISL', 'IRL', 'SCO', 'WLS',
       
-      // ========== AMERICAS (18) ==========
-      'USA', 'CAN', 'MEX', 'ARG', 'BRA', 'COL', 'PER', 'CHI', 'VEN',
+      // ========== AMERICAS ==========
+      'CAN', 'MEX', 'COL', 'PER', 'CHI', 'VEN',
       'ECU', 'URU', 'PAR', 'BOL', 'CUB', 'PUR', 'CRC', 'PAN', 'DOM',
       
-      // ========== ASIA (27) ==========
-      'IND', 'CHN', 'JPN', 'KOR', 'PHI', 'INA', 'VIE', 'MAS', 'SGP',
+      // ========== ASIA ==========
+      'JPN', 'KOR', 'PHI', 'INA', 'VIE', 'MAS', 'SGP',
       'THA', 'MYA', 'BAN', 'SRI', 'PAK', 'IRI', 'IRQ', 'UAE', 'KSA',
       'QAT', 'KUW', 'BRN', 'JOR', 'LBN', 'SYR', 'UZB', 'KAZ', 'MGL',
       
-      // ========== AFRICA (18) ==========
+      // ========== AFRICA ==========
       'RSA', 'EGY', 'MAR', 'TUN', 'ALG', 'NGR', 'KEN', 'UGA', 'ZIM',
       'ZAM', 'BOT', 'NAM', 'GHA', 'CIV', 'SEN', 'CMR', 'ANG', 'ETH',
       
-      // ========== OCEANIA (3) ==========
-      'AUS', 'NZL', 'FIJ',
-      
-      // ========== MIDDLE EAST ==========
-      'ISR',
+      // ========== OCEANIA ==========
+      'NZL', 'FIJ',
     ];
+    
+    // Remove duplicates
+    const uniqueFeds = [...new Set(feds)];
     const allLinks: string[] = [];
 
-    for (const fed of feds) {
+    for (const fed of uniqueFeds) {
       process.stdout.write(`  ${fed}... `);
       const links = await getLinks(browser, fed);
       console.log(`${links.length}`);
       allLinks.push(...links);
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => setTimeout(r, SCRAPER_CONFIG.delayBetweenRequests));
     }
 
     const unique = allLinks.filter(l => {

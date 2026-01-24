@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "../lib/AuthContext";
 import { ToastProvider } from "../components/Toast";
 import { GoogleAnalytics } from '@next/third-parties/google';
+import { QueryProvider } from "./providers";
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.tourneyradar.com'),
@@ -111,9 +112,11 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
       </head>
       <body>
-        <AuthProvider>
-          <ToastProvider>{children}</ToastProvider>
-        </AuthProvider>
+        <QueryProvider>
+          <AuthProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </AuthProvider>
+        </QueryProvider>
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
         )}

@@ -1,11 +1,12 @@
 import { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import TournamentDetailClient from './TournamentDetailClient';
+import { generateTournamentJsonLd, generateBreadcrumbJsonLd } from '../../lib/metadata';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://htohprkfygyzvgzijvnd.supabase.co";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0b2hwcmtmeWd5enZnemlqdm5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2NDY3MDMsImV4cCI6MjA4MjIyMjcwM30.4TYIhteDvauPVtWbWp_Dql3VgJcYsdhgYq65Z6kGDfA";
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -67,5 +68,28 @@ export default async function TournamentDetailPage({ params }: Props) {
   const { id } = await params;
   const tournament = await getTournament(id);
   
-  return <TournamentDetailClient tournament={tournament} />;
+  if (!tournament) {
+    return <TournamentDetailClient tournament={null} />;
+  }
+
+  const eventJsonLd = generateTournamentJsonLd(tournament);
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+    { name: 'Home', url: 'https://www.tourneyradar.com' },
+    { name: 'Tournaments', url: 'https://www.tourneyradar.com/tournaments' },
+    { name: tournament.name, url: `https://www.tourneyradar.com/tournaments/${id}` },
+  ]);
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <TournamentDetailClient tournament={tournament} />
+    </>
+  );
 }
