@@ -4,6 +4,7 @@ import { AuthProvider } from "@/lib/AuthContext";
 import { ToastProvider } from "@/components/Toast";
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { QueryProvider } from "./providers";
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.tourneyradar.com'),
@@ -120,6 +121,7 @@ export default function RootLayout({
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
         )}
+        <Analytics />
       </body>
     </html>
   );
