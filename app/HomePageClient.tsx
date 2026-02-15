@@ -616,7 +616,10 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                         <tr key={t.id} className="table-row">
                           <td>
                             <div style={{ fontWeight: 800, color: "var(--text-primary)" }}>
-                              {t.name} {t.fide_rated ? <span className="badge badge-fide">FIDE</span> : null}
+                              {(t.fide_rated || t.name.toLowerCase().includes('fide')) && (
+                                <span className="badge badge-fide">FIDE</span>
+                              )}
+                              {t.name}
                             </div>
                             <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>
                               ID: {t.id}
