@@ -223,9 +223,6 @@ export default function Footer() {
                 </svg>
               </a>
             </div>
-            <p style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
-              +91 89761 91515
-            </p>
           </div>
         </div>      
       </div>
