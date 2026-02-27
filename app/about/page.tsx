@@ -17,7 +17,7 @@ export default function AboutPage() {
               Our Mission
             </h2>
             <p style={{ color: "var(--text-secondary)", lineHeight: 1.8 }}>
-              TourneyRadar is a free, open-source platform that helps chess players discover 
+              TourneyRadar is a platform that helps chess players discover 
               over-the-board tournaments happening around the world. We aggregate tournament 
               data from Chess-Results.com so you can find events in one place.
             </p>
@@ -50,14 +50,13 @@ export default function AboutPage() {
             </p>
           </div>
 
-          {/* Open Source */}
+          {/* Platform */}
           <div className="card" style={{ marginBottom: "2rem", background: "linear-gradient(135deg, var(--primary) 0%, #1d4ed8 100%)", color: "white" }}>
             <h2 className="font-display" style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1rem" }}>
-              Open Source
+              Platform
             </h2>
             <p style={{ marginBottom: "1rem", opacity: 0.9, lineHeight: 1.8 }}>
-              TourneyRadar is completely free and open source. The entire codebase is 
-              available on GitHub.
+              TourneyRadar is a platform for chess tournament discovery.
             </p>
             <a 
               href="https://github.com/AnayDhawan/tourneyradar" 

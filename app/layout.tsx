@@ -4,7 +4,7 @@ import { AuthProvider } from "@/lib/AuthContext";
 import { ToastProvider } from "@/components/Toast";
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { QueryProvider } from "./providers";
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from '@vercel/analytics/react';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.tourneyradar.com'),
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     default: "TourneyRadar | Find Chess Tournaments Worldwide",
     template: "%s | TourneyRadar"
   },
-  description: "Discover over-the-board chess tournaments worldwide. Free, open-source platform with 500+ FIDE-rated tournaments from 40+ countries. Interactive map, filters by format, country, and date.",
+  description: "Discover over-the-board chess tournaments worldwide. Platform with 500+ FIDE-rated tournaments from 40+ countries. Interactive map, filters by format, country, and date.",
   keywords: [
     "chess tournaments",
     "FIDE tournaments",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     url: "https://www.tourneyradar.com",
     siteName: "TourneyRadar",
     title: "TourneyRadar | Find Chess Tournaments Worldwide",
-    description: "Discover 500+ chess tournaments from 40+ countries on an interactive map. Free, open-source, no signup required.",
+    description: "Discover 500+ chess tournaments from 40+ countries on an interactive map. No signup required.",
     images: [
       {
         url: "/og-image.png",
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "TourneyRadar | Find Chess Tournaments Worldwide",
-    description: "Discover 500+ chess tournaments from 40+ countries. Free & open-source.",
+    description: "Discover 500+ chess tournaments from 40+ countries.",
     images: ["/og-image.png"],
   },
   icons: {

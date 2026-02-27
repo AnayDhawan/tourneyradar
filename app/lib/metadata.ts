@@ -74,7 +74,7 @@ export function generateTournamentMetadata(tournament: TournamentMetadata): Meta
 
 export function generateCountryMetadata(countryCode: string, countryName: string, tournamentCount: number): Metadata {
   const title = `Chess Tournaments in ${countryName} | ${SITE_NAME}`;
-  const description = `Discover ${tournamentCount}+ upcoming chess tournaments in ${countryName}. Find FIDE-rated Classical, Rapid, and Blitz events. Free tournament finder with interactive map.`;
+  const description = `Discover ${tournamentCount}+ upcoming chess tournaments in ${countryName}. Find FIDE-rated Classical, Rapid, and Blitz events. Tournament finder with interactive map.`;
 
   return {
     title,
@@ -201,7 +201,7 @@ export function generateOrganizationJsonLd() {
     name: SITE_NAME,
     url: BASE_URL,
     logo: `${BASE_URL}/favicon-96x96.png`,
-    description: 'Find chess tournaments worldwide on an interactive map. Free, open-source platform.',
+    description: 'Find chess tournaments worldwide on an interactive map.',
     sameAs: [],
     contactPoint: {
       '@type': 'ContactPoint',

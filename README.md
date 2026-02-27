@@ -1,6 +1,5 @@
 # TourneyRadar
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 
@@ -8,7 +7,7 @@
 
 ## About
 
-TourneyRadar is a free, open-source platform that aggregates over-the-board chess tournaments from around the world. We automatically scrape tournament data from [Chess-Results.com](https://chess-results.com) and display them on an interactive map.
+TourneyRadar is a platform that aggregates over-the-board chess tournaments from around the world. We automatically scrape tournament data from [Chess-Results.com](https://chess-results.com) and display them on an interactive map.
 
 **Live Site:** [tourneyradar.com](https://tourneyradar.com)
 
@@ -99,24 +98,12 @@ tourneyradar/
 └── public/               # Static assets
 ```
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## Data Sources
 
 Tournament data is scraped from:
 - [Chess-Results.com](https://chess-results.com) - The world's largest chess tournament database
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 

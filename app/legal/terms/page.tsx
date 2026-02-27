@@ -17,7 +17,7 @@ export default function TermsPage() {
             
             <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>1. Service Description</h3>
             <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem", lineHeight: 1.7 }}>
-              TourneyRadar is a free tournament discovery platform that aggregates chess tournament information from public sources. We do not organize tournaments or handle registrations.
+              TourneyRadar is a tournament discovery platform that aggregates chess tournament information from public sources. We do not organize tournaments or handle registrations.
             </p>
             
             <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>2. Data Sources</h3>
@@ -27,7 +27,7 @@ export default function TermsPage() {
             
             <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>3. User Accounts</h3>
             <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem", lineHeight: 1.7 }}>
-              You may create a free account to save tournaments to your wishlist. You are responsible for maintaining the security of your account.
+              You may create an account to save tournaments to your wishlist. You are responsible for maintaining the security of your account.
             </p>
             
             <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>4. Limitation of Liability</h3>

@@ -345,7 +345,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               </h1>
 
               <p className="hero-description">
-                A free, open-source platform aggregating over-the-board chess tournaments 
+                A platform aggregating over-the-board chess tournaments 
                 from around the world. Find your next event.
               </p>
 

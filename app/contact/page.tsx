@@ -45,7 +45,7 @@ export default function ContactPage() {
               About TourneyRadar
             </h2>
             <p style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>
-              TourneyRadar is a free, open-source chess tournament aggregator. We scrape 
+              TourneyRadar is a chess tournament aggregator. We scrape 
               tournament data from Chess-Results.com so you can discover events worldwide.
             </p>
           </div>
@@ -71,7 +71,7 @@ export default function ContactPage() {
                   Is TourneyRadar free?
                 </h3>
                 <p style={{ color: "var(--text-secondary)", fontSize: "0.9375rem" }}>
-                  Yes, completely free and open source.
+                  Yes, it is available to use.
                 </p>
               </div>
 
