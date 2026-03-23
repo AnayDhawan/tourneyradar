@@ -1,5 +1,6 @@
 import puppeteer, { Browser } from 'puppeteer';
 import { createClient } from '@supabase/supabase-js';
+import { countryNameToCode } from '../lib/countryMap';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -105,6 +106,22 @@ function detectCategory(name: string): 'Classical' | 'Rapid' | 'Blitz' {
   return 'Rapid';
 }
 
+// ========== FIDE RATING DETECTION ==========
+function detectFideRated(name: string): boolean {
+  const n = (name || '').toLowerCase();
+  if (n.includes('fide')) return true;
+  if (n.includes('rated')) return true;
+  if (n.includes('bewertet') || n.includes('gewertet')) return true; // German
+  if (n.includes('noté') || n.includes('notée') || n.includes('homologué')) return true; // French
+  if (n.includes('valorado')) return true; // Spanish
+  if (n.includes('omologato')) return true; // Italian
+  if (n.includes('classificado')) return true; // Portuguese
+  if (n.includes('рейтинговый') || n.includes('рейтинговий')) return true; // Russian/Ukrainian
+  // "ELO" as a standalone word (not inside another word)
+  if (/\belo\b/.test(n)) return true;
+  return false;
+}
+
 // ========== COUNTRY CODES ==========
 const COUNTRY_CODES: Record<string, string> = {
   // Europe
@@ -143,12 +160,31 @@ const COUNTRY_CODES: Record<string, string> = {
   
   // Middle East
   'ISR': 'IL',
+
+  // Additional Europe
+  'CYP': 'CY', 'LUX': 'LU', 'MLT': 'MT', 'AND': 'AD', 'SMR': 'SM', 'FRO': 'FO',
+
+  // Additional Asia
+  'NEP': 'NP', 'AFG': 'AF', 'TKM': 'TM', 'KGZ': 'KG', 'TJK': 'TJ',
+  'MDV': 'MV', 'BRU': 'BN', 'CAM': 'KH', 'LAO': 'LA',
+  'YEM': 'YE', 'OMA': 'OM', 'PLE': 'PS',
+
+  // Additional Africa
+  'LBA': 'LY', 'SUD': 'SD', 'MLI': 'ML', 'BUR': 'BF', 'TOG': 'TG',
+  'BEN': 'BJ', 'RWA': 'RW', 'MOZ': 'MZ', 'MAD': 'MG', 'MRI': 'MU',
+  'SEY': 'SC', 'CPV': 'CV',
+
+  // Additional Americas
+  'TRI': 'TT', 'JAM': 'JM', 'BAR': 'BB', 'GUY': 'GY', 'SUR': 'SR',
+  'HAI': 'HT', 'NCA': 'NI', 'ESA': 'SV', 'HON': 'HN', 'GUA': 'GT',
 };
 
 function getCountryCode(fed: string): string {
   const m = fed.match(/\(\s*([A-Z]{2,3})\s*\)/);
   if (!m) return 'XX';
-  return COUNTRY_CODES[m[1]] || m[1].substring(0, 2);
+  if (COUNTRY_CODES[m[1]]) return COUNTRY_CODES[m[1]];
+  // Fallback: derive from the full country name
+  return countryNameToCode(getCountryName(fed)) ?? 'XX';
 }
 
 function getCountryName(fed: string): string {
@@ -334,19 +370,25 @@ async function main() {
       'FIN', 'BEL', 'POR', 'SLO', 'SVK', 'BUL',
       'GEO', 'ARM', 'AZE', 'LTU', 'LAT', 'EST', 'BLR', 'MDA', 'MKD',
       'BIH', 'MNE', 'ALB', 'ISL', 'IRL', 'SCO', 'WLS',
+      'CYP', 'LUX', 'MLT', 'AND', 'SMR', 'FRO',
       
       // ========== AMERICAS ==========
       'CAN', 'MEX', 'COL', 'PER', 'CHI', 'VEN',
       'ECU', 'URU', 'PAR', 'BOL', 'CUB', 'PUR', 'CRC', 'PAN', 'DOM',
+      'TRI', 'JAM', 'BAR', 'GUY', 'SUR', 'HAI', 'NCA', 'ESA', 'HON', 'GUA',
       
       // ========== ASIA ==========
       'JPN', 'KOR', 'PHI', 'INA', 'VIE', 'MAS', 'SGP',
       'THA', 'MYA', 'BAN', 'SRI', 'PAK', 'IRI', 'IRQ', 'UAE', 'KSA',
       'QAT', 'KUW', 'BRN', 'JOR', 'LBN', 'SYR', 'UZB', 'KAZ', 'MGL',
+      'NEP', 'AFG', 'TKM', 'KGZ', 'TJK', 'MDV', 'BRU', 'CAM', 'LAO',
+      'YEM', 'OMA', 'PLE',
       
       // ========== AFRICA ==========
       'RSA', 'EGY', 'MAR', 'TUN', 'ALG', 'NGR', 'KEN', 'UGA', 'ZIM',
       'ZAM', 'BOT', 'NAM', 'GHA', 'CIV', 'SEN', 'CMR', 'ANG', 'ETH',
+      'LBA', 'SUD', 'MLI', 'BUR', 'TOG', 'BEN', 'RWA', 'MOZ', 'MAD',
+      'MRI', 'SEY', 'CPV',
       
       // ========== OCEANIA ==========
       'NZL', 'FIJ',
@@ -443,7 +485,7 @@ async function main() {
         status: 'published',
         category: detectCategory(t.name),
         format: 'Swiss',
-        fide_rated: true,
+        fide_rated: detectFideRated(t.name),
         scraped_at: new Date().toISOString()
       }, { onConflict: 'id' });
 

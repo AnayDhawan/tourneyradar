@@ -93,6 +93,9 @@ export default function Footer() {
             <Link href="/legal" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
               Legal & Privacy
             </Link>
+            <Link href="/stats" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
+              Site Analytics
+            </Link>
           </div>
         </div>
 

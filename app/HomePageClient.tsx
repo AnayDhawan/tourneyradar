@@ -258,7 +258,6 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
 
   const getDashboardLink = () => {
     if (userType === "player") return { href: "/player/wishlist", label: "My Wishlist" };
-    if (userType === "admin") return { href: "/admin/dashboard", label: "Admin Panel" };
     return { href: "/player/login", label: "Login" };
   };
 

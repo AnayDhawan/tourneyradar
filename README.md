@@ -1,116 +1,126 @@
 # TourneyRadar
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+**The global over-the-board chess tournament aggregator.**
 
-## A website displaying upcoming chess tournaments worldwide on an interactive map
+[![Tournaments](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Ftourneyradar.vercel.app%2Fapi%2Ftournaments%3Flimit%3D1%26upcoming%3Dtrue&query=%24.tournaments.length&label=tournaments&color=3b82f6)](https://tourneyradar.vercel.app)
+[![Countries](https://img.shields.io/badge/countries-100%2B-green)](https://tourneyradar.vercel.app)
+[![Updated](https://img.shields.io/badge/updated-every%206h-orange)](https://github.com/AnayDhawan/tourneyradar/actions)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-## About
+Live: [tourneyradar.vercel.app](https://tourneyradar.vercel.app)
 
-TourneyRadar is a platform that aggregates over-the-board chess tournaments from around the world. We automatically scrape tournament data from [Chess-Results.com](https://chess-results.com) and display them on an interactive map.
+---
 
-**Live Site:** [tourneyradar.com](https://tourneyradar.com)
+## What it does
 
-## Features
+TourneyRadar automatically collects upcoming chess tournaments from 100+ countries and displays them on an interactive world map. Filter by country, category (Classical / Rapid / Blitz), date range, or FIDE-rated status. Add tournaments to your personal wishlist.
 
-- Interactive world map with tournament markers
-- Search and filter tournaments by location, category, date
-- 200+ tournaments from 16+ countries
-- Automated daily scraping from Chess-Results
-- Fully responsive design
-- Dark/Light mode support
+**Data sources:**
+- [Chess-Results.com](https://chess-results.com) — FIDE-registered OTB tournaments worldwide
+- [Lichess](https://lichess.org) — online and hybrid events
+
+---
+
+## How It Works
+
+```
+Chess-Results federation pages
+        ↓
+  Tournament link collection (Puppeteer)
+        ↓
+  Per-tournament detail scraping
+  (name, dates, location, organizer, time control)
+        ↓
+  Google Maps geocoding (lat/lng)
+        ↓
+  Upsert into Supabase (PostgreSQL)
+        ↓
+  Next.js API routes serve the frontend
+```
+
+1. The scraper (`scripts/scrape.ts`) visits the federation listing page for each country on Chess-Results (e.g. `fed.aspx?fed=IND` for India), collects all tournament links, then scrapes each tournament page for details.
+2. Locations are geocoded using the Google Maps Geocoding API. Results are cached in-run to avoid duplicate API calls.
+3. Data is upserted into Supabase on the `id` field (format: `cr_<tournament-number>`) so re-runs are safe and don't create duplicates.
+4. The scraper runs automatically every 6 hours via GitHub Actions. It can also be triggered manually with `npm run scrape`.
+
+---
+
+## Data Coverage
+
+| Dimension | Coverage |
+|---|---|
+| Countries | 100+ federations |
+| Primary source | Chess-Results.com |
+| Update frequency | Every 6 hours (GitHub Actions) |
+| Tournament types | Classical, Rapid, Blitz |
+| Map coverage | All geocoded tournaments shown on interactive map |
+
+Top countries by tournament volume: India, Russia, Germany, USA, China, France, Spain, Netherlands, England, Poland.
+
+---
 
 ## Tech Stack
 
-- **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
-- **Language:** [TypeScript](https://www.typescriptlang.org/)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/) + CSS Variables
-- **Database:** [Supabase](https://supabase.com/) (PostgreSQL)
-- **Maps:** [Leaflet](https://leafletjs.com/) + [react-leaflet](https://react-leaflet.js.org/)
-- **Scraping:** [Puppeteer](https://pptr.dev/)
-- **Geocoding:** [Google Maps API](https://developers.google.com/maps)
-- **Deployment:** [Vercel](https://vercel.com/)
+| Layer | Technology | Why |
+|---|---|---|
+| Framework | [Next.js 15](https://nextjs.org/) (App Router) | Server components for fast SSR, ISR caching |
+| Language | TypeScript 5 | Strict types across scraper and frontend |
+| Database | [Supabase](https://supabase.com/) (PostgreSQL) | Realtime-ready, generous free tier |
+| Map | [Leaflet](https://leafletjs.com/) + [react-leaflet](https://react-leaflet.js.org/) | Lightweight, no API key for map tiles |
+| Scraping | [Puppeteer](https://pptr.dev/) + [Cheerio](https://cheerio.js.org/) | JS-rendered pages need a headless browser |
+| Geocoding | [Google Maps API](https://developers.google.com/maps) | Best accuracy for obscure venue names |
+| Styling | [Tailwind CSS v4](https://tailwindcss.com/) | Utility-first, CSS-variable theming |
+| Hosting | [Vercel](https://vercel.com/) | Edge caching, cron jobs, zero-config deploys |
+| Analytics | [Firebase](https://firebase.google.com/) + custom `page_views` table | Dual tracking |
 
-## Getting Started
+---
 
-### Prerequisites
+## Local Setup
 
-- Node.js 18+
-- npm or yarn
-- Supabase account
-- Google Maps API key (for geocoding)
-
-### Installation
-
-1. Clone the repository:
 ```bash
-git clone https://github.com/AnayDhawan/tourneyradar.git
+git clone https://github.com/AnayDhawan/tourneyradar
 cd tourneyradar
-```
-
-2. Install dependencies:
-```bash
 npm install
-```
-
-3. Create `.env.local` with your credentials:
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_key
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_key
-```
-
-4. Run the development server:
-```bash
+cp .env.example .env.local
+# Fill in all values in .env.local
 npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000)
-
-### Running the Scraper
-
-To fetch new tournaments from Chess-Results:
+**Run the scraper locally** (requires all env vars, downloads Chromium on first run):
 
 ```bash
 npm run scrape
 ```
 
-The scraper will:
-- Skip tournaments already in your database
-- Fetch up to 200 new tournaments
-- Geocode locations using Google Maps API
-- Save to Supabase
+---
 
-## Project Structure
+## Open Source Model
 
-```
-tourneyradar/
-├── app/                    # Next.js App Router pages
-│   ├── page.tsx           # Homepage with map
-│   ├── tournaments/       # Tournament pages
-│   ├── about/            # About page
-│   └── contact/          # Contact page
-├── components/            # React components
-├── lib/                   # Utilities and configs
-├── scripts/              
-│   └── scrape.ts         # Tournament scraper
-└── public/               # Static assets
-```
+TourneyRadar is a **centralized aggregator** — there is one shared database that powers the public site. You don't need to self-host anything to contribute.
 
-
-## Data Sources
-
-Tournament data is scraped from:
-- [Chess-Results.com](https://chess-results.com) - The world's largest chess tournament database
-
-
-## Acknowledgments
-
-- [echecsfrance](https://github.com/TheRealOwenRees/echecsfrance) - Inspiration for the project
-- [Chess-Results.com](https://chess-results.com) - Tournament data source
-- [Leaflet](https://leafletjs.com/) - Map library
+- The app reads from Supabase using the public anon key.
+- The scraper writes with the service role key (maintainers only).
+- Contributors add new scrapers via pull requests — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
-Made by [Anay Dhawan](https://github.com/AnayDhawan)
+## Roadmap
+
+See the [Feature Ideas section in CONTRIBUTING.md](CONTRIBUTING.md#feature-ideas) for open contribution opportunities:
+
+- Calendar export (ICS)
+- Email / push notifications
+- Rating filter
+- Tournament reviews
+- Mobile app
+- Multi-language UI
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+MIT — see [LICENSE](LICENSE).
