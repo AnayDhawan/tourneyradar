@@ -62,11 +62,12 @@ export async function GET(request: NextRequest) {
 
   const periodStart = getPeriodStart(period);
 
-  // Base query scoped to the period
   const baseQuery = () => {
-    const q = supabase.from('page_views');
+    const q = supabase.from('page_views').select('*');
     return periodStart ? q.gte('created_at', periodStart) : q;
   };
+
+  void baseQuery;
 
   const [totalResult, uniqueResult, topPathsResult] = await Promise.all([
     periodStart
@@ -79,8 +80,6 @@ export async function GET(request: NextRequest) {
       ? supabase.from('page_views').select('path').gte('created_at', periodStart)
       : supabase.from('page_views').select('path'),
   ]);
-
-  void baseQuery; // suppress unused warning
 
   const total_views = totalResult.count ?? 0;
 
