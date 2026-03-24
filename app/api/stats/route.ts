@@ -71,14 +71,14 @@ export async function GET(request: NextRequest) {
 
   const [totalResult, uniqueResult, topPathsResult] = await Promise.all([
     periodStart
-      ? supabase.from('page_views').select('*', { count: 'exact', head: true }).gte('created_at', periodStart)
+      ? supabase.from('page_views').select('*', { count: 'exact', head: true }).gte('viewed_at', periodStart)
       : supabase.from('page_views').select('*', { count: 'exact', head: true }),
     periodStart
-      ? supabase.from('page_views').select('session_id').gte('created_at', periodStart)
+      ? supabase.from('page_views').select('session_id').gte('viewed_at', periodStart)
       : supabase.from('page_views').select('session_id'),
     periodStart
-      ? supabase.from('page_views').select('path').gte('created_at', periodStart)
-      : supabase.from('page_views').select('path'),
+      ? supabase.from('page_views').select('page_path').gte('viewed_at', periodStart)
+      : supabase.from('page_views').select('page_path'),
   ]);
 
   const total_views = totalResult.count ?? 0;
@@ -88,8 +88,8 @@ export async function GET(request: NextRequest) {
   ).size;
 
   const pathCounts: Record<string, number> = {};
-  for (const { path } of (topPathsResult.data ?? [])) {
-    pathCounts[path] = (pathCounts[path] ?? 0) + 1;
+  for (const { page_path } of (topPathsResult.data ?? [])) {
+    pathCounts[page_path] = (pathCounts[page_path] ?? 0) + 1;
   }
   const top_paths = Object.entries(pathCounts)
     .sort((a, b) => b[1] - a[1])
@@ -121,8 +121,8 @@ export async function GET(request: NextRequest) {
 
   const { data: rawRows } = await supabase
     .from('page_views')
-    .select('created_at, session_id')
-    .gte('created_at', chartStartStr);
+    .select('viewed_at, session_id')
+    .gte('viewed_at', chartStartStr);
 
   const byDate: Record<string, { views: number; sessions: Set<string> }> = {};
   for (let i = 0; i < chartDays; i++) {
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
   }
 
   for (const row of rawRows ?? []) {
-    const date = row.created_at.slice(0, 10);
+    const date = row.viewed_at.slice(0, 10);
     if (!byDate[date]) continue;
     byDate[date].views++;
     byDate[date].sessions.add(row.session_id);

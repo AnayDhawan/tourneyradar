@@ -15,7 +15,7 @@ export async function trackPageView(path: string): Promise<void> {
   try {
     const session_id = getSessionId();
     await supabase.from('page_views').insert({
-      path,
+      page_path: path,
       session_id,
       referrer: document.referrer || null,
     });

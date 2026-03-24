@@ -24,20 +24,15 @@ export async function GET(request: NextRequest) {
   
   const { searchParams } = new URL(request.url);
   const country = searchParams.get('country');
-  const upcoming = searchParams.get('upcoming') !== 'false';
   const limit = parseInt(searchParams.get('limit') || '100');
-  
+
+  const today = new Date().toISOString().split('T')[0];
   let query = supabase
     .from('tournaments')
     .select(OPTIMIZED_SELECT)
-    .eq('status', 'published');
-  
-  const today = new Date().toISOString().split('T')[0];
-  if (upcoming) {
-    query = query.gte('date', today).order('date', { ascending: true });
-  } else {
-    query = query.lt('date', today).order('date', { ascending: false });
-  }
+    .eq('status', 'published')
+    .gte('date', today)
+    .order('date', { ascending: true });
   
   if (country) {
     query = query.eq('country_code', country.toUpperCase());

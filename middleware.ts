@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
         'Prefer': 'return=minimal',
       },
       body: JSON.stringify({
-        path: pathname,
+        page_path: pathname,
         referrer: request.headers.get('referer') ?? null,
         session_id: sessionId,
       }),
