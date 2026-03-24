@@ -2,12 +2,12 @@
 
 **The global over-the-board chess tournament aggregator.**
 
-[![Tournaments](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Ftourneyradar.vercel.app%2Fapi%2Ftournaments%3Flimit%3D1%26upcoming%3Dtrue&query=%24.tournaments.length&label=tournaments&color=3b82f6)](https://tourneyradar.vercel.app)
-[![Countries](https://img.shields.io/badge/countries-100%2B-green)](https://tourneyradar.vercel.app)
+[![Tournaments](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Ftourneyradar.com%2Fapi%2Ftournaments%3Flimit%3D1%26upcoming%3Dtrue&query=%24.tournaments.length&label=tournaments&color=3b82f6)](https://tourneyradar.com)
+[![Countries](https://img.shields.io/badge/countries-100%2B-green)](https://tourneyradar.com)
 [![Updated](https://img.shields.io/badge/updated-every%206h-orange)](https://github.com/AnayDhawan/tourneyradar/actions)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-Live: [tourneyradar.vercel.app](https://tourneyradar.vercel.app)
+Live: [tourneyradar.com](https://tourneyradar.com)
 
 ---
 
