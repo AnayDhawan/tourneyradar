@@ -77,10 +77,12 @@ export default function WishlistPage() {
       const tournamentIds = wishlistData.map(w => w.tournament_id);
 
       // Get tournament details
+      const today = new Date().toISOString().split('T')[0];
       const { data: tournamentsData } = await supabase
         .from("tournaments")
         .select("id, name, date, location, state, category, source, source_url")
         .in("id", tournamentIds)
+        .gte("date", today)
         .order("date", { ascending: true });
 
       setTournaments((tournamentsData || []) as WishlistTournament[]);

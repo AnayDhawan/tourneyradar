@@ -111,6 +111,10 @@ export default function RootLayout({
         {/* Theme */}
         <meta name="theme-color" content="#3b82f6" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+
+        {/* Umami Analytics */}
+        {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
+        <script defer src="https://cloud.umami.is/script.js" data-website-id="5807c73a-efa2-41ec-8b88-f8708a429f75" />
       </head>
       <body>
         <QueryProvider>

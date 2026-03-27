@@ -292,9 +292,6 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               <Link href="/tournaments" onClick={() => setMobileMenuOpen(false)}>
                 Tournaments
               </Link>
-              <Link href="/tournaments/completed" onClick={() => setMobileMenuOpen(false)}>
-                Completed Events
-              </Link>
               {!authLoading && (
                 <Link 
                   href={dashboard.href} 
@@ -318,7 +315,6 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
 
             <div className="nav-links">
               <a href="/tournaments">Tournaments</a>
-              <a href="/tournaments/completed">Completed Events</a>
               {!authLoading && (
                 <a href={dashboard.href} className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>{dashboard.label}</a>
               )}

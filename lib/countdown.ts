@@ -3,7 +3,8 @@ export function getCountdown(dateStr: string): string {
   const now = new Date();
   const diff = targetDate.getTime() - now.getTime();
 
-  if (diff < 0) return "Tournament passed";
+  // Only show countdown for future tournaments
+  if (diff < 0) return "";
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));

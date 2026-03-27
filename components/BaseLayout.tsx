@@ -74,9 +74,6 @@ export default function BaseLayout({
               <Link href="/tournaments" onClick={() => setMobileMenuOpen(false)}>
                 Tournaments
               </Link>
-              <Link href="/tournaments/completed" onClick={() => setMobileMenuOpen(false)}>
-                Completed Events
-              </Link>
               {!authLoading && (
                 <Link 
                   href={dashboard.href} 
@@ -102,9 +99,6 @@ export default function BaseLayout({
               <div className="nav-links">
                 <Link href="/tournaments" style={{ textDecoration: "none", color: "inherit" }}>
                   Tournaments
-                </Link>
-                <Link href="/tournaments/completed" style={{ textDecoration: "none", color: "inherit" }}>
-                  Completed Events
                 </Link>
                 {!authLoading && (
                   <Link href={dashboard.href} className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>
@@ -150,7 +144,6 @@ export default function BaseLayout({
 
             <div className="nav-links">
               <Link href="/tournaments" style={{ textDecoration: "none", color: "inherit" }}>Tournaments</Link>
-              <Link href="/tournaments/completed" style={{ textDecoration: "none", color: "inherit" }}>Completed Events</Link>
               {!authLoading && (
                 <Link href={dashboard.href} className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>
                   {dashboard.label}
