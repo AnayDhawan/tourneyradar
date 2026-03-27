@@ -16,11 +16,11 @@ import {
 type Range = "24h" | "7d" | "30d";
 
 interface UmamiStats {
-  pageviews: { value: number };
-  visitors: { value: number };
-  visits: { value: number };
-  bounces: { value: number };
-  totaltime: { value: number };
+  pageviews: number;
+  visitors: number;
+  visits: number;
+  bounces: number;
+  totaltime: number;
 }
 
 interface ChartPoint { x: string; y: number }
@@ -216,10 +216,10 @@ export default function StatsPage() {
 
   // Derived metrics
   const bounceRate = data
-    ? ((data.stats.bounces.value / Math.max(data.stats.visits.value, 1)) * 100).toFixed(1) + "%"
+    ? ((data.stats.bounces / Math.max(data.stats.visits, 1)) * 100).toFixed(1) + "%"
     : "—";
   const avgDuration = data
-    ? formatDuration(data.stats.totaltime.value / Math.max(data.stats.visits.value, 1) / 1000)
+    ? formatDuration(data.stats.totaltime / Math.max(data.stats.visits, 1) / 1000)
     : "—";
 
   return (
@@ -272,9 +272,9 @@ export default function StatsPage() {
               </>
             ) : data ? (
               <>
-                <StatCard label="Total Pageviews" value={data.stats.pageviews.value} />
-                <StatCard label="Unique Visitors" value={data.stats.visitors.value} />
-                <StatCard label="Visits" value={data.stats.visits.value} />
+                <StatCard label="Total Pageviews" value={data.stats.pageviews} />
+                <StatCard label="Unique Visitors" value={data.stats.visitors} />
+                <StatCard label="Visits" value={data.stats.visits} />
                 <StatCard label="Bounce Rate" value={bounceRate} />
                 <StatCard label="Avg Session Duration" value={avgDuration} />
               </>
