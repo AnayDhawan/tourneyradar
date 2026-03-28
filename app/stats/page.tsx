@@ -13,7 +13,7 @@ import {
   Legend,
 } from "recharts";
 
-type Range = "24h" | "7d" | "30d";
+type Range = "24h" | "7d" | "30d" | "6m" | "1y" | "all";
 
 interface UmamiStats {
   pageviews: number;
@@ -40,21 +40,29 @@ interface AnalyticsData {
 
 const RANGES: { key: Range; label: string }[] = [
   { key: "24h", label: "24h" },
-  { key: "7d", label: "7d" },
+  { key: "7d",  label: "7d"  },
   { key: "30d", label: "30d" },
+  { key: "6m",  label: "6m"  },
+  { key: "1y",  label: "1y"  },
+  { key: "all", label: "All" },
 ];
 
 function formatAxisDate(iso: string, range: Range): string {
   const d = new Date(iso);
-  if (range === "24h") return d.toLocaleTimeString("en-US", { hour: "numeric" });
-  if (range === "7d") return d.toLocaleDateString("en-US", { weekday: "short" });
+  if (range === "24h") return d.toLocaleTimeString("en-US", { hour: "numeric", hour12: true });
+  if (range === "7d") return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + " " + d.toLocaleTimeString("en-US", { hour: "numeric", hour12: true });
+  if (range === "6m" || range === "1y" || range === "all") return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-function CustomTooltip({ active, payload, label }: any) {
+function CustomTooltip({ active, payload, label, range }: any) {
   if (!active || !payload?.length) return null;
   const d = new Date(label);
-  const formatted = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  const formatted = (range === "6m" || range === "1y" || range === "all")
+    ? d.toLocaleDateString("en-US", { month: "short", year: "numeric" })
+    : range === "30d"
+    ? d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+    : d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true });
   return (
     <div className="card" style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", minWidth: "140px" }}>
       <div style={{ fontWeight: 600, marginBottom: "0.4rem", color: "var(--text-primary)" }}>
@@ -292,6 +300,7 @@ export default function StatsPage() {
                   <XAxis
                     dataKey="date"
                     tickFormatter={(v) => formatAxisDate(v, range)}
+                    interval={range === "24h" ? 2 : range === "7d" ? 5 : "preserveStartEnd"}
                     tick={{ fill: "var(--text-muted)", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
@@ -302,7 +311,7 @@ export default function StatsPage() {
                     tickLine={false}
                     allowDecimals={false}
                   />
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={<CustomTooltip range={range} />} />
                   <Legend wrapperStyle={{ fontSize: "0.8125rem", color: "var(--text-secondary)", paddingTop: "1rem" }} />
                   <Line type="monotone" dataKey="pageviews" name="Page Views" stroke="var(--primary)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
                   <Line type="monotone" dataKey="sessions" name="Sessions" stroke="#10b981" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
