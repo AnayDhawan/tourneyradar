@@ -19,8 +19,6 @@ interface UmamiStats {
   pageviews: number;
   visitors: number;
   visits: number;
-  bounces: number;
-  totaltime: number;
 }
 
 interface ChartPoint { x: string; y: number }
@@ -45,13 +43,6 @@ const RANGES: { key: Range; label: string }[] = [
   { key: "7d", label: "7d" },
   { key: "30d", label: "30d" },
 ];
-
-function formatDuration(seconds: number): string {
-  if (seconds < 60) return `${Math.round(seconds)}s`;
-  const m = Math.floor(seconds / 60);
-  const s = Math.round(seconds % 60);
-  return `${m}m ${s}s`;
-}
 
 function formatAxisDate(iso: string, range: Range): string {
   const d = new Date(iso);
@@ -214,14 +205,6 @@ export default function StatsPage() {
       })
     : [];
 
-  // Derived metrics
-  const bounceRate = data
-    ? ((data.stats.bounces / Math.max(data.stats.visits, 1)) * 100).toFixed(1) + "%"
-    : "—";
-  const avgDuration = data
-    ? formatDuration(data.stats.totaltime / Math.max(data.stats.visits, 1) / 1000)
-    : "—";
-
   return (
     <BaseLayout
       showHero={true}
@@ -268,15 +251,12 @@ export default function StatsPage() {
             {loading ? (
               <>
                 <SkeletonCard /><SkeletonCard /><SkeletonCard />
-                <SkeletonCard /><SkeletonCard />
               </>
             ) : data ? (
               <>
                 <StatCard label="Total Pageviews" value={data.stats.pageviews} />
                 <StatCard label="Unique Visitors" value={data.stats.visitors} />
                 <StatCard label="Visits" value={data.stats.visits} />
-                <StatCard label="Bounce Rate" value={bounceRate} />
-                <StatCard label="Avg Session Duration" value={avgDuration} />
               </>
             ) : null}
           </div>
