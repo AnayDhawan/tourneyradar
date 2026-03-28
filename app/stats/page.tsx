@@ -47,6 +47,38 @@ const RANGES: { key: Range; label: string }[] = [
   { key: "all", label: "All" },
 ];
 
+const COUNTRY_NAMES: Record<string, string> = {
+  IN: "India", US: "United States", DE: "Germany", FR: "France",
+  GB: "United Kingdom", RU: "Russia", CN: "China", ES: "Spain",
+  IT: "Italy", PL: "Poland", NL: "Netherlands", UA: "Ukraine",
+  BR: "Brazil", AR: "Argentina", AU: "Australia", CA: "Canada",
+  JP: "Japan", KR: "South Korea", TR: "Turkey", PH: "Philippines",
+  ID: "Indonesia", PK: "Pakistan", NG: "Nigeria", ZA: "South Africa",
+  EG: "Egypt", MA: "Morocco", SE: "Sweden", NO: "Norway", DK: "Denmark",
+  FI: "Finland", CH: "Switzerland", AT: "Austria", BE: "Belgium",
+  PT: "Portugal", GR: "Greece", CZ: "Czech Republic", HU: "Hungary",
+  RO: "Romania", RS: "Serbia", HR: "Croatia", SK: "Slovakia",
+  BG: "Bulgaria", GE: "Georgia", KZ: "Kazakhstan", IR: "Iran",
+  SA: "Saudi Arabia", AE: "UAE", IL: "Israel", MY: "Malaysia",
+  SG: "Singapore", TH: "Thailand", VN: "Vietnam", LK: "Sri Lanka",
+  CL: "Chile", CO: "Colombia", PE: "Peru", NZ: "New Zealand",
+  LT: "Lithuania", LV: "Latvia", EE: "Estonia", BY: "Belarus",
+  MX: "Mexico", BD: "Bangladesh", NP: "Nepal", KE: "Kenya",
+  GH: "Ghana", TN: "Tunisia", DZ: "Algeria", ET: "Ethiopia",
+  UG: "Uganda", ZW: "Zimbabwe", ZM: "Zambia", SN: "Senegal",
+  CM: "Cameroon", TZ: "Tanzania", IQ: "Iraq", JO: "Jordan",
+  LB: "Lebanon", QA: "Qatar", KW: "Kuwait", UZ: "Uzbekistan",
+  AM: "Armenia", AZ: "Azerbaijan", MD: "Moldova", MK: "North Macedonia",
+  AL: "Albania", SI: "Slovenia", ME: "Montenegro", BA: "Bosnia",
+};
+
+function flagEmoji(alpha2: string): string {
+  if (!alpha2 || alpha2.length !== 2) return "🌐";
+  return [...alpha2.toUpperCase()]
+    .map((c) => String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65))
+    .join("");
+}
+
 function formatAxisDate(iso: string, range: Range): string {
   const d = new Date(iso);
   if (range === "24h") return d.toLocaleTimeString("en-US", { hour: "numeric", hour12: true });
@@ -77,7 +109,7 @@ function CustomTooltip({ active, payload, label, range }: any) {
   );
 }
 
-function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="card" style={{ textAlign: "center", padding: "2rem" }}>
       <div style={{
@@ -99,11 +131,6 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
       }}>
         {typeof value === "number" ? value.toLocaleString() : value}
       </div>
-      {sub && (
-        <div style={{ fontSize: "0.8125rem", color: "var(--text-secondary)", marginTop: "0.5rem" }}>
-          {sub}
-        </div>
-      )}
     </div>
   );
 }
@@ -148,7 +175,7 @@ function MetricTable({ title, rows, colLabel }: { title: string; rows: MetricRow
                   key={row.x}
                   style={{ borderBottom: "1px solid var(--border)", background: i % 2 === 0 ? "var(--surface)" : "var(--surface-elevated)" }}
                 >
-                  <td style={{ padding: "0.875rem 1.75rem", fontFamily: "monospace", fontSize: "0.875rem", color: "var(--text-primary)" }}>
+                  <td style={{ padding: "0.875rem 1.75rem", fontSize: "0.875rem", color: "var(--text-primary)" }}>
                     {row.x || "(direct)"}
                   </td>
                   <td style={{ padding: "0.875rem 1.75rem", textAlign: "right", fontWeight: 600, color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
@@ -189,7 +216,7 @@ export default function StatsPage() {
     setLoading(true);
     setError(null);
     fetch(`/api/analytics?range=${r}`)
-      .then(res => {
+      .then((res) => {
         if (!res.ok) throw new Error("Request failed");
         return res.json();
       })
@@ -205,10 +232,9 @@ export default function StatsPage() {
 
   useEffect(() => { fetchData(range); }, [range, fetchData]);
 
-  // Build chart data by merging pageviews + sessions arrays
   const chartData = data
     ? data.pageviews.pageviews.map((pv) => {
-        const session = data.pageviews.sessions.find(s => s.x === pv.x);
+        const session = data.pageviews.sessions.find((s) => s.x === pv.x);
         return { date: pv.x, pageviews: pv.y, sessions: session?.y ?? 0 };
       })
     : [];
@@ -221,18 +247,34 @@ export default function StatsPage() {
       <section className="tournament-section">
         <div className="section-container">
 
-          {/* Range selector */}
-          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "2rem", flexWrap: "wrap" }}>
-            {RANGES.map(({ key, label }) => (
-              <button
-                key={key}
-                className={`btn${range === key ? " btn-primary" : ""}`}
-                onClick={() => setRange(key)}
-                style={{ padding: "0.625rem 1.25rem" }}
-              >
-                {label}
-              </button>
-            ))}
+          {/* Range selector — pill toggle */}
+          <div style={{ marginBottom: "2rem" }}>
+            <div style={{
+              display: "inline-flex",
+              background: "var(--surface-elevated)",
+              borderRadius: "10px",
+              padding: "4px",
+              gap: "2px",
+            }}>
+              {RANGES.map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setRange(key)}
+                  style={{
+                    padding: "0.4rem 1rem",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    border: "none",
+                    borderRadius: "8px",
+                    background: range === key ? "var(--primary)" : "transparent",
+                    color: range === key ? "white" : "var(--text-secondary)",
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Error */}
@@ -327,15 +369,30 @@ export default function StatsPage() {
           {/* Tables */}
           {loading ? (
             <>
-              <SkeletonTable />
-              <SkeletonTable />
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
+                <SkeletonTable /><SkeletonTable />
+              </div>
               <SkeletonTable />
             </>
           ) : data ? (
             <>
-              <MetricTable title="Top Pages" rows={data.topPages} colLabel="Path" />
-              <MetricTable title="Top Referrers" rows={data.topReferrers} colLabel="Referrer" />
-              <MetricTable title="Top Countries" rows={data.topCountries} colLabel="Country" />
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: "1.5rem",
+                marginBottom: "2rem",
+              }}>
+                <MetricTable title="Top Pages" rows={data.topPages} colLabel="Path" />
+                <MetricTable
+                  title="Top Countries"
+                  colLabel="Country"
+                  rows={data.topCountries.map((r: { x: string; y: number }) => ({
+                    x: `${flagEmoji(r.x)} ${COUNTRY_NAMES[r.x] ?? r.x}`,
+                    y: r.y,
+                  }))}
+                />
+              </div>
+              <MetricTable title="Top Referrers" rows={data.topReferrers.slice(0, 5)} colLabel="Referrer" />
             </>
           ) : null}
 
