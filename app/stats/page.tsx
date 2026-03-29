@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import BaseLayout from "@/components/BaseLayout";
 import {
   LineChart,
@@ -12,6 +13,8 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
+
+const WorldMap = dynamic(() => import("./WorldMap"), { ssr: false });
 
 type Range = "24h" | "7d" | "30d" | "6m" | "1y" | "all";
 
@@ -33,8 +36,6 @@ interface MetricRow { x: string; y: number }
 interface AnalyticsData {
   stats: UmamiStats;
   pageviews: UmamiPageviews;
-  topPages: MetricRow[];
-  topReferrers: MetricRow[];
   topCountries: MetricRow[];
 }
 
@@ -211,6 +212,11 @@ export default function StatsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAllCountries, setShowAllCountries] = useState(false);
+  const [tournamentsByCountry, setTournamentsByCountry] = useState<Record<string, number>>({});
+  const [tournamentsLoading, setTournamentsLoading] = useState(true);
+
+  useEffect(() => { setShowAllCountries(false); }, [range]);
 
   const fetchData = useCallback((r: Range) => {
     setLoading(true);
@@ -231,6 +237,26 @@ export default function StatsPage() {
   }, []);
 
   useEffect(() => { fetchData(range); }, [range, fetchData]);
+
+  useEffect(() => {
+    fetch("/api/tournaments/by-country")
+      .then((r) => r.json())
+      .then((d: Record<string, number>) => {
+        setTournamentsByCountry(d);
+        setTournamentsLoading(false);
+      })
+      .catch(() => setTournamentsLoading(false));
+  }, []);
+
+  const countryRows = (data?.topCountries ?? []).map((r: { x: string; y: number }) => ({
+    x: `${flagEmoji(r.x)} ${COUNTRY_NAMES[r.x] ?? r.x}`,
+    y: r.y,
+  }));
+
+  const visitorsByCountry: Record<string, number> = {};
+  (data?.topCountries ?? []).forEach((r) => {
+    if (r.x) visitorsByCountry[r.x] = r.y;
+  });
 
   const chartData = data
     ? data.pageviews.pageviews.map((pv) => {
@@ -311,6 +337,58 @@ export default function StatsPage() {
             ) : null}
           </div>
 
+          {/* Global Reach map */}
+          <div className="card" style={{ marginBottom: "2rem", padding: "1.75rem" }}>
+            <h3 style={{
+              fontSize: "1.125rem",
+              fontWeight: 700,
+              color: "var(--text-primary)",
+              marginBottom: "1.25rem",
+            }}>
+              Global Reach
+            </h3>
+            {loading || tournamentsLoading ? (
+              <div style={{
+                height: "450px",
+                background: "var(--surface-elevated)",
+                borderRadius: "8px",
+              }} />
+            ) : (
+              <WorldMap
+                key={`${range}-${Object.keys(visitorsByCountry).join(',')}`}
+                visitorsByCountry={visitorsByCountry}
+                tournamentsByCountry={tournamentsByCountry}
+              />
+            )}
+            <div style={{
+              display: "flex",
+              gap: "1.5rem",
+              marginTop: "0.75rem",
+              fontSize: "0.75rem",
+              color: "var(--text-muted)",
+              flexWrap: "wrap",
+            }}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem" }}>
+                <span style={{
+                  width: "12px", height: "12px", borderRadius: "2px",
+                  background: "#1e3a5f", display: "inline-block", border: "1px solid #334155",
+                }} /> Has visitors (low)
+              </span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem" }}>
+                <span style={{
+                  width: "12px", height: "12px", borderRadius: "2px",
+                  background: "#3b82f6", display: "inline-block",
+                }} /> Has visitors (high)
+              </span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem" }}>
+                <span style={{
+                  width: "12px", height: "12px", borderRadius: "2px",
+                  background: "#1e293b", border: "1px solid #334155", display: "inline-block",
+                }} /> No data
+              </span>
+            </div>
+          </div>
+
           {/* Line chart */}
           <div className="card" style={{ marginBottom: "2rem", padding: "1.75rem" }}>
             <h3 className="font-display" style={{
@@ -366,34 +444,48 @@ export default function StatsPage() {
             )}
           </div>
 
-          {/* Tables */}
+          {/* Top Countries — full width */}
           {loading ? (
-            <>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
-                <SkeletonTable /><SkeletonTable />
-              </div>
-              <SkeletonTable />
-            </>
+            <SkeletonTable />
           ) : data ? (
-            <>
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: "1.5rem",
-                marginBottom: "2rem",
+            <div style={{ overflow: "hidden" }}>
+              <div style={showAllCountries ? {
+                maxHeight: "400px",
+                overflowY: "auto",
+                overflowX: "hidden",
+                borderRadius: "8px",
+                scrollbarWidth: "thin",
+                scrollbarColor: "var(--border) transparent",
+              } : {
+                overflow: "hidden",
               }}>
-                <MetricTable title="Top Pages" rows={data.topPages} colLabel="Path" />
                 <MetricTable
                   title="Top Countries"
+                  rows={showAllCountries ? countryRows : countryRows.slice(0, 10)}
                   colLabel="Country"
-                  rows={data.topCountries.map((r: { x: string; y: number }) => ({
-                    x: `${flagEmoji(r.x)} ${COUNTRY_NAMES[r.x] ?? r.x}`,
-                    y: r.y,
-                  }))}
                 />
               </div>
-              <MetricTable title="Top Referrers" rows={data.topReferrers.slice(0, 5)} colLabel="Referrer" />
-            </>
+              {countryRows.length > 10 && (
+                <button
+                  onClick={() => setShowAllCountries(p => !p)}
+                  style={{
+                    display: "block",
+                    margin: "0.5rem auto 0",
+                    background: "none",
+                    border: "none",
+                    color: "var(--primary)",
+                    fontSize: "0.8125rem",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    padding: "0.25rem 0.5rem",
+                  }}
+                >
+                  {showAllCountries
+                    ? "Show less ↑"
+                    : `Show all ${countryRows.length} countries ↓`}
+                </button>
+              )}
+            </div>
           ) : null}
 
         </div>

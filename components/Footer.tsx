@@ -236,7 +236,7 @@ export default function Footer() {
         textAlign: "center"
       }}>
         <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: 0 }}>
-          © 2025 TourneyRadar. All rights reserved.
+          © 2026 TourneyRadar. All rights reserved.
         </p>
       </div>
     </footer>

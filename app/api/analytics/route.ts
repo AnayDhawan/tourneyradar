@@ -25,16 +25,14 @@ export async function GET(request: NextRequest) {
   const headers: Record<string, string> = { 'x-umami-api-key': apiKey };
   const base = `startAt=${startAt}&endAt=${endAt}`;
 
-  const [stats, pageviews, topPages, topReferrers, topCountries] = await Promise.all([
+  const [stats, pageviews, topCountries] = await Promise.all([
     fetch(`${BASE_URL}/websites/${WEBSITE_ID}/stats?${base}`, { headers }).then(r => r.json()),
     fetch(`${BASE_URL}/websites/${WEBSITE_ID}/pageviews?${base}&unit=${unit}&timezone=Asia/Kolkata`, { headers }).then(r => r.json()),
-    fetch(`${BASE_URL}/websites/${WEBSITE_ID}/metrics?${base}&type=url&limit=10`, { headers }).then(r => r.json()),
-    fetch(`${BASE_URL}/websites/${WEBSITE_ID}/metrics?${base}&type=referrer&limit=10`, { headers }).then(r => r.json()),
-    fetch(`${BASE_URL}/websites/${WEBSITE_ID}/metrics?${base}&type=country&limit=10`, { headers }).then(r => r.json()),
+    fetch(`${BASE_URL}/websites/${WEBSITE_ID}/metrics?${base}&type=country&limit=100`, { headers }).then(r => r.json()),
   ]);
 
   return NextResponse.json(
-    { stats, pageviews, topPages, topReferrers, topCountries },
+    { stats, pageviews, topCountries },
     { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } },
   );
 }
