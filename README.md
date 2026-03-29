@@ -1,225 +1,154 @@
 # TourneyRadar
 
-**The global platform for finding over-the-board chess tournaments.**
+TourneyRadar aggregates over-the-board chess tournaments from around the world onto an interactive map, solving the problem that chess events are scattered across Chess-Results.com, national federation websites, and club newsletters with no single place to discover what is happening globally. Players can filter by country, date, time control, and FIDE rating status without creating an account.
 
-Chess tournament discovery is broken. Events are scattered across Chess-Results.com, national federation websites, WhatsApp groups, and club newsletters — with no single place to find what's happening worldwide. Players regularly miss tournaments they'd love to play in.
+Live: **[tourneyradar.com](https://www.tourneyradar.com)**
 
-TourneyRadar fixes that. It aggregates upcoming tournaments from 60+ countries into one searchable, filterable platform with an interactive map, smart filters, and a real-time data pipeline scraping Chess-Results.com daily.
-
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript)](https://typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?logo=supabase)](https://supabase.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
 [![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?logo=vercel)](https://vercel.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-Live: **[tourneyradar.com](https://www.tourneyradar.com)**
-
-![TourneyRadar Screenshot](./docs/screenshot.png)
-
 ---
 
-## Features
+## Tech Stack
 
-- **Global tournament map** — Interactive Leaflet map with marker clustering; 500+ tournaments across 40+ countries at a glance
-- **Smart filtering** — Filter by country, date range, time control (Classical / Rapid / Blitz), and FIDE rating status
-- **Real-time data pipeline** — Puppeteer scraper pulls from Chess-Results.com, geocodes locations via Google Maps, and normalizes data across federation formats
-- **Player accounts** — Wishlist / favorites, profile with FIDE ID and rating
-- **Admin analytics dashboard** — Vercel-style analytics: page views, unique visitors, avg. session duration, bounce rate, hourly traffic comparison, top pages, referrers, countries, OS, browser, and device breakdown
-- **SEO-optimized** — Dynamic `sitemap.xml`, structured metadata for every tournament and country page
-- **Mobile-first** — Fully responsive design with a clean dark/light mode
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 15 (App Router), TypeScript, React 19 |
+| Database | Supabase (PostgreSQL) |
+| Map | Leaflet + react-leaflet + react-leaflet-cluster |
+| Charts | Recharts |
+| Scraper | Puppeteer + Cheerio |
+| Styling | Tailwind CSS v4 |
+| Analytics | Umami Cloud |
+| Deployment | Vercel |
 
 ---
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  DATA SOURCES                                               │
-│  Chess-Results.com  ·  National federations                 │
-└────────────────────────┬────────────────────────────────────┘
-                         │  Puppeteer + Cheerio
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│  SCRAPER PIPELINE  (scripts/scrape.ts)                      │
-│  Parse · Geocode (Google Maps) · Deduplicate · Normalize    │
-└────────────────────────┬────────────────────────────────────┘
-                         │  Supabase JS client
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│  DATABASE  (Supabase PostgreSQL)                            │
-│  tournaments · players · admins · page_views               │
-│  player_favorite_tournaments · tournament_analytics        │
-└──────────┬──────────────────────────────────────────────────┘
-           │  REST API / Supabase client
-           ▼
-┌─────────────────────────────────────────────────────────────┐
-│  NEXT.JS APP  (App Router)                                  │
-│  Server Components → unstable_cache (5 min revalidation)   │
-│  API Routes → Cache-Control: s-maxage=1800                  │
-│  Client Components → TanStack React Query v5               │
-└──────────┬──────────────────────────────────────────────────┘
-           │
-           ▼
-┌─────────────────────────────────────────────────────────────┐
-│  ANALYTICS PIPELINE                                         │
-│  Edge Middleware → page_views (geo, UA, UTMs)              │
-│  Client tracker → screen_width · duration · referrer       │
-│  Admin dashboard → /admin/analytics                        │
-└─────────────────────────────────────────────────────────────┘
-```
+### Scraper → Database
 
-### Tech Stack
+`scripts/scrape.ts` is a Puppeteer scraper that fetches upcoming tournaments from [Chess-Results.com](https://chess-results.com) across 80+ national federation codes (e.g. `IND`, `GER`, `USA`). For each tournament it:
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| Framework | Next.js 16 (App Router) | SSR, API routes, ISR caching |
-| Language | TypeScript 5 | End-to-end type safety |
-| Database | Supabase (PostgreSQL) | Tournaments, users, analytics |
-| Map | Leaflet + react-leaflet | Interactive world map |
-| Clustering | react-leaflet-cluster | Marker grouping at scale |
-| Charts | Recharts | Analytics dashboard visualizations |
-| Auth | Supabase Auth | Player + Admin sessions |
-| Styling | Tailwind CSS v4 | Utility-first design system |
-| Scraping | Puppeteer + Cheerio | Headless browser scraping |
-| Geocoding | Google Maps API | Address → lat/lng coordinates |
-| Analytics | Firebase + Vercel Analytics | Event + pageview tracking |
-| Deployment | Vercel | Edge network, cron jobs |
+1. Parses the tournament name, dates, location, rounds, time control, and organizer from the HTML.
+2. Infers `category` (Classical / Rapid / Blitz) and `fide_rated` from name keywords.
+3. Geocodes each `city, country` pair via the Google Maps Geocoding API to get lat/lng coordinates (results are cached per run).
+4. Upserts the record into the `tournaments` table in Supabase with `status = 'published'`.
+
+### Next.js App
+
+- `app/page.tsx` is a Server Component that fetches tournaments with `unstable_cache` (5-minute revalidation).
+- `app/HomePageClient.tsx` renders the interactive Leaflet map. The map is always lazy-loaded via `next/dynamic` because Leaflet is SSR-unsafe.
+- API routes at `/api/tournaments` and `/api/tournaments/upcoming` serve the frontend with 30-minute cache headers.
+- TanStack React Query v5 handles client-side caching for paginated views.
+- Two user roles (Player and Admin) are managed via `lib/AuthContext.tsx` backed by Supabase Auth.
+
+### Analytics
+
+Umami Cloud is embedded in `app/layout.tsx` and collects privacy-friendly pageview and visitor data. The `/api/analytics` route proxies the Umami API using `UMAMI_API_KEY`. The public `/stats` page visualises that data (see below).
 
 ---
 
-## Getting Started
+## Environment Variables
 
-### Prerequisites
-
-- Node.js 18+
-- npm or pnpm
-- [Supabase](https://supabase.com/) account (free tier works)
-- [Google Maps API key](https://developers.google.com/maps/documentation/geocoding/get-api-key) (for scraper geocoding only)
-
-### Setup
-
-```bash
-git clone https://github.com/AnayDhawan/tourneyradar.git
-cd tourneyradar
-npm install
-```
-
-Copy the example env file and fill in your credentials:
-
-```bash
-cp .env.local.example .env.local
-```
-
-Required environment variables:
+Create a `.env.local` file at the project root:
 
 ```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=          # Your Supabase project URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY=     # Supabase anon/public key
-SUPABASE_SERVICE_ROLE_KEY=         # Supabase service role key (server-side only)
-
-# Scraper
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=   # Google Maps Geocoding API key
-
-# Firebase Analytics (optional)
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
-
-# Cron security
-CRON_SECRET=                       # Secret for Vercel cron endpoint auth
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
+UMAMI_API_KEY=
+CRON_SECRET=
 ```
 
-Start the dev server:
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key (public, safe for the browser) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (scraper only — never exposed to the browser) |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps Geocoding API key (used by the scraper) |
+| `UMAMI_API_KEY` | Umami Cloud API key (used by `/api/analytics`) |
+| `CRON_SECRET` | Bearer token that protects the Vercel cron endpoint |
+
+---
+
+## Running Locally
 
 ```bash
-npm run dev        # http://localhost:3000
-npm run build      # Production build
-npm run scrape     # Run the scraper (requires .env.local)
+# 1. Install dependencies
+npm install
+
+# 2. Create and fill in environment variables
+cp .env.local.example .env.local   # or create .env.local manually
+
+# 3. Start the development server
+npm run dev
 ```
+
+Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## Project Structure
+## Running the Scraper
 
+```bash
+npm run scrape
 ```
-tourneyradar/
-├── app/
-│   ├── admin/analytics/         # Admin analytics dashboard (admin-only)
-│   ├── api/
-│   │   ├── admin/analytics/     # Overview, daily, hourly, pages, referrers, countries, devices
-│   │   ├── analytics/duration/  # Client-side duration beacon endpoint
-│   │   ├── tournaments/         # Tournament list + paginated upcoming endpoints
-│   │   ├── cron/                # Vercel daily cron trigger
-│   │   └── wishlist/            # Player favorites
-│   ├── country/[code]/          # Country-filtered pages (SEO)
-│   ├── player/                  # Login, register, wishlist
-│   ├── tournaments/[id]/        # Individual tournament detail pages
-│   ├── HomePageClient.tsx       # Interactive map (core UI, ~24KB)
-│   └── layout.tsx               # Root layout with providers + analytics
-├── components/
-│   └── BaseLayout.tsx           # Shared nav + footer shell
-├── lib/
-│   ├── supabase.ts              # Supabase client + Tournament type
-│   ├── tournaments.ts           # Server-side query helpers
-│   ├── tracker.ts               # Client-side pageview + duration tracking
-│   ├── analytics.ts             # Tournament event tracking
-│   └── AuthContext.tsx          # Global auth state (Player / Admin)
-├── middleware.ts                # Edge middleware: tracking, geo, UA parsing
-├── scripts/
-│   └── scrape.ts                # Puppeteer scraper (run locally or on a server)
-└── vercel.json                  # Cron schedule + security headers
-```
+
+Requires `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and (optionally) `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` in `.env.local`. Without the Google Maps key, geocoding is skipped and tournaments are saved without coordinates. The scraper targets up to 2,000 new tournaments per run.
 
 ---
 
-## Data Pipeline
+## GitHub Actions Cron
 
-The scraper is the most technically complex piece. Here's how it works end-to-end:
+`.github/workflows/scrape.yml` runs `npm run scrape` automatically every 6 hours (`0 */6 * * *`) using repository secrets for all required environment variables. It can also be triggered manually from the **Actions** tab in GitHub.
 
-1. **Fetch** — Puppeteer navigates Chess-Results.com's federation-filtered tournament lists for 60+ country federation codes (e.g. `fed.aspx?fed=IND` for India)
-2. **Parse** — Cheerio extracts tournament name, dates, location, rounds, time control, organizer, and source URLs from the HTML
-3. **Normalize** — Date strings like `2025/04/12 to 2025/04/15` are parsed into ISO format; `category` (Classical/Rapid/Blitz) and `fide_rated` are inferred from tournament name keywords
-4. **Geocode** — Each `city, country` pair is sent to the Google Maps Geocoding API to get lat/lng; results are cached within the run to avoid duplicate API calls
-5. **Deduplicate** — Tournaments are upserted by `source_url`, so re-running the scraper safely updates existing records without creating duplicates
-6. **Store** — Records are written to Supabase with `status = 'published'`; the frontend only surfaces future events
-
-The scraper runs on demand via `npm run scrape`. A daily Vercel cron at `0 2 * * *` hits `/api/cron/scrape-tournaments` for logging; the heavy Puppeteer work runs locally or on a dedicated machine to avoid Vercel's function timeout limits.
+Repository secrets required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`.
 
 ---
 
-## Analytics
+## The /stats Page
 
-Page views are tracked at the edge before any page renders. `middleware.ts` fires a fire-and-forget insert into `page_views` capturing:
+`/stats` is a public analytics dashboard powered by Umami Cloud. It shows:
 
-- Path, referrer, session ID (cookie-based, 30-day window)
-- **Geo**: country, city, region from Vercel's `x-vercel-ip-*` headers
-- **Device**: OS, browser, device type parsed from User-Agent (no external dependencies)
-- **UTM parameters**: `utm_source`, `utm_medium`, `utm_campaign` from query string
-- **Duration**: tracked client-side via `visibilitychange` / `beforeunload`, sent via `navigator.sendBeacon()`
-- **Screen width**: captured client-side and sent with the initial insert
+- **Stat cards** — total pageviews, unique visitors, and sessions for the selected period.
+- **Time-range selector** — 24h, 7d, 30d, 6m, 1y, and all-time.
+- **Traffic chart** — line chart of pageviews and sessions over time (Recharts).
+- **Global Reach map** — choropleth world map showing visitor distribution by country.
+- **Top Countries table** — ranked list of countries by pageviews with flag emojis; expandable to show all countries.
 
-The admin dashboard at `/admin/analytics` (requires admin login) aggregates all of this into a Vercel Analytics-style UI with charts, breakdown tables, and date range selection.
+---
+
+## Route Structure
+
+```
+/                          → Interactive world map (homepage)
+/tournaments               → Paginated tournament list
+/tournaments/[id]          → Tournament detail
+/country/[code]            → Country-filtered view
+/stats                     → Public analytics dashboard
+/player/login|register|wishlist  → Player portal
+/admin/login|dashboard     → Admin panel
+/api/tournaments           → GET (filters: country, upcoming, limit)
+/api/tournaments/upcoming  → GET/POST paginated upcoming list
+/api/analytics             → GET proxied Umami stats (used by /stats)
+/api/wishlist              → GET/POST/DELETE player favorites
+/api/cron/scrape-tournaments → Vercel cron trigger
+```
 
 ---
 
 ## Contributing
 
-Issues and pull requests are welcome. For significant changes, open an issue first to discuss the approach.
+Contributions are welcome. Please open an issue or pull request — see `.github/ISSUE_TEMPLATE` and `.github/PULL_REQUEST_TEMPLATE.md` for guidelines. For significant changes, open an issue first to discuss the approach.
 
 ---
 
 ## License
 
 MIT — see [LICENSE](./LICENSE)
-
----
-
-## Author
-
-**Anay Dhawan** — [GitHub](https://github.com/AnayDhawan)
