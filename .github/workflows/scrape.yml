@@ -2,7 +2,7 @@ name: Scrape Tournaments
 
 on:
   schedule:
-    - cron: '0 */6 * * *'   # every 6 hours
+    - cron: '0 2 */2 * *'   # every 2 days at 2am UTC
   workflow_dispatch:          # allow manual runs from the GitHub UI
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Run scraper
         run: npm run scrape
