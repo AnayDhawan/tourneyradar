@@ -1,0 +1,10 @@
+# TourneyRadar
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://www.tourneyradar.com/sitemap.xml
+
+# Disallow
+Disallow: /api/
+Disallow: /admin/
