@@ -9,7 +9,7 @@ function getDateRange(range: string): { startAt: number; endAt: number; unit: st
   if (range === '1y') return { startAt: now - 365 * 24 * 60 * 60 * 1000, endAt: now, unit: 'day' };
   if (range === '6m') return { startAt: now - 180 * 24 * 60 * 60 * 1000, endAt: now, unit: 'day' };
   if (range === '30d') return { startAt: now - 30 * 24 * 60 * 60 * 1000, endAt: now, unit: 'day' };
-  if (range === '7d') return { startAt: now - 7 * 24 * 60 * 60 * 1000, endAt: now, unit: 'hour' };
+  if (range === '7d') return { startAt: now - 7 * 24 * 60 * 60 * 1000, endAt: now, unit: 'day' };
   return { startAt: now - 24 * 60 * 60 * 1000, endAt: now, unit: 'hour' };
 }
 
