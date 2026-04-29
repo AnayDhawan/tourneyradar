@@ -36,7 +36,7 @@ async function geocode(address: string): Promise<{ lat: number; lng: number } | 
   if (!GOOGLE_MAPS_API_KEY) return null;
   try {
     const res = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_MAPS_API_KEY}` 
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_MAPS_API_KEY}`
     );
     const data = await res.json();
     if (data.status === 'OK' && data.results[0]) {
@@ -65,21 +65,21 @@ function parseDate(str: string): { start: string; end: string } | null {
 // Only Classical or Blitz if explicitly mentioned
 function detectCategory(name: string): 'Classical' | 'Rapid' | 'Blitz' {
   const n = (name || '').toLowerCase();
-  
+
   // Check for Blitz keywords
   if (
-    n.includes('blitz') || 
-    n.includes('bullet') || 
+    n.includes('blitz') ||
+    n.includes('bullet') ||
     n.includes('lightning') ||
     n.includes('speed chess')
   ) {
     return 'Blitz';
   }
-  
+
   // Check for Classical keywords - ONLY if explicitly mentioned
   if (
-    n.includes('classical') || 
-    n.includes('standard') || 
+    n.includes('classical') ||
+    n.includes('standard') ||
     n.includes('long play') ||
     n.includes('klassisch') ||    // German
     n.includes('classique') ||    // French
@@ -88,10 +88,10 @@ function detectCategory(name: string): 'Classical' | 'Rapid' | 'Blitz' {
   ) {
     return 'Classical';
   }
-  
+
   // Check for Rapid keywords
   if (
-    n.includes('rapid') || 
+    n.includes('rapid') ||
     n.includes('schnell') ||      // German
     n.includes('rapide') ||       // French
     n.includes('rápido') ||       // Spanish
@@ -101,7 +101,7 @@ function detectCategory(name: string): 'Classical' | 'Rapid' | 'Blitz' {
   ) {
     return 'Rapid';
   }
-  
+
   // DEFAULT: Rapid (most common format worldwide)
   return 'Rapid';
 }
@@ -134,13 +134,13 @@ const COUNTRY_CODES: Record<string, string> = {
   'LTU': 'LT', 'LAT': 'LV', 'EST': 'EE', 'BLR': 'BY', 'MDA': 'MD',
   'MKD': 'MK', 'BIH': 'BA', 'MNE': 'ME', 'ALB': 'AL', 'ISL': 'IS',
   'IRL': 'IE', 'SCO': 'GB', 'WLS': 'GB',
-  
+
   // Americas
   'USA': 'US', 'CAN': 'CA', 'MEX': 'MX', 'ARG': 'AR', 'BRA': 'BR',
   'COL': 'CO', 'PER': 'PE', 'CHI': 'CL', 'VEN': 'VE', 'ECU': 'EC',
   'URU': 'UY', 'PAR': 'PY', 'BOL': 'BO', 'CUB': 'CU', 'PUR': 'PR',
   'CRC': 'CR', 'PAN': 'PA', 'DOM': 'DO',
-  
+
   // Asia
   'IND': 'IN', 'CHN': 'CN', 'JPN': 'JP', 'KOR': 'KR', 'PHI': 'PH',
   'INA': 'ID', 'VIE': 'VN', 'MAS': 'MY', 'SGP': 'SG', 'THA': 'TH',
@@ -148,16 +148,16 @@ const COUNTRY_CODES: Record<string, string> = {
   'IRQ': 'IQ', 'UAE': 'AE', 'KSA': 'SA', 'QAT': 'QA', 'KUW': 'KW',
   'BRN': 'BH', 'JOR': 'JO', 'LBN': 'LB', 'SYR': 'SY', 'UZB': 'UZ',
   'KAZ': 'KZ', 'MGL': 'MN',
-  
+
   // Africa
   'RSA': 'ZA', 'EGY': 'EG', 'MAR': 'MA', 'TUN': 'TN', 'ALG': 'DZ',
   'NGR': 'NG', 'KEN': 'KE', 'UGA': 'UG', 'ZIM': 'ZW', 'ZAM': 'ZM',
   'BOT': 'BW', 'NAM': 'NA', 'GHA': 'GH', 'CIV': 'CI', 'SEN': 'SN',
   'CMR': 'CM', 'ANG': 'AO', 'ETH': 'ET',
-  
+
   // Oceania
   'AUS': 'AU', 'NZL': 'NZ', 'FIJ': 'FJ',
-  
+
   // Middle East
   'ISR': 'IL',
 
@@ -197,21 +197,21 @@ async function scrapeTournament(browser: Browser, url: string): Promise<ScrapedT
   try {
     page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
-    
+
     const fullUrl = url.includes('turdet=') ? url : `${url}&turdet=YES`;
     await page.goto(fullUrl, { waitUntil: 'domcontentloaded', timeout: 12000 });
     await new Promise(r => setTimeout(r, 200));
 
     const data = await page.evaluate(() => {
       const result: Record<string, string> = {};
-      
+
       document.querySelectorAll('h2').forEach(h2 => {
         const t = h2.textContent?.trim();
         if (t && t.length > 3 && !t.includes('Chess-Results') && !result.name) {
           result.name = t;
         }
       });
-      
+
       document.querySelectorAll('td').forEach((td, i, all) => {
         const label = td.textContent?.trim().toLowerCase() || '';
         const next = all[i + 1]?.textContent?.trim() || '';
@@ -222,23 +222,23 @@ async function scrapeTournament(browser: Browser, url: string): Promise<ScrapedT
         if (label.includes('time control') && !result.timeControl) result.timeControl = next;
         if (label === 'number of rounds' && !result.rounds) result.rounds = next;
       });
-      
+
       document.querySelectorAll('a').forEach(a => {
         const href = a.getAttribute('href') || '';
         const text = a.textContent?.toLowerCase() || '';
-        if ((text.includes('official homepage') || text.includes('organizer')) && 
+        if ((text.includes('official homepage') || text.includes('organizer')) &&
             href.startsWith('http') && !href.includes('chess-results')) {
           result.externalLink = href;
         }
       });
-      
+
       return result;
     });
 
     if (!data.name || !data.federation || !data.date) return null;
     const dates = parseDate(data.date);
     if (!dates) return null;
-    
+
     const today = new Date().toISOString().split('T')[0];
     if (dates.start < today) return null;
 
@@ -279,10 +279,10 @@ async function getLinks(browser: Browser, fed: string): Promise<string[]> {
   try {
     page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0');
-    await page.goto(`https://chess-results.com/fed.aspx?lan=1&fed=${fed}`, { 
-      waitUntil: 'domcontentloaded', timeout: 15000 
+    await page.goto(`https://chess-results.com/fed.aspx?lan=1&fed=${fed}`, {
+      waitUntil: 'domcontentloaded', timeout: 15000
     });
-    
+
     return await page.evaluate(() => {
       const links: string[] = [];
       document.querySelectorAll('a[href*="tnr"]').forEach(a => {
@@ -301,40 +301,26 @@ async function getLinks(browser: Browser, fed: string): Promise<string[]> {
 }
 
 // ========== SCRAPER CONFIGURATION ==========
-const SCRAPER_CONFIG = {
-  // Top 10 chess countries - prioritize these
-  top10: ['IND', 'RUS', 'USA', 'GER', 'CHN', 'FRA', 'ESP', 'NED', 'ENG', 'POL'],
-  
-  // Target tournament counts
-  targets: {
-    top10: 100,    // 100 tournaments per top 10 country
-    tier2: 50,     // 50 tournaments per tier 2 country
-    others: 25,    // 25 tournaments per other country
-  },
-  
-  // Tier 2 countries (strong chess nations)
-  tier2: [
-    'ITA', 'AUT', 'SUI', 'CZE', 'HUN', 'SWE', 'NOR', 'DEN', 'UKR',
-    'ARG', 'BRA', 'AUS', 'ISR', 'TUR', 'GRE', 'SRB', 'CRO', 'ROU',
-  ],
-  
-  // Maximum total tournaments to scrape
-  maxTotal: 2000,
-  
-  // Concurrency settings
-  concurrentPages: 5,
-  delayBetweenRequests: 150,
-};
+const HIGH_VOLUME_COUNTRIES = [
+  'IND', 'GER', 'USA', 'FRA', 'ESP', 'HUN', 'RUS', 'POL',
+  'ITA', 'NED', 'CZE', 'AUT', 'SRB', 'ROU', 'UKR', 'BUL',
+  'SWE', 'NOR', 'DEN', 'FIN', 'TUR', 'AZE', 'ARM', 'GEO', 'CHN'
+];
+
+const HIGH_VOLUME_LIMIT = 25;
+const DEFAULT_LIMIT = 10;
+const MAX_TOTAL = 2000;
+const DELAY_BETWEEN_REQUESTS = 150;
 
 // ========== MAIN ==========
 async function main() {
   console.log('\n' + '═'.repeat(60));
-  console.log('  TourneyRadar Scraper v9 - GLOBAL COVERAGE');
+  console.log('  TourneyRadar Scraper - GLOBAL COVERAGE');
   console.log('═'.repeat(60));
   console.log('\n  Configuration:');
-  console.log(`    ✓ Top 10 countries: ${SCRAPER_CONFIG.top10.length} (target: ${SCRAPER_CONFIG.targets.top10} each)`);
-  console.log(`    ✓ Tier 2 countries: ${SCRAPER_CONFIG.tier2.length} (target: ${SCRAPER_CONFIG.targets.tier2} each)`);
-  console.log(`    ✓ Maximum total: ${SCRAPER_CONFIG.maxTotal} tournaments`);
+  console.log(`    ✓ High-volume countries (${HIGH_VOLUME_COUNTRIES.length}): ${HIGH_VOLUME_LIMIT} tournaments each`);
+  console.log(`    ✓ All other countries: ${DEFAULT_LIMIT} tournaments each`);
+  console.log(`    ✓ Maximum total: ${MAX_TOTAL} tournaments`);
   console.log('    ✓ Smart category detection (Rapid default)\n');
 
   console.log('  Loading existing tournaments from DB...');
@@ -342,7 +328,7 @@ async function main() {
     .from('tournaments')
     .select('id')
     .like('id', 'cr_%');
-  
+
   const existingIds = new Set((existing || []).map(t => t.id));
   console.log(`  Found ${existingIds.size} existing tournaments\n`);
 
@@ -352,115 +338,111 @@ async function main() {
   });
 
   const tournaments: ScrapedTournament[] = [];
-  const MAX = SCRAPER_CONFIG.maxTotal;
   const seen = new Set<string>();
 
+  const feds = [
+    // ========== EUROPE ==========
+    'GER', 'FRA', 'ESP', 'ENG', 'ITA', 'POL', 'NED', 'RUS', 'UKR', 'AUT',
+    'SUI', 'CZE', 'HUN', 'SWE', 'NOR', 'DEN', 'FIN', 'BEL', 'POR', 'GRE',
+    'TUR', 'SRB', 'CRO', 'SLO', 'SVK', 'ROU', 'BUL', 'GEO', 'ARM', 'AZE',
+    'LTU', 'LAT', 'EST', 'BLR', 'MDA', 'MKD', 'BIH', 'MNE', 'ALB', 'ISL',
+    'IRL', 'SCO', 'WLS', 'CYP', 'LUX', 'MLT', 'AND', 'SMR', 'FRO',
+
+    // ========== AMERICAS ==========
+    'USA', 'CAN', 'MEX', 'ARG', 'BRA', 'COL', 'PER', 'CHI', 'VEN',
+    'ECU', 'URU', 'PAR', 'BOL', 'CUB', 'PUR', 'CRC', 'PAN', 'DOM',
+    'TRI', 'JAM', 'BAR', 'GUY', 'SUR', 'HAI', 'NCA', 'ESA', 'HON', 'GUA',
+
+    // ========== ASIA ==========
+    'IND', 'CHN', 'JPN', 'KOR', 'PHI', 'INA', 'VIE', 'MAS', 'SGP',
+    'THA', 'MYA', 'BAN', 'SRI', 'PAK', 'IRI', 'IRQ', 'UAE', 'KSA',
+    'QAT', 'KUW', 'BRN', 'JOR', 'LBN', 'SYR', 'UZB', 'KAZ', 'MGL',
+    'NEP', 'AFG', 'TKM', 'KGZ', 'TJK', 'MDV', 'BRU', 'CAM', 'LAO',
+    'YEM', 'OMA', 'PLE',
+
+    // ========== AFRICA ==========
+    'RSA', 'EGY', 'MAR', 'TUN', 'ALG', 'NGR', 'KEN', 'UGA', 'ZIM',
+    'ZAM', 'BOT', 'NAM', 'GHA', 'CIV', 'SEN', 'CMR', 'ANG', 'ETH',
+    'LBA', 'SUD', 'MLI', 'BUR', 'TOG', 'BEN', 'RWA', 'MOZ', 'MAD',
+    'MRI', 'SEY', 'CPV',
+
+    // ========== OCEANIA ==========
+    'AUS', 'NZL', 'FIJ',
+
+    // ========== MIDDLE EAST ==========
+    'ISR',
+  ];
+
+  const uniqueFeds = [...new Set(feds)];
+
   try {
-    console.log('Phase 1: Collecting links from federations...\n');
-    
-    // Prioritized federation list
-    const feds = [
-      // ========== TOP 10 PRIORITY ==========
-      ...SCRAPER_CONFIG.top10,
-      
-      // ========== TIER 2 ==========
-      ...SCRAPER_CONFIG.tier2,
-      
-      // ========== EUROPE ==========
-      'FIN', 'BEL', 'POR', 'SLO', 'SVK', 'BUL',
-      'GEO', 'ARM', 'AZE', 'LTU', 'LAT', 'EST', 'BLR', 'MDA', 'MKD',
-      'BIH', 'MNE', 'ALB', 'ISL', 'IRL', 'SCO', 'WLS',
-      'CYP', 'LUX', 'MLT', 'AND', 'SMR', 'FRO',
-      
-      // ========== AMERICAS ==========
-      'CAN', 'MEX', 'COL', 'PER', 'CHI', 'VEN',
-      'ECU', 'URU', 'PAR', 'BOL', 'CUB', 'PUR', 'CRC', 'PAN', 'DOM',
-      'TRI', 'JAM', 'BAR', 'GUY', 'SUR', 'HAI', 'NCA', 'ESA', 'HON', 'GUA',
-      
-      // ========== ASIA ==========
-      'JPN', 'KOR', 'PHI', 'INA', 'VIE', 'MAS', 'SGP',
-      'THA', 'MYA', 'BAN', 'SRI', 'PAK', 'IRI', 'IRQ', 'UAE', 'KSA',
-      'QAT', 'KUW', 'BRN', 'JOR', 'LBN', 'SYR', 'UZB', 'KAZ', 'MGL',
-      'NEP', 'AFG', 'TKM', 'KGZ', 'TJK', 'MDV', 'BRU', 'CAM', 'LAO',
-      'YEM', 'OMA', 'PLE',
-      
-      // ========== AFRICA ==========
-      'RSA', 'EGY', 'MAR', 'TUN', 'ALG', 'NGR', 'KEN', 'UGA', 'ZIM',
-      'ZAM', 'BOT', 'NAM', 'GHA', 'CIV', 'SEN', 'CMR', 'ANG', 'ETH',
-      'LBA', 'SUD', 'MLI', 'BUR', 'TOG', 'BEN', 'RWA', 'MOZ', 'MAD',
-      'MRI', 'SEY', 'CPV',
-      
-      // ========== OCEANIA ==========
-      'NZL', 'FIJ',
-    ];
-    
-    // Remove duplicates
-    const uniqueFeds = [...new Set(feds)];
-    const allLinks: string[] = [];
+    console.log('Scraping federations (per-country limits)...\n');
 
     for (const fed of uniqueFeds) {
-      process.stdout.write(`  ${fed}... `);
+      if (tournaments.length >= MAX_TOTAL) break;
+
+      const limit = HIGH_VOLUME_COUNTRIES.includes(fed) ? HIGH_VOLUME_LIMIT : DEFAULT_LIMIT;
+      process.stdout.write(`  ${fed} (limit:${limit})... `);
+
       const links = await getLinks(browser, fed);
-      console.log(`${links.length}`);
-      allLinks.push(...links);
-      await new Promise(r => setTimeout(r, SCRAPER_CONFIG.delayBetweenRequests));
+
+      const newLinks = links.filter(l => {
+        const m = l.match(/tnr(\d+)/);
+        if (!m) return false;
+        const id = `cr_${m[1]}`;
+        if (seen.has(m[1]) || existingIds.has(id)) return false;
+        seen.add(m[1]);
+        return true;
+      });
+
+      let fedCount = 0;
+      for (const link of newLinks) {
+        if (fedCount >= limit || tournaments.length >= MAX_TOTAL) break;
+        const t = await scrapeTournament(browser, link);
+        if (t) {
+          tournaments.push(t);
+          fedCount++;
+        }
+        await new Promise(r => setTimeout(r, 100));
+      }
+
+      console.log(`${fedCount} new`);
+      await new Promise(r => setTimeout(r, DELAY_BETWEEN_REQUESTS));
     }
 
-    const unique = allLinks.filter(l => {
-      const m = l.match(/tnr(\d+)/);
-      if (!m) return false;
-      const id = `cr_${m[1]}`;
-      if (seen.has(m[1]) || existingIds.has(id)) return false;
-      seen.add(m[1]);
-      return true;
-    });
-
-    console.log(`\n  Total unique: ${unique.length}`);
-    console.log(`  Already in DB: ${allLinks.length - unique.length - (allLinks.length - seen.size)}`);
-    console.log(`  New to check: ${unique.length}\n`);
-
-    console.log('Phase 2: Scraping new tournaments...\n');
-    
-    for (let i = 0; i < unique.length && tournaments.length < MAX; i++) {
-      process.stdout.write(`\r  ${i + 1}/${unique.length} checked, ${tournaments.length} valid`);
-      const t = await scrapeTournament(browser, unique[i]);
-      if (t) tournaments.push(t);
-      await new Promise(r => setTimeout(r, 100));
-    }
-
-    console.log(`\n\n  ✓ Found ${tournaments.length} new tournaments\n`);
+    console.log(`\n  ✓ Found ${tournaments.length} new tournaments\n`);
 
     if (GOOGLE_MAPS_API_KEY && tournaments.length > 0) {
-      console.log('Phase 3: Geocoding...\n');
+      console.log('Geocoding...\n');
       const cache = new Map<string, { lat: number; lng: number } | null>();
       let geocoded = 0;
 
       for (let i = 0; i < tournaments.length; i++) {
         const t = tournaments[i];
         const key = `${t.city}, ${t.country}`;
-        
+
         if (!cache.has(key)) {
           const coords = await geocode(key);
           cache.set(key, coords);
           if (coords) geocoded++;
           await new Promise(r => setTimeout(r, 50));
         }
-        
+
         const coords = cache.get(key);
         if (coords) {
           t.lat = coords.lat;
           t.lng = coords.lng;
         }
-        
+
         process.stdout.write(`\r  ${i + 1}/${tournaments.length}`);
       }
-      
+
       console.log(`\n\n  ✓ Geocoded ${geocoded} unique locations\n`);
     } else if (!GOOGLE_MAPS_API_KEY) {
-      console.log('Phase 3: Skipped (no GOOGLE_MAPS_API_KEY)\n');
+      console.log('Geocoding: Skipped (no GOOGLE_MAPS_API_KEY)\n');
     }
 
-    console.log('Phase 4: Saving to database...\n');
+    console.log('Saving to database...\n');
     let saved = 0;
 
     for (const t of tournaments) {
