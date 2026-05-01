@@ -342,35 +342,36 @@ async function main() {
 
   const feds = [
     // ========== EUROPE ==========
-    'GER', 'FRA', 'ESP', 'ENG', 'ITA', 'POL', 'NED', 'RUS', 'UKR', 'AUT',
-    'SUI', 'CZE', 'HUN', 'SWE', 'NOR', 'DEN', 'FIN', 'BEL', 'POR', 'GRE',
-    'TUR', 'SRB', 'CRO', 'SLO', 'SVK', 'ROU', 'BUL', 'GEO', 'ARM', 'AZE',
-    'LTU', 'LAT', 'EST', 'BLR', 'MDA', 'MKD', 'BIH', 'MNE', 'ALB', 'ISL',
-    'IRL', 'SCO', 'WLS', 'CYP', 'LUX', 'MLT', 'AND', 'SMR', 'FRO',
+    'ALB', 'AND', 'AUT', 'BEL', 'BLR', 'BIH', 'BUL', 'CRO', 'CYP', 'CZE',
+    'DEN', 'ENG', 'EST', 'FIN', 'FRA', 'GEO', 'GER', 'GRE', 'HUN', 'IRL',
+    'ISL', 'ITA', 'LAT', 'LIE', 'LTU', 'LUX', 'MKD', 'MLT', 'MDA', 'MNE',
+    'NED', 'NOR', 'POL', 'POR', 'ROU', 'RUS', 'SMR', 'SRB', 'SLE', 'SVK',
+    'SLO', 'ESP', 'SWE', 'SUI', 'TUR', 'UKR', 'WLS',
 
     // ========== AMERICAS ==========
-    'USA', 'CAN', 'MEX', 'ARG', 'BRA', 'COL', 'PER', 'CHI', 'VEN',
-    'ECU', 'URU', 'PAR', 'BOL', 'CUB', 'PUR', 'CRC', 'PAN', 'DOM',
-    'TRI', 'JAM', 'BAR', 'GUY', 'SUR', 'HAI', 'NCA', 'ESA', 'HON', 'GUA',
+    'ANT', 'ARG', 'ARU', 'BAH', 'BAR', 'BIZ', 'BOL', 'BRA', 'CAN', 'CAF',
+    'CHI', 'COL', 'CRC', 'CUB', 'DOM', 'ECU', 'ESA', 'GUA', 'GUY', 'HAI',
+    'HON', 'JAM', 'MEX', 'NCA', 'PAN', 'PAR', 'PER', 'PUR', 'TRI', 'URU',
+    'VEN',
 
     // ========== ASIA ==========
-    'IND', 'CHN', 'JPN', 'KOR', 'PHI', 'INA', 'VIE', 'MAS', 'SGP',
-    'THA', 'MYA', 'BAN', 'SRI', 'PAK', 'IRI', 'IRQ', 'UAE', 'KSA',
-    'QAT', 'KUW', 'BRN', 'JOR', 'LBN', 'SYR', 'UZB', 'KAZ', 'MGL',
-    'NEP', 'AFG', 'TKM', 'KGZ', 'TJK', 'MDV', 'BRU', 'CAM', 'LAO',
-    'YEM', 'OMA', 'PLE',
+    'AFG', 'ARM', 'AZE', 'BAN', 'BHU', 'BRN', 'CHN', 'HKG', 'IND', 'INA',
+    'IRI', 'IRQ', 'JCI', 'JOR', 'JPN', 'KAZ', 'KEN', 'KGZ', 'KOS', 'KUW',
+    'LAO', 'LBN', 'LES', 'MAS', 'MDV', 'MGL', 'MTN', 'MYA', 'NEP', 'PAK',
+    'PLE', 'PHI', 'QAT', 'KSA', 'SRI', 'SYR', 'TJK', 'TPE', 'THA', 'TKM',
+    'UAE', 'UZB', 'VIE', 'YEM',
 
     // ========== AFRICA ==========
-    'RSA', 'EGY', 'MAR', 'TUN', 'ALG', 'NGR', 'KEN', 'UGA', 'ZIM',
-    'ZAM', 'BOT', 'NAM', 'GHA', 'CIV', 'SEN', 'CMR', 'ANG', 'ETH',
-    'LBA', 'SUD', 'MLI', 'BUR', 'TOG', 'BEN', 'RWA', 'MOZ', 'MAD',
-    'MRI', 'SEY', 'CPV',
+    'ALG', 'ANG', 'BEN', 'BOT', 'BUR', 'CAM', 'CMR', 'CIV', 'COM', 'CGO',
+    'DJI', 'EGY', 'ETH', 'FAI', 'GAB', 'GAM', 'GHA', 'GCI', 'GUI', 'KEN',
+    'LBA', 'MAD', 'MAW', 'MLI', 'MAR', 'MRI', 'MOZ', 'NAM', 'NGR', 'RWA',
+    'SEN', 'STP', 'RSA', 'SUD', 'TAN', 'TUN', 'UGA', 'ZAM', 'ZIM',
 
     // ========== OCEANIA ==========
-    'AUS', 'NZL', 'FIJ',
+    'AUS', 'FIJ', 'NZL', 'SOL',
 
     // ========== MIDDLE EAST ==========
-    'ISR',
+    'ISR', 'MNC',
   ];
 
   const uniqueFeds = [...new Set(feds)];
