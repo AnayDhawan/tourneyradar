@@ -37,7 +37,7 @@ export default function PrivacyPage() {
             
             <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>5. Contact</h3>
             <p style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>
-              For privacy concerns, contact us at help@tourneyradar.com
+              For privacy concerns, contact us at dhawansanay@gmail.com
             </p>
           </div>
         </div>

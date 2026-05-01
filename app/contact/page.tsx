@@ -21,7 +21,7 @@ export default function ContactPage() {
             </p>
             <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
               <a
-                href="mailto:help@tourneyradar.com"
+                href="mailto:dhawansanay@gmail.com"
                 className="btn btn-primary"
                 style={{ textDecoration: "none" }}
               >

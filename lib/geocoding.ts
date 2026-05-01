@@ -220,7 +220,7 @@ async function geocodeWithNominatim(city: string, country?: string): Promise<{ l
     
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'TourneyRadar/1.0 (chess tournament aggregator, help@tourneyradar.com)'
+        'User-Agent': 'TourneyRadar/1.0 (chess tournament aggregator, dhawansanay@gmail.com)'
       }
     });
     
