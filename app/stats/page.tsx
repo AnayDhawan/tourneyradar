@@ -419,8 +419,12 @@ export default function StatsPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                   <XAxis
                     dataKey="date"
-                    interval={0}
+                    interval="preserveStartEnd"
                     tickFormatter={(v) => {
+                      if (range === '24h') {
+                        const d = new Date(v);
+                        return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                      }
                       if (range === '7d') {
                         const d = new Date(v);
                         return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
@@ -432,6 +436,14 @@ export default function StatsPage() {
                         return dayNum % 2 === todayParity
                           ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
                           : '';
+                      }
+                      if (range === '6m' || range === '1y') {
+                        const d = new Date(v);
+                        return d.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
+                      }
+                      if (range === 'all') {
+                        const d = new Date(v);
+                        return d.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
                       }
                       return formatAxisDate(v, range);
                     }}
