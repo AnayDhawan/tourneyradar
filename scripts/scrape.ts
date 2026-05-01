@@ -307,8 +307,8 @@ const HIGH_VOLUME_COUNTRIES = [
   'SWE', 'NOR', 'DEN', 'FIN', 'TUR', 'AZE', 'ARM', 'GEO', 'CHN'
 ];
 
-const HIGH_VOLUME_LIMIT = 25;
-const DEFAULT_LIMIT = 10;
+const HIGH_VOLUME_LIMIT = 20;
+const DEFAULT_LIMIT = 20;
 const MAX_TOTAL = 2000;
 const DELAY_BETWEEN_REQUESTS = 150;
 
