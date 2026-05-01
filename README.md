@@ -28,6 +28,12 @@ Live: **[tourneyradar.com](https://www.tourneyradar.com)**
 
 ---
 
+## Live demo
+
+![TourneyRadar Demo](https://raw.githubusercontent.com/AnayDhawan/tourneyradar/main/docs/demo.gif)
+
+---
+
 ## Architecture
 
 ### Scraper → Database
@@ -50,6 +56,27 @@ Live: **[tourneyradar.com](https://www.tourneyradar.com)**
 ### Analytics
 
 Umami Cloud is embedded in `app/layout.tsx` and collects privacy-friendly pageview and visitor data. The `/api/analytics` route proxies the Umami API using `UMAMI_API_KEY`. The public `/stats` page visualises that data (see below).
+
+---
+
+## Public API
+
+Tournament data is available via the free public API — no auth, no key needed.
+
+**Base URL:** `https://tourneyradar-api.vercel.app`
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /v1/tournaments` | List tournaments (filter by country, category, upcoming) |
+| `GET /v1/tournaments/:id` | Get a single tournament |
+| `GET /v1/countries` | List all available countries |
+
+**Quick example:**
+```bash
+curl "https://tourneyradar-api.vercel.app/v1/tournaments?country=IN&upcoming=true"
+```
+
+Full documentation: [tourneyradar-api](https://github.com/AnayDhawan/tourneyradar-api)
 
 ---
 
