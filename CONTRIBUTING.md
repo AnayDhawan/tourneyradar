@@ -1,116 +1,110 @@
-# Contributing to TourneyRadar
+# Contributing
 
-Thank you for helping make chess tournament discovery better for everyone.
+Thanks for your interest in TourneyRadar.
 
 ---
 
-## How to add a new scraper source
+## Setup
 
-Each scraper is a standalone TypeScript script in `scripts/`. The existing reference is `scripts/scrape.ts`.
+```bash
+git clone https://github.com/AnayDhawan/tourneyradar.git
+cd tourneyradar
+npm install
+cp .env.local.example .env.local
+npm run dev
+```
 
-### Step-by-step
+You will need your own Supabase project and Google Maps API key.
+The admin panel is not open source — all other routes work locally.
 
-1. **Create `scripts/scrape-<source>.ts`**
+---
 
-   ```typescript
-   import { createClient } from '@supabase/supabase-js';
-   import { countryNameToCode } from '../lib/countryMap';
+## Adding a new data source
 
-   const supabase = createClient(
-     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-     process.env.SUPABASE_SERVICE_ROLE_KEY! // always service key for writes
-   );
-   ```
+The scraper lives in `scripts/scrape.ts`. To add a new source:
 
-2. **Generate a stable, source-prefixed ID** for every tournament so duplicates are handled by upsert:
+**1. Create `scripts/scrape-<source>.ts`**
 
-   ```typescript
-   id: `lichess_${tournament.id}`  // e.g. "lichess_abc123"
-   ```
+```typescript
+import { createClient } from '@supabase/supabase-js';
 
-3. **Map the country** — always set both `country` (full name) and `country_code` (ISO 2-letter):
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+```
 
-   ```typescript
-   import { countryNameToCode } from '../lib/countryMap';
+**2. Use a stable source-prefixed ID**
 
-   country: 'Germany',
-   country_code: countryNameToCode('Germany') ?? 'DE',
-   ```
+```typescript
+id: `mysource_${tournament.id}`
+```
 
-4. **Write to the `tournaments` table** using upsert so re-runs are idempotent:
+**3. Upsert to tournaments**
 
-   ```typescript
-   await supabase.from('tournaments').upsert({
-     id,
-     name,
-     date,          // YYYY-MM-DD
-     end_date,      // YYYY-MM-DD
-     city,
-     country,
-     country_code,
-     category,      // 'Classical' | 'Rapid' | 'Blitz'
-     status: 'published',
-     source: 'your-source-name',
-     source_url,
-     fide_rated,    // use detectFideRated(name) pattern from scrape.ts
-     scraped_at: new Date().toISOString(),
-   }, { onConflict: 'id' });
-   ```
+```typescript
+await supabase.from('tournaments').upsert({
+  id,
+  name,
+  date,           // YYYY-MM-DD
+  end_date,       // YYYY-MM-DD
+  city,
+  country,        // full name e.g. "India"
+  country_code,   // ISO alpha-2 e.g. "IN"
+  category,       // 'Classical' | 'Rapid' | 'Blitz'
+  status: 'published',
+  source: 'mysource',
+  source_url,
+  fide_rated,
+  scraped_at: new Date().toISOString(),
+}, { onConflict: 'id' });
+```
 
-5. **Add a script entry** in `package.json`:
+**4. Add to package.json**
 
-   ```json
-   "scrape:lichess": "npx tsx --env-file=.env.local scripts/scrape-lichess.ts"
-   ```
+```json
+"scrape:mysource": "npx tsx --env-file=.env.local scripts/scrape-mysource.ts"
+```
 
-6. **Open a PR** — see PR guidelines below.
+**5. Open a PR** with an example tournament URL that scraped successfully.
 
 ### Required fields
 
-| Field | Type | Notes |
-|---|---|---|
-| `id` | string | Stable, source-prefixed |
-| `name` | string | Tournament name |
-| `date` | string | Start date `YYYY-MM-DD` |
-| `end_date` | string | End date `YYYY-MM-DD` |
-| `country` | string | Full English country name |
-| `country_code` | string | ISO 3166-1 alpha-2 via `countryNameToCode()` |
-| `category` | string | `'Classical'`, `'Rapid'`, or `'Blitz'` |
-| `status` | string | `'published'` |
-| `source` | string | Your source identifier |
-| `source_url` | string | Direct URL to the tournament page |
+| Field | Type | |
+|-------|------|-|
+| `id` | string | source-prefixed, stable |
+| `name` | string | |
+| `date` | string | YYYY-MM-DD |
+| `end_date` | string | YYYY-MM-DD |
+| `country` | string | full English name |
+| `country_code` | string | ISO 3166-1 alpha-2 |
+| `category` | string | Classical / Rapid / Blitz |
+| `status` | string | always `published` |
+| `source_url` | string | direct link to tournament page |
 
 ---
 
 ## Code style
 
-- **TypeScript strict mode** is enabled (`strict: true` in `tsconfig.json`). All new code must type-check cleanly (`npm run build`).
-- **No `any`** — use `unknown` and narrow it, or define a proper interface.
-- **No `console.log` in production paths** — API routes and `lib/` files must not log. Scraper scripts may use `console.log` and `process.stdout.write` for progress output.
-- **No hardcoded credentials** — all secrets come from environment variables. Never commit a `.env.local` file.
+- Strict TypeScript — must pass `npm run build`
+- No `any`
+- No hardcoded secrets
+- No `console.log` in API routes or `lib/` files
 
 ---
 
 ## PR guidelines
 
-- Keep PRs focused: one scraper or one fix per PR.
-- Scraper PRs must include the source URL and an example tournament URL that was successfully scraped.
-- If the source has rate limits or ToS concerns, mention them in the PR description.
-- Bug fix PRs should include a short description of what was wrong and what the fix does.
-- AI-generated PRs are welcome, provided the contributor has reviewed, tested, and verified the output themselves before submitting.
+- One PR per change
+- Scraper PRs must include a working example URL
+- AI-assisted PRs welcome — review and test before submitting
 
 ---
 
-## Feature Ideas
+## Open ideas
 
-These are open for community contributions. Pick one up, open an issue to claim it, then submit a PR.
-
-- **User accounts / wishlist sync across devices** — currently wishlist is per-device
-- **Email / push notifications** — alert users when new tournaments appear in their country
-- **Calendar export (ICS)** — let users add tournaments to Google Calendar / Apple Calendar
-- **Mobile app** — React Native wrapper around the existing API
-- **Rating filter** — show only tournaments that accept players above/below a given rating
-- **Tournament reviews** — players can leave a star rating and comment after attending
-- **Organizer profiles** — verified badge for known organizers, direct contact
-- **Multi-language UI (i18n)** — Spanish, French, German, Russian interface translations
-- **Tournament result submission** — organizers can submit final standings after completion
+- Email alerts for new tournaments in your country
+- ICS calendar export
+- Rating range filter
+- Tournament reviews
+- Mobile app using the public API
