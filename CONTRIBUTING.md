@@ -21,6 +21,10 @@ The admin panel is not open source — all other routes work locally.
 
 ## Adding a new data source
 
+The biggest way to contribute is adding a new tournament data source.
+Chess-Results is the current only source — but FIDE, national federation
+websites, and Lichess broadcast data are all viable additions.
+
 The scraper lives in `scripts/scrape.ts`. To add a new source:
 
 **1. Create `scripts/scrape-<source>.ts`**
@@ -70,41 +74,62 @@ await supabase.from('tournaments').upsert({
 
 ### Required fields
 
-| Field | Type | |
-|-------|------|-|
-| `id` | string | source-prefixed, stable |
-| `name` | string | |
+| Field | Type | Notes |
+|-------|------|-------|
+| `id` | string | source-prefixed, stable across runs |
+| `name` | string | tournament name |
 | `date` | string | YYYY-MM-DD |
 | `end_date` | string | YYYY-MM-DD |
-| `country` | string | full English name |
-| `country_code` | string | ISO 3166-1 alpha-2 |
+| `country` | string | full English name e.g. "India" |
+| `country_code` | string | ISO 3166-1 alpha-2 e.g. "IN" |
 | `category` | string | Classical / Rapid / Blitz |
 | `status` | string | always `published` |
 | `source_url` | string | direct link to tournament page |
 
 ---
 
+## Other good first contributions
+
+**Data quality**
+- Fix tournaments showing in the wrong city on the map
+- Improve time control detection (Classical vs Rapid vs Blitz inference)
+- Add missing federation codes to the scraper country list
+
+**Map and UI**
+- Add a date range filter to the map
+- Add a rating range filter (show tournaments for players above/below a rating)
+- Improve mobile layout of the tournament list
+- Dark/light mode toggle
+
+**Player features**
+- Email notifications when new tournaments appear in a saved country
+- ICS calendar export so players can add tournaments to Google/Apple Calendar
+- Share a tournament via link with pre-filled filters
+
+**API**
+- Add a `GET /v1/tournaments/search?q=` full-text search endpoint
+- Add a `GET /v1/organizers/:id` endpoint
+- Client libraries — a Python wrapper, a JS/TS SDK
+
+**Infrastructure**
+- Add Playwright end-to-end tests for the map page
+- Add a staging environment with a separate Supabase project
+- Improve scraper error reporting — log failures to a Supabase table
+
+---
+
 ## Code style
 
-- Strict TypeScript — must pass `npm run build`
-- No `any`
-- No hardcoded secrets
-- No `console.log` in API routes or `lib/` files
+- Strict TypeScript — all code must pass `npm run build`
+- No `any` — use `unknown` and narrow, or define a proper interface
+- No hardcoded secrets — all values via environment variables
+- No `console.log` in API routes or `lib/` — scraper scripts may log freely
 
 ---
 
 ## PR guidelines
 
-- One PR per change
-- Scraper PRs must include a working example URL
-- AI-assisted PRs welcome — review and test before submitting
-
----
-
-## Open ideas
-
-- Email alerts for new tournaments in your country
-- ICS calendar export
-- Rating range filter
-- Tournament reviews
-- Mobile app using the public API
+- One PR per change — keep scope tight
+- Scraper PRs must include a working example URL that was successfully scraped
+- If the source has rate limits or ToS restrictions, mention them in the PR
+- AI-assisted PRs are welcome — provided you have reviewed and tested the output

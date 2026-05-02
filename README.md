@@ -63,26 +63,26 @@ no manual intervention needed.
 
 ---
 
-## Environment variables
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
-UMAMI_API_KEY=
-CRON_SECRET=
-```
-
----
-
 ## Routes
-/                    → World map
-/tournaments         → Full tournament list
-/tournaments/[id]    → Tournament detail
-/country/[code]      → Filter by country
-/stats               → Public analytics
+
+**Public**
+/                    → Interactive world map
+/tournaments         → Paginated list of all tournaments
+/tournaments/[id]    → Tournament detail page
+/country/[code]      → Tournaments filtered by country
+/stats               → Public analytics dashboard
+
+**Player portal**
+/player/login        → Sign in
+/player/register     → Create account
 /player/wishlist     → Saved tournaments
+
+**API**
+/api/tournaments           → GET — list tournaments (country, upcoming, limit)
+/api/tournaments/upcoming  → GET/POST — paginated upcoming tournaments
+/api/analytics             → GET — proxied Umami stats
+/api/wishlist              → GET/POST/DELETE — player favorites
+/api/cron/scrape-tournaments → Vercel cron trigger (stub)
 
 ---
 
