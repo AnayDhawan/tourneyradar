@@ -9,6 +9,51 @@ jobs:
   scrape:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      matrix:
+        region: [europe, americas, asia-oceania, africa-me]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Cache Puppeteer browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            puppeteer-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium for Puppeteer
+        run: npx puppeteer browsers install chrome
+
+      - name: Run scraper — ${{ matrix.region }}
+        run: npm run scrape:ci -- --region ${{ matrix.region }} --output tournaments-${{ matrix.region }}.json
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
+
+      - name: Upload scraped data
+        uses: actions/upload-artifact@v4
+        with:
+          name: tournaments-${{ matrix.region }}
+          path: tournaments-${{ matrix.region }}.json
+
+  merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [scrape]
+
     steps:
       - uses: actions/checkout@v4
 
@@ -20,11 +65,33 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Chromium for Puppeteer
-        run: npx puppeteer browsers install chrome
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
 
-      - name: Run scraper
-        run: npm run scrape:ci
+      - name: Merge artifact JSONs
+        run: |
+          node -e "
+            const fs = require('fs');
+            const regions = ['europe', 'americas', 'asia-oceania', 'africa-me'];
+            let all = [];
+            regions.forEach(r => {
+              const file = 'artifacts/tournaments-' + r + '/tournaments-' + r + '.json';
+              if (fs.existsSync(file)) {
+                const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+                all = all.concat(data);
+                console.log(r + ': ' + data.length + ' tournaments');
+              } else {
+                console.warn('Missing artifact: ' + file);
+              }
+            });
+            fs.writeFileSync('merged-tournaments.json', JSON.stringify(all));
+            console.log('Total merged: ' + all.length);
+          "
+
+      - name: Push merged data to Supabase
+        run: npm run scrape:ci -- --push-from merged-tournaments.json
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}

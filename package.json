@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "scrape": "npx tsx --env-file=.env.local scripts/scrape.ts",
-    "scrape:ci": "npx tsx scripts/scrape.ts"
+    "scrape:ci": "npx tsx scripts/scrape.ts",
+    "scrape:region": "npx tsx scripts/scrape.ts"
   },
   "dependencies": {
     "@next/third-parties": "^16.1.1",
