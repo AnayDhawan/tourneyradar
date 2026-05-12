@@ -13,6 +13,19 @@ Find chess tournaments happening near you — and around the world.
 
 ---
 
+## Screenshots
+
+| | | |
+|---|---|---|
+| **World Map** | **Zoom & Filter** | **Tournament Detail** |
+| ![Map View](./docs/media/01-screenshot.png) | ![Filter Controls](./docs/media/04-filter-rapid.png) | ![Detail Panel](./docs/media/03-tournament-detail.png) |
+
+### Demo
+
+![TourneyRadar Demo](./docs/media/demo.gif)
+
+---
+
 Chess tournaments are scattered across Chess-Results.com, federation websites,
 and club newsletters. TourneyRadar puts them all on one map.
 

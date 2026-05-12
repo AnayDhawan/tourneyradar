@@ -4,15 +4,20 @@
 
 | Version | Supported |
 |---------|-----------|
-| `0.x` | ✅ Active |
+| `{{CURRENT_MAJOR}}.x` | ✅ Active |
+| `< {{CURRENT_MAJOR}}.0` | ❌ No longer supported |
 
 ## Reporting a Vulnerability
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
-Email: **anaydhawan.work@gmail.com**
+Email: **{{SECURITY_EMAIL}}**
 
-Include: description, steps to reproduce, potential impact, suggested fix (optional).
+Include in your report:
+- Description of the vulnerability
+- Steps to reproduce
+- Potential impact
+- Any suggested fix (optional)
 
 ### Response Timeline
 
@@ -24,9 +29,17 @@ Include: description, steps to reproduce, potential impact, suggested fix (optio
 
 ## Scope
 
-**In scope:** auth/authorization bypass, injection (SQL, command, XSS), sensitive data exposure, RCE, dependency CVEs affecting this project.
+**In scope:**
+- Authentication or authorization bypass
+- Injection vulnerabilities (SQL, command, XSS)
+- Sensitive data exposure
+- Remote code execution
+- Dependency with known CVE affecting this project
 
-**Out of scope:** third-party service vulnerabilities, social engineering, DoS via excessive API calls.
+**Out of scope:**
+- Vulnerabilities in third-party services (report to them directly)
+- Social engineering
+- Theoretical vulnerabilities without proof of concept
 
 ## Security Hall of Fame
 

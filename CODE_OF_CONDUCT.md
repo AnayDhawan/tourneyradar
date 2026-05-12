@@ -20,7 +20,7 @@ We pledge to make participation in our community a harassment-free experience fo
 
 ## Enforcement
 
-Instances of unacceptable behavior may be reported to: **anaydhawan.work@gmail.com**
+Instances of unacceptable behavior may be reported to: **{{CONTACT_EMAIL}}**
 
 All complaints will be reviewed and investigated promptly and fairly.
 
