@@ -5,6 +5,7 @@ import { ToastProvider } from "@/components/Toast";
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { QueryProvider } from "./providers";
 import { Analytics } from '@vercel/analytics/react';
+import { inter, poppins } from "./fonts";
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.tourneyradar.com'),
@@ -91,7 +92,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang="en" data-scroll-behavior="smooth" className={`${inter.variable} ${poppins.variable}`}>
       <head>
         {/* FAVICON - Must be first for Google to pick up */}
         <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -99,21 +100,15 @@ export default function RootLayout({
         <link rel="icon" href="/favicon-96x96.png" type="image/png" sizes="96x96" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" />
-        
-        {/* Fonts */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-        
+
         {/* Leaflet CSS */}
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        
+
         {/* Theme */}
         <meta name="theme-color" content="#3b82f6" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
 
         {/* Umami Analytics */}
-        {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
         <script defer src="https://cloud.umami.is/script.js" data-website-id="5807c73a-efa2-41ec-8b88-f8708a429f75" />
       </head>
       <body>

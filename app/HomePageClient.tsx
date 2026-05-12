@@ -309,14 +309,14 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
       <section className="hero-bg">
         <nav className="glass">
           <div className="nav-container">
-            <a href="/" className="nav-brand font-display" style={{ textDecoration: "none" }}>
+            <Link href="/" className="nav-brand font-display" style={{ textDecoration: "none" }}>
               TourneyRadar
-            </a>
+            </Link>
 
             <div className="nav-links">
-              <a href="/tournaments">Tournaments</a>
+              <Link href="/tournaments">Tournaments</Link>
               {!authLoading && (
-                <a href={dashboard.href} className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>{dashboard.label}</a>
+                <Link href={dashboard.href} className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>{dashboard.label}</Link>
               )}
             </div>
 
@@ -345,9 +345,9 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               </p>
 
               <div className="btn-group">
-                <a href="/tournaments" className="btn btn-primary">
+                <Link href="/tournaments" className="btn btn-primary">
                   Explore Tournaments
-                </a>
+                </Link>
                 <a 
                   href="https://github.com/AnayDhawan/tourneyradar" 
                   target="_blank"

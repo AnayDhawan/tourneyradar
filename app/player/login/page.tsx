@@ -219,7 +219,7 @@ export default function PlayerLoginPage() {
                 Reset Password
               </h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
-                Enter your email address and we'll send you a link to reset your password.
+                Enter your email address and we&apos;ll send you a link to reset your password.
               </p>
               <div style={{ marginBottom: '1.5rem' }}>
                 <input

@@ -62,7 +62,7 @@ export default function ContactPage() {
                   How do I register for a tournament?
                 </h3>
                 <p style={{ color: "var(--text-secondary)", fontSize: "0.9375rem" }}>
-                  Click "View on Chess-Results" on any tournament page to go to the original listing.
+                  Click &quot;View on Chess-Results&quot; on any tournament page to go to the original listing.
                 </p>
               </div>
 

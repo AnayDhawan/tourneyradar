@@ -80,9 +80,9 @@ export default function AboutPage() {
               Disclaimer
             </h2>
             <p style={{ color: "var(--text-secondary)", lineHeight: 1.8 }}>
-              TourneyRadar does not organize tournaments. We aggregate publicly available 
-              information to help players discover events. For registration and official 
-              details, always refer to the original source (Chess-Results or the tournament's 
+              TourneyRadar does not organize tournaments. We aggregate publicly available
+              information to help players discover events. For registration and official
+              details, always refer to the original source (Chess-Results or the tournament&apos;s
               official website).
             </p>
           </div>

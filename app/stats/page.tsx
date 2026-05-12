@@ -216,8 +216,6 @@ export default function StatsPage() {
   const [tournamentsByCountry, setTournamentsByCountry] = useState<Record<string, number>>({});
   const [tournamentsLoading, setTournamentsLoading] = useState(true);
 
-  useEffect(() => { setShowAllCountries(false); }, [range]);
-
   const fetchData = useCallback((r: Range) => {
     setLoading(true);
     setError(null);
@@ -236,7 +234,11 @@ export default function StatsPage() {
       });
   }, []);
 
-  useEffect(() => { fetchData(range); }, [range, fetchData]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setShowAllCountries(false);
+    fetchData(range);
+  }, [range, fetchData]);
 
   useEffect(() => {
     fetch("/api/tournaments/by-country")

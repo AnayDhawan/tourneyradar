@@ -4,22 +4,15 @@ import { useState, useEffect } from 'react';
 
 export default function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
-  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isClient) return;
-    
     const toggleVisibility = () => {
       setIsVisible(window.pageYOffset > 300);
     };
 
     window.addEventListener('scroll', toggleVisibility);
     return () => window.removeEventListener('scroll', toggleVisibility);
-  }, [isClient]);
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -28,7 +21,7 @@ export default function ScrollToTop() {
     });
   };
 
-  if (!isVisible || !isClient) return null;
+  if (!isVisible) return null;
 
   return (
     <button

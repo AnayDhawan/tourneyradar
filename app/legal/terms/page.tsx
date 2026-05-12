@@ -32,7 +32,7 @@ export default function TermsPage() {
             
             <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>4. Limitation of Liability</h3>
             <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem", lineHeight: 1.7 }}>
-              TourneyRadar is provided "as is" without warranties. We are not responsible for any inaccuracies in tournament information or any issues arising from your use of external tournament websites.
+              TourneyRadar is provided &quot;as is&quot; without warranties. We are not responsible for any inaccuracies in tournament information or any issues arising from your use of external tournament websites.
             </p>
             
             <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>5. Contact</h3>
