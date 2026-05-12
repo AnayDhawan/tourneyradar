@@ -17,12 +17,8 @@ Find chess tournaments happening near you — and around the world.
 
 | | | |
 |---|---|---|
-| **World Map** | **Zoom & Filter** | **Tournament Detail** |
-| ![Map View](./docs/media/01-screenshot.png) | ![Filter Controls](./docs/media/04-filter-rapid.png) | ![Detail Panel](./docs/media/03-tournament-detail.png) |
-
-### Demo
-
-![TourneyRadar Demo](./docs/media/demo.gif)
+| **Homepage** | **Map Loaded** | **Final View** |
+| ![Homepage](./docs/media/01-homepage.png) | ![Map Loaded](./docs/media/02-map-loaded.png) | ![Final View](./docs/media/03-final.png) |
 
 ---
 
