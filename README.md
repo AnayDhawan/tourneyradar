@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![TourneyRadar Logo](./public/favicon.svg)
+<img src="./public/favicon.svg" alt="TourneyRadar Logo" width="120" height="120">
 
 **Find chess tournaments happening near you — and around the world.**
 
