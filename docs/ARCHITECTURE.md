@@ -7,7 +7,7 @@
 - **Server Components + `unstable_cache`**: Homepage and tournament list pages are Server Components. Data is cached for 5 minutes via `unstable_cache()`, reducing Supabase query load.
 - **Edge Middleware for analytics**: Page view tracking runs in the Vercel Edge runtime before any page renders, so it never adds latency to the user experience.
 - **Leaflet always lazy-loaded**: Leaflet reads `window` at import time, so it's always wrapped in `next/dynamic` with `ssr: false`.
-- **Scraper runs outside Vercel**: Puppeteer with Chromium exceeds Vercel's function timeout (10s max). The cron endpoint only logs; actual scraping runs locally or on a dedicated machine.
+- **Scraper runs on GitHub Actions, not Vercel**: Puppeteer with Chromium exceeds Vercel's function timeout (10s max). The `/api/cron/scrape-tournaments` endpoint only triggers a log; actual scraping runs in the `scrape.yml` GitHub Actions workflow on a weekly cron with a 30-minute timeout, parallelized across four regional matrix jobs.
 
 ## Database Schema
 

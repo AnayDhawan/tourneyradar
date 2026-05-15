@@ -89,11 +89,10 @@ Chess tournaments are scattered across Chess-Results.com, federation websites, a
    ```
 
 2. **Set up environment variables:**
-   Create `.env.local`:
+   ```bash
+   cp .env.local.example .env.local
    ```
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-   ```
+   Fill in your Supabase project URL and keys. See `.env.local.example` for all required variables.
 
 3. **Run dev server:**
    ```bash
