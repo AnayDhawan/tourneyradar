@@ -29,8 +29,6 @@ Chess tournaments are scattered across Chess-Results.com, federation websites, a
 |---|---|
 | ![Map View](./docs/media/01-map-view.png) | ![Tournament List View](./docs/media/02-tournaments-list.png) |
 | **Interactive World Map** - All tournaments at a glance with clustered pins | **Paginated List** - Browse and search tournaments by country, format, rating |
-| ![Tournament Detail](./docs/media/03-final.png) | ![Analytics Dashboard](./docs/media/04-screenshot.png) |
-| **Tournament Detail** - Full info: venue, prize pool, time control, registration link | **Analytics** - Regional breakdowns, format stats, weekly updates |
 
 ---
 
