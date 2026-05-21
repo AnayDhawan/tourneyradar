@@ -45,4 +45,4 @@ Include in your report:
 
 | Researcher | Issue | Date |
 |------------|-------|------|
-| — | — | — |
+| | | |

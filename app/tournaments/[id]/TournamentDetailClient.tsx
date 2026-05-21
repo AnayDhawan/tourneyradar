@@ -67,7 +67,7 @@ export default function TournamentDetailClient({ tournament }: Props) {
   }
 
   const dateDisplay = tournament.end_date && tournament.end_date !== tournament.date
-    ? `${formatDate(tournament.date)} — ${formatDate(tournament.end_date)}` 
+    ? `${formatDate(tournament.date)} - ${formatDate(tournament.end_date)}`
     : formatDate(tournament.date);
 
   const locationDisplay = [

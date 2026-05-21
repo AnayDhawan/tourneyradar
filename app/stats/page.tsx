@@ -275,7 +275,7 @@ export default function StatsPage() {
       <section className="tournament-section">
         <div className="section-container">
 
-          {/* Range selector — pill toggle */}
+          {/* Range selector: pill toggle */}
           <div style={{ marginBottom: "2rem" }}>
             <div style={{
               display: "inline-flex",
@@ -472,7 +472,7 @@ export default function StatsPage() {
             )}
           </div>
 
-          {/* Top Countries — full width */}
+          {/* Top Countries: full width */}
           {loading ? (
             <SkeletonTable />
           ) : data ? (

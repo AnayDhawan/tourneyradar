@@ -4,7 +4,7 @@
 
 <img src="./public/favicon.svg" alt="TourneyRadar Logo" width="120" height="120">
 
-**Find chess tournaments happening near you — and around the world.**
+**Find chess tournaments happening near you and around the world.**
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript)](https://typescriptlang.org/)
@@ -27,8 +27,10 @@ Chess tournaments are scattered across Chess-Results.com, federation websites, a
 
 | | |
 |---|---|
-| ![Homepage Map View](./docs/media/01-homepage.png) | ![Tournament List View](./docs/media/02-tournaments-list.png) |
-| **Interactive World Map** — All tournaments at a glance with clustered pins | **Paginated List** — Browse and search tournaments by country, format, rating |
+| ![Map View](./docs/media/01-map-view.png) | ![Tournament List View](./docs/media/02-tournaments-list.png) |
+| **Interactive World Map** - All tournaments at a glance with clustered pins | **Paginated List** - Browse and search tournaments by country, format, rating |
+| ![Tournament Detail](./docs/media/03-final.png) | ![Analytics Dashboard](./docs/media/04-screenshot.png) |
+| **Tournament Detail** - Full info: venue, prize pool, time control, registration link | **Analytics** - Regional breakdowns, format stats, weekly updates |
 
 ---
 
@@ -36,7 +38,7 @@ Chess tournaments are scattered across Chess-Results.com, federation websites, a
 
 ### Map Experience
 - **Interactive Leaflet map** with real-time tournament clusters
-- Zoom to any region — Europe, Asia, Americas
+- Zoom to any region: Europe, Asia, Americas
 - Click pins for instant tournament details
 - No login required
 
@@ -109,7 +111,7 @@ Chess tournaments are scattered across Chess-Results.com, federation websites, a
 
 ## Public API
 
-Tournament data is freely available — no auth, no key, no cost.
+Tournament data is freely available: no auth, no key, no cost.
 
 **Base URL:** `https://tourneyradar-api.vercel.app`
 
@@ -151,7 +153,7 @@ Response:
 
 ## How Data Gets In
 
-A Puppeteer scraper hits Chess-Results.com weekly across 140+ federation codes, parses tournament details, geocodes locations via Google Maps, and upserts everything into Supabase. Runs automatically via GitHub Actions — no manual intervention needed.
+A Puppeteer scraper hits Chess-Results.com weekly across 140+ federation codes, parses tournament details, geocodes locations via Google Maps, and upserts everything into Supabase. Runs automatically via GitHub Actions with no manual intervention needed.
 
 ---
 
@@ -194,7 +196,7 @@ Good first issues: add a new data source, add a missing country, improve the map
 
 ## License
 
-[MIT](LICENSE) — Use freely, give credit where it's due.
+[MIT](LICENSE). Use freely, give credit where it's due.
 
 ---
 

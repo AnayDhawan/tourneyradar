@@ -15,14 +15,14 @@ npm run dev
 ```
 
 You will need your own Supabase project and Google Maps API key.
-The admin panel is not open source — all other routes work locally.
+The admin panel is not open source. All other routes work locally.
 
 ---
 
 ## Adding a new data source
 
 The biggest way to contribute is adding a new tournament data source.
-Chess-Results is the current only source — but FIDE, national federation
+Chess-Results is the current only source, but FIDE, national federation
 websites, and Lichess broadcast data are all viable additions.
 
 The scraper lives in `scripts/scrape.ts`. To add a new source:
@@ -109,27 +109,27 @@ await supabase.from('tournaments').upsert({
 **API**
 - Add a `GET /v1/tournaments/search?q=` full-text search endpoint
 - Add a `GET /v1/organizers/:id` endpoint
-- Client libraries — a Python wrapper, a JS/TS SDK
+- Client libraries: a Python wrapper, a JS/TS SDK
 
 **Infrastructure**
 - Add Playwright end-to-end tests for the map page
 - Add a staging environment with a separate Supabase project
-- Improve scraper error reporting — log failures to a Supabase table
+- Improve scraper error reporting: log failures to a Supabase table
 
 ---
 
 ## Code style
 
-- Strict TypeScript — all code must pass `npm run build`
-- No `any` — use `unknown` and narrow, or define a proper interface
-- No hardcoded secrets — all values via environment variables
-- No `console.log` in API routes or `lib/` — scraper scripts may log freely
+- Strict TypeScript: all code must pass `npm run build`
+- No `any`: use `unknown` and narrow, or define a proper interface
+- No hardcoded secrets: all values via environment variables
+- No `console.log` in API routes or `lib/`. Scraper scripts may log freely.
 
 ---
 
 ## PR guidelines
 
-- One PR per change — keep scope tight
+- One PR per change. Keep scope tight.
 - Scraper PRs must include a working example URL that was successfully scraped
 - If the source has rate limits or ToS restrictions, mention them in the PR
-- AI-assisted PRs are welcome — provided you have reviewed and tested the output
+- AI-assisted PRs are welcome, provided you have reviewed and tested the output
