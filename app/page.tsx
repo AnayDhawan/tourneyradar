@@ -28,8 +28,8 @@ const getCachedTournaments = unstable_cache(
     return data || [];
   },
   ['home-tournaments'],
-  { 
-    revalidate: 300,
+  {
+    revalidate: 86400,
     tags: ['tournaments']
   }
 );
@@ -67,7 +67,7 @@ const getCachedStats = unstable_cache(
     };
   },
   ['home-stats'],
-  { revalidate: 300, tags: ['tournaments'] }
+  { revalidate: 86400, tags: ['tournaments'] }
 );
 
 export default async function HomePage() {

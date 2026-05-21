@@ -53,7 +53,7 @@ const getCachedTournaments = unstable_cache(
     return data || [];
   },
   ['tournaments-list'],
-  { revalidate: 300, tags: ['tournaments'] }
+  { revalidate: 86400, tags: ['tournaments'] }
 );
 
 export default async function TournamentsPage() {
