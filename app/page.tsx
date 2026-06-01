@@ -6,8 +6,14 @@ const API_URL = 'https://tourneyradar-api.vercel.app';
 
 const getCachedData = unstable_cache(
   async () => {
-    const res = await fetch(`${API_URL}/v1/tournaments`, { next: { revalidate: 86400 } });
-    if (!res.ok) return { tournaments: [], stats: { total: 0, countries: 0, mapped: 0 } };
+    const empty = { tournaments: [], stats: { total: 0, countries: 0, mapped: 0 } };
+    let res: Response;
+    try {
+      res = await fetch(`${API_URL}/v1/tournaments`, { next: { revalidate: 86400 } });
+    } catch {
+      return empty;
+    }
+    if (!res.ok) return empty;
 
     const { data: tournaments } = await res.json();
     const list = (tournaments || []) as Array<Record<string, unknown>>;
