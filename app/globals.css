@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
     :root {
       /* Modern Minimalist Color Palette - Matching main website */
       --primary: #2563EB; /* Vibrant Blue */
