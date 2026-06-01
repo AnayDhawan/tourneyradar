@@ -9,7 +9,7 @@ const getCachedData = unstable_cache(
     const empty = { tournaments: [], stats: { total: 0, countries: 0, mapped: 0 } };
     let res: Response;
     try {
-      res = await fetch(`${API_URL}/v1/tournaments`, { next: { revalidate: 86400 } });
+      res = await fetch(`${API_URL}/v1/tournaments?limit=1000&upcoming=true`, { next: { revalidate: 86400 } });
     } catch {
       return empty;
     }
