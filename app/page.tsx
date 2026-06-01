@@ -41,7 +41,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
       />
-      <HomePageClient initialTournaments={tournaments as Parameters<typeof HomePageClient>[0]['initialTournaments']} stats={stats} />
+      <HomePageClient initialTournaments={tournaments as unknown as Parameters<typeof HomePageClient>[0]['initialTournaments']} stats={stats} />
     </>
   );
 }
