@@ -1,28 +1,16 @@
-# Contributor Covenant Code of Conduct
+# Code of Conduct
 
 ## Our Pledge
 
-We pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity, level of experience, nationality, personal appearance, race, religion, or sexual identity.
+We are committed to making TourneyRadar a welcoming, harassment-free space for everyone.
 
-## Our Standards
+## Standards
 
-**Positive behavior includes:**
-- Using welcoming and inclusive language
-- Being respectful of differing viewpoints
-- Gracefully accepting constructive criticism
-- Showing empathy towards other community members
-
-**Unacceptable behavior includes:**
-- Sexualized language or imagery
-- Trolling, insulting or derogatory comments
-- Public or private harassment
-- Publishing others' private information without permission
+Be respectful, constructive, and kind. Harassment, discrimination, or abusive behavior of any kind is not tolerated.
 
 ## Enforcement
 
-Instances of unacceptable behavior may be reported to: **{{CONTACT_EMAIL}}**
-
-All complaints will be reviewed and investigated promptly and fairly.
+Report issues to: **dhawansanay@gmail.com**. All reports will be reviewed fairly and confidentially.
 
 ## Attribution
 
