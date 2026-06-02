@@ -20,7 +20,6 @@ type Range = "24h" | "7d" | "30d" | "6m" | "1y" | "all";
 
 interface UmamiStats {
   pageviews: number;
-  visitors: number;
   visits: number;
 }
 

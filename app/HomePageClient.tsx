@@ -218,16 +218,11 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
     const shownThisSession = sessionStorage.getItem('tr_star_shown');
     if (dismissed || shownThisSession) return;
 
-    const visits = parseInt(localStorage.getItem('tr_visits') || '0', 10) + 1;
-    localStorage.setItem('tr_visits', String(visits));
-
-    if (visits >= 3) {
-      const timer = setTimeout(() => {
-        setShowStarPopup(true);
-        sessionStorage.setItem('tr_star_shown', '1');
-      }, 8000);
-      return () => clearTimeout(timer);
-    }
+    const timer = setTimeout(() => {
+      setShowStarPopup(true);
+      sessionStorage.setItem('tr_star_shown', '1');
+    }, 45000);
+    return () => clearTimeout(timer);
   }, []);
 
   const states = useMemo(() => {
