@@ -127,8 +127,39 @@ await supabase.from('tournaments').upsert({
 
 ---
 
+## Commit format
+
+All commits must follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>: <short description>
+```
+
+Common types:
+
+| Type | When to use |
+|------|-------------|
+| `feat:` | New feature or capability |
+| `fix:` | Bug fix |
+| `docs:` | Documentation only |
+| `refactor:` | Code change with no behaviour change |
+| `chore:` | Tooling, deps, config |
+| `revert:` | Reverting a prior commit |
+
+Examples:
+```
+feat: add FIDE scraper
+fix: correct country code for Serbia
+docs: add calendar export to good first contributions
+```
+
+Non-conforming commits will be requested to change before merge.
+
+---
+
 ## PR guidelines
 
+- **Submit all PRs as drafts.** Mark ready for review only when the work is complete and tested. Regular (non-draft) PRs will be converted to drafts.
 - One PR per change. Keep scope tight.
 - Scraper PRs must include a working example URL that was successfully scraped
 - If the source has rate limits or ToS restrictions, mention them in the PR
