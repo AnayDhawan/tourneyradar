@@ -333,7 +333,6 @@ export default function StatsPage() {
             ) : data ? (
               <>
                 <StatCard label="Total Pageviews" value={data.stats.pageviews} />
-                <StatCard label="Unique Visitors" value={data.stats.visitors} />
                 <StatCard label="Visits" value={data.stats.visits} />
               </>
             ) : null}
