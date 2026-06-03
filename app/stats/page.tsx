@@ -327,7 +327,7 @@ export default function StatsPage() {
           }}>
             {loading ? (
               <>
-                <SkeletonCard /><SkeletonCard /><SkeletonCard />
+                <SkeletonCard /><SkeletonCard />
               </>
             ) : data ? (
               <>
