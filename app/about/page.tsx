@@ -3,6 +3,10 @@
 import BaseLayout from "@/components/BaseLayout";
 import { trackEvent } from "@/lib/track";
 
+const REPO_URL = "https://github.com/AnayDhawan/tourneyradar";
+const ISSUE_URL = "https://github.com/AnayDhawan/tourneyradar/issues/new";
+const CONTRIB_URL = "https://github.com/AnayDhawan/tourneyradar/blob/main/CONTRIBUTING.md";
+
 export default function AboutPage() {
   return (
     <BaseLayout 
@@ -51,29 +55,53 @@ export default function AboutPage() {
             </p>
           </div>
 
-          {/* Platform */}
+          {/* Open Source & Contributing */}
           <div className="card" style={{ marginBottom: "2rem", background: "linear-gradient(135deg, var(--primary) 0%, #1d4ed8 100%)", color: "white" }}>
             <h2 className="font-display" style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1rem" }}>
-              Platform
+              Open Source & Contributing
             </h2>
-            <p style={{ marginBottom: "1rem", opacity: 0.9, lineHeight: 1.8 }}>
-              TourneyRadar is a platform for chess tournament discovery.
+            <p style={{ marginBottom: "1rem", opacity: 0.95, lineHeight: 1.8 }}>
+              TourneyRadar is free and open source. A GitHub star is the simplest way
+              to help: it pushes the project up in GitHub search, shows other players
+              it is active and worth trusting, and keeps it being maintained.
             </p>
-            <a
-              href="https://github.com/AnayDhawan/tourneyradar"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn"
-              style={{
-                background: "rgba(255,255,255,0.2)",
-                border: "2px solid rgba(255,255,255,0.5)",
-                color: "white",
-                textDecoration: "none"
-              }}
-              onClick={() => trackEvent("star_link", { src: "about" })}
-            >
-              View on GitHub
-            </a>
+            <p style={{ marginBottom: "1.5rem", opacity: 0.95, lineHeight: 1.8 }}>
+              Want to do more? Report bugs or missing tournaments by opening an issue,
+              or submit a pull request. The contributing guide walks you through
+              getting set up.
+            </p>
+            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+              <a
+                href={REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn"
+                style={{ background: "white", border: "2px solid white", color: "var(--primary)", textDecoration: "none", fontWeight: 700 }}
+                onClick={() => trackEvent("star_link", { src: "about" })}
+              >
+                ⭐ Star on GitHub
+              </a>
+              <a
+                href={ISSUE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn"
+                style={{ background: "rgba(255,255,255,0.15)", border: "2px solid rgba(255,255,255,0.5)", color: "white", textDecoration: "none" }}
+                onClick={() => trackEvent("issue_link", { src: "about" })}
+              >
+                Open an Issue
+              </a>
+              <a
+                href={CONTRIB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn"
+                style={{ background: "rgba(255,255,255,0.15)", border: "2px solid rgba(255,255,255,0.5)", color: "white", textDecoration: "none" }}
+                onClick={() => trackEvent("contribute_link", { src: "about" })}
+              >
+                Contributing Guide
+              </a>
+            </div>
           </div>
 
           {/* Disclaimer */}
