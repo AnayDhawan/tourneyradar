@@ -1,6 +1,7 @@
 "use client";
 
 import BaseLayout from "@/components/BaseLayout";
+import { trackEvent } from "@/lib/track";
 
 export default function AboutPage() {
   return (
@@ -58,17 +59,18 @@ export default function AboutPage() {
             <p style={{ marginBottom: "1rem", opacity: 0.9, lineHeight: 1.8 }}>
               TourneyRadar is a platform for chess tournament discovery.
             </p>
-            <a 
-              href="https://github.com/AnayDhawan/tourneyradar" 
+            <a
+              href="https://github.com/AnayDhawan/tourneyradar"
               target="_blank"
               rel="noopener noreferrer"
               className="btn"
-              style={{ 
-                background: "rgba(255,255,255,0.2)", 
+              style={{
+                background: "rgba(255,255,255,0.2)",
                 border: "2px solid rgba(255,255,255,0.5)",
                 color: "white",
                 textDecoration: "none"
               }}
+              onClick={() => trackEvent("star_link", { src: "about" })}
             >
               View on GitHub
             </a>

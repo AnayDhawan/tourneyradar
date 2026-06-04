@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from "next/link";
+import { trackEvent } from "@/lib/track";
 
 export default function Footer() {
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
@@ -59,9 +60,18 @@ export default function Footer() {
           <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", lineHeight: 1.6 }}>
             Discover chess tournaments worldwide. The free, open-source global chess tournament aggregator.
           </p>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", marginTop: "1rem" }}>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", marginTop: "1rem", marginBottom: "0.5rem" }}>
             Free & Open Source
           </p>
+          <a
+            href="https://github.com/AnayDhawan/tourneyradar"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent("star_link", { src: "footer_text" })}
+            style={{ color: "var(--primary)", fontSize: "0.8125rem", fontWeight: 700, textDecoration: "none" }}
+          >
+            ⭐ Star on GitHub
+          </a>
         </div>
 
         {/* Quick Links */}
@@ -206,6 +216,7 @@ export default function Footer() {
                 href="https://github.com/AnayDhawan/tourneyradar"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackEvent("star_link", { src: "footer" })}
                 style={{
                   width: "40px",
                   height: "40px",

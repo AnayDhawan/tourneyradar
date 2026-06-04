@@ -1,9 +1,5 @@
 "use client";
 
-declare global {
-  interface Window { umami?: { track: (event: string, data?: Record<string, unknown>) => void }; }
-}
-
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
@@ -14,6 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "@/lib/AuthContext";
 import Footer from "@/components/Footer";
+import { trackEvent } from "@/lib/track";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -267,6 +264,14 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
 
   const dashboard = getDashboardLink();
 
+  // Tell StarPrompt the user got value (used a filter / opened a tournament),
+  // so it can fire the star nudge at a value moment instead of waiting on time.
+  const markEngaged = () => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("tr:engaged"));
+    }
+  };
+
   return (
     <>
       {/* Mobile Menu Overlay */}
@@ -352,11 +357,12 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                 <Link href="/tournaments" className="btn btn-primary">
                   Explore Tournaments
                 </Link>
-                <a 
-                  href="https://github.com/AnayDhawan/tourneyradar" 
+                <a
+                  href="https://github.com/AnayDhawan/tourneyradar"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-outline"
+                  onClick={() => trackEvent("star_link", { src: "hero" })}
                 >
                   View on GitHub
                 </a>
@@ -498,7 +504,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                   className="form-input"
                   placeholder="Tournament name..."
                   value={filters.search}
-                  onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value }))}
+                  onChange={(e) => { markEngaged(); setFilters((p) => ({ ...p, search: e.target.value })); }}
                 />
               </div>
 
@@ -595,16 +601,16 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               </div>
             </div>
 
-            <div style={{ textAlign: 'right', marginBottom: '0.75rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+            <div style={{ textAlign: 'right', marginBottom: '0.75rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
               Find this useful?{' '}
               <a
                 href="https://github.com/AnayDhawan/tourneyradar"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: 'var(--primary)', fontWeight: 600 }}
-                onClick={() => window.umami?.track('star_nudge_clicked')}
+                style={{ color: 'var(--primary)', fontWeight: 700 }}
+                onClick={() => trackEvent('star_link', { src: 'home_nudge' })}
               >
-                Star us on GitHub
+                ⭐ Star us on GitHub
               </a>
             </div>
 
@@ -663,6 +669,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                               href={`/tournaments/${t.id}`}
                               className="btn btn-primary"
                               style={{ padding: "0.5rem 0.9rem", borderRadius: 10, fontSize: 14 }}
+                              onClick={markEngaged}
                             >
                               View Details
                             </Link>

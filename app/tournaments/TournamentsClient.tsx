@@ -5,6 +5,7 @@ import { useState, useMemo, useEffect } from "react";
 import BaseLayout from "@/components/BaseLayout";
 import TournamentCardSkeleton from "@/components/TournamentCardSkeleton";
 import { getCountdown, isNewTournament } from "@/lib/countdown";
+import { trackEvent } from "@/lib/track";
 
 interface Tournament {
   id: string;
@@ -68,6 +69,13 @@ export default function TournamentsClient({ initialTournaments }: Props) {
     });
   }, [initialTournaments, debouncedSearch]);
 
+  // Signal StarPrompt that the user got value (searched / opened a tournament).
+  const markEngaged = () => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("tr:engaged"));
+    }
+  };
+
   return (
     <BaseLayout 
       showHero 
@@ -82,7 +90,7 @@ export default function TournamentsClient({ initialTournaments }: Props) {
                 type="text"
                 placeholder="Search tournaments, locations, organizers..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => { markEngaged(); setSearchQuery(e.target.value); }}
                 className="form-input"
                 style={{
                   width: "100%",
@@ -192,12 +200,27 @@ export default function TournamentsClient({ initialTournaments }: Props) {
                     </div>
                   </div>
 
-                  <Link href={`/tournaments/${tournament.id}`} className="btn btn-primary" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", textDecoration: "none" }}>
+                  <Link href={`/tournaments/${tournament.id}`} className="btn btn-primary" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", textDecoration: "none" }} onClick={markEngaged}>
                     View Details →
                   </Link>
                 </div>
               ))}
             </div>
+          )}
+
+          {filteredTournaments.length > 0 && (
+            <p style={{ textAlign: "center", marginTop: "2rem", fontSize: "0.875rem", color: "var(--text-secondary)" }}>
+              Find this useful?{' '}
+              <a
+                href="https://github.com/AnayDhawan/tourneyradar"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "var(--primary)", fontWeight: 700, textDecoration: "none" }}
+                onClick={() => trackEvent("star_link", { src: "tournaments_nudge" })}
+              >
+                ⭐ Star us on GitHub
+              </a>
+            </p>
           )}
         </div>
       </section>
