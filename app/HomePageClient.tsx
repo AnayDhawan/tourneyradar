@@ -122,7 +122,6 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
   });
 
   const [markerIcon, setMarkerIcon] = useState<import("leaflet").DivIcon | null>(null);
-  const [showStarPopup, setShowStarPopup] = useState(false);
 
   // Animated stats
   const [animatedStats, setAnimatedStats] = useState({ total: 0, countries: 0, mapped: 0 });
@@ -211,18 +210,6 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  useEffect(() => {
-    const dismissed = localStorage.getItem('tr_star_ok');
-    const shownThisSession = sessionStorage.getItem('tr_star_shown');
-    if (dismissed || shownThisSession) return;
-
-    const timer = setTimeout(() => {
-      setShowStarPopup(true);
-      sessionStorage.setItem('tr_star_shown', '1');
-    }, 45000);
-    return () => clearTimeout(timer);
   }, []);
 
   const states = useMemo(() => {
@@ -690,63 +677,6 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
           </div>
         </div>
       </section>
-
-      {showStarPopup && (
-        <div style={{
-          position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 1000,
-          background: 'var(--surface)', border: '1px solid var(--border)',
-          borderRadius: 16, padding: '1.25rem 1.5rem', maxWidth: 320,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
-          animation: 'slideUp 0.3s ease',
-        }}>
-          <button
-            onClick={() => setShowStarPopup(false)}
-            style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 18 }}
-            aria-label="Close"
-          >×</button>
-          <div style={{ fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
-            Enjoying TourneyRadar?
-          </div>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-            If this saved you time finding a tournament, a GitHub star helps us grow.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <a
-              href="https://github.com/AnayDhawan/tourneyradar"
-              target="_blank" rel="noopener noreferrer"
-              className="btn btn-primary"
-              style={{ textAlign: 'center', textDecoration: 'none', fontSize: '0.875rem' }}
-              onClick={() => {
-                window.umami?.track('star_popup_star_clicked');
-                localStorage.setItem('tr_star_ok', '1');
-                setShowStarPopup(false);
-              }}
-            >
-              Star on GitHub
-            </a>
-            <button
-              className="btn"
-              style={{ background: 'var(--surface-elevated)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.875rem' }}
-              onClick={() => {
-                window.umami?.track('star_popup_maybe_later');
-                setShowStarPopup(false);
-              }}
-            >
-              Maybe later
-            </button>
-            <button
-              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '0.8125rem', cursor: 'pointer', textDecoration: 'underline' }}
-              onClick={() => {
-                window.umami?.track('star_popup_never_again');
-                localStorage.setItem('tr_star_ok', '1');
-                setShowStarPopup(false);
-              }}
-            >
-              Don&apos;t show again
-            </button>
-          </div>
-        </div>
-      )}
 
       <Footer />
     </>
