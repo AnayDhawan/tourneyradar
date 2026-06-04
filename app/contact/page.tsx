@@ -1,6 +1,10 @@
 "use client";
 
 import BaseLayout from "@/components/BaseLayout";
+import { trackEvent } from "@/lib/track";
+
+const REPO_URL = "https://github.com/AnayDhawan/tourneyradar";
+const ISSUE_URL = "https://github.com/AnayDhawan/tourneyradar/issues/new";
 
 export default function ContactPage() {
   return (
@@ -39,15 +43,44 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* About */}
+          {/* Open Source & Support */}
           <div className="card" style={{ marginBottom: "2rem" }}>
             <h2 className="font-display" style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1rem", color: "var(--text-primary)" }}>
-              About TourneyRadar
+              Open Source & Support
             </h2>
-            <p style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>
-              TourneyRadar is a chess tournament aggregator. We scrape 
-              tournament data from Chess-Results.com so you can discover events worldwide.
+            <p style={{ color: "var(--text-secondary)", lineHeight: 1.7, marginBottom: "1rem" }}>
+              TourneyRadar is free and open source. The best way to support it is to
+              star the project on GitHub. Stars help it rank higher in GitHub search,
+              signal to other players that it is active and trusted, and keep me
+              motivated to ship updates and add more tournaments.
             </p>
+            <p style={{ color: "var(--text-secondary)", lineHeight: 1.7, marginBottom: "1.5rem" }}>
+              Found a bug, want a feature, or noticed a tournament that is missing?
+              Open a GitHub issue. It is public, gets tracked, and is the fastest way
+              to get it fixed (you can also email or WhatsApp using the buttons above).
+            </p>
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
+              <a
+                href={REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary"
+                style={{ textDecoration: "none" }}
+                onClick={() => trackEvent("star_link", { src: "contact" })}
+              >
+                ⭐ Star on GitHub
+              </a>
+              <a
+                href={ISSUE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn"
+                style={{ textDecoration: "none", background: "var(--surface-elevated)", border: "2px solid var(--border)", color: "var(--text-primary)" }}
+                onClick={() => trackEvent("issue_link", { src: "contact" })}
+              >
+                Open an Issue
+              </a>
+            </div>
           </div>
 
           {/* FAQ */}
