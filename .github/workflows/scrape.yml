@@ -11,7 +11,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        region: [europe, americas, asia-oceania, africa-me]
+        region: [europe, americas, india, asia-oceania, africa-me]
 
     steps:
       - uses: actions/checkout@v4
@@ -74,7 +74,7 @@ jobs:
         run: |
           node -e "
             const fs = require('fs');
-            const regions = ['europe', 'americas', 'asia-oceania', 'africa-me'];
+            const regions = ['europe', 'americas', 'india', 'asia-oceania', 'africa-me'];
             let all = [];
             regions.forEach(r => {
               const file = 'artifacts/tournaments-' + r + '/tournaments-' + r + '.json';
