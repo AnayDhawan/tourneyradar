@@ -21,7 +21,7 @@
 
 ---
 
-**TourneyRadar puts 1,100+ upcoming chess tournaments across 45 countries on one interactive map, updated weekly.**
+**TourneyRadar puts 1,100+ upcoming chess tournaments across 80+ countries on one interactive map, updated weekly.**
 
 <!-- DEMO GIF: an animated walkthrough (filter by country → click a pin → open details) belongs here as docs/media/demo.gif. Tracked in a "good first issue" — contributions welcome. -->
 
