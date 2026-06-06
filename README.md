@@ -11,7 +11,9 @@
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?logo=supabase)](https://supabase.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
 [![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?logo=vercel)](https://vercel.com/)
+[![CI](https://github.com/AnayDhawan/tourneyradar/actions/workflows/ci.yml/badge.svg)](https://github.com/AnayDhawan/tourneyradar/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/AnayDhawan/tourneyradar?style=social)](https://github.com/AnayDhawan/tourneyradar/stargazers)
 
 **[→ Live site: tourneyradar.com](https://www.tourneyradar.com)**
 
@@ -19,7 +21,11 @@
 
 ---
 
-Chess tournaments are scattered across Chess-Results.com, federation websites, and club newsletters. TourneyRadar puts them all on one map. Filter by country, time control, and FIDE rating status. No account needed.
+**TourneyRadar puts 1,100+ upcoming chess tournaments across 45 countries on one interactive map, updated weekly.**
+
+<!-- DEMO GIF: an animated walkthrough (filter by country → click a pin → open details) belongs here as docs/media/demo.gif. Tracked in a "good first issue" — contributions welcome. -->
+
+Chess tournaments are scattered across Chess-Results.com, federation websites, and club newsletters. TourneyRadar puts them all in one place. Filter by country, time control, and FIDE rating status. No account needed.
 
 ---
 
