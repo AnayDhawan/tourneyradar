@@ -6,7 +6,6 @@ import { useAuth } from "../lib/AuthContext";
 import Footer from "./Footer";
 import ScrollToTop from "./ScrollToTop";
 import ThemeToggle from "./ThemeToggle";
-import { useThemePreference } from "@/lib/theme";
 interface BaseLayoutProps {
   children: React.ReactNode;
   showHero?: boolean;
@@ -22,7 +21,6 @@ export default function BaseLayout({
 }: BaseLayoutProps) {
   const { userType, loading: authLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { resolvedTheme, toggleTheme } = useThemePreference();
 
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
@@ -34,7 +32,6 @@ export default function BaseLayout({
     return { href: "/player/login", label: "Login" };
   };
   const dashboard = getDashboardLink();
-  const isHeroNav = showHero;
 
   return (
     <div style={{ background: "var(--background)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -51,7 +48,6 @@ export default function BaseLayout({
           >
             <div className="mobile-drawer-header">
               <span className="mobile-drawer-brand font-display">TourneyRadar</span>
-              <ThemeToggle />
               <button
                 className="mobile-drawer-close"
                 onClick={() => setMobileMenuOpen(false)}
@@ -69,15 +65,14 @@ export default function BaseLayout({
               </Link>
               {!authLoading && (
                 <Link
-                  href={dashboard.href}
-                  className="mobile-drawer-cta"
-                  onClick={() => setMobileMenuOpen(false)}
+                href={dashboard.href}
+                className="mobile-drawer-cta"
+                onClick={() => setMobileMenuOpen(false)}
                 >
                   {dashboard.label}
                 </Link>
               )}
               <ThemeToggle />
-
             </nav>
           </div>
         </div>
@@ -136,15 +131,20 @@ export default function BaseLayout({
             <Link href="/" className="nav-brand font-display" style={{ textDecoration: "none" }}>
               TourneyRadar
             </Link>
-            <ThemeToggle />
 
-            <div className="nav-links">
-              <Link href="/tournaments" style={{ textDecoration: "none", color: "inherit" }}>Tournaments</Link>
-              {!authLoading && (
-                <Link href={dashboard.href} className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>
-                  {dashboard.label}
-                </Link>
-              )}
+            <div className="nav-actions">
+              <ThemeToggle />
+              <button
+                type="button"
+                className="mobile-menu-btn"
+                aria-label="Open menu"
+                onClick={() => setMobileMenuOpen(true)}
+                style={{ color: "var(--text-primary)" }}
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </button>
             </div>
 
           </div>

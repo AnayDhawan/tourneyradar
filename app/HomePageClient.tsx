@@ -10,7 +10,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import Footer from "@/components/Footer";
 import { trackEvent } from "@/lib/track";
-import ThemeToggle from "@/components/ThemeToggle";
 import { useThemePreference } from "@/lib/theme";
 
 const MapContainer = dynamic(
@@ -267,7 +266,6 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
           >
             <div className="mobile-drawer-header">
               <span className="mobile-drawer-brand font-display">TourneyRadar</span>
-              <ThemeToggle />
               <button
                 className="mobile-drawer-close"
                 onClick={() => setMobileMenuOpen(false)}
@@ -309,8 +307,6 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               {!authLoading && (
                 <Link href={dashboard.href} className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>{dashboard.label}</Link>
               )}
-                            <ThemeToggle />
-              
             </div>
 
             <button

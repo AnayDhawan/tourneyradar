@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/Toast";
-import ThemeToggle from "@/components/ThemeToggle";
 import { useThemePreference } from "@/lib/theme";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function PlayerLoginPage() {
   const router = useRouter();
@@ -90,9 +90,9 @@ export default function PlayerLoginPage() {
             <div className="nav-links">
               <Link href="/tournaments" style={{ textDecoration: "none" }}>Tournaments</Link>
               <Link href="/player/register" style={{ textDecoration: "none" }}>Register</Link>
+              <ThemeToggle />
             </div>
           </div>
-                       <ThemeToggle />
         </nav>
 
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
@@ -185,7 +185,7 @@ export default function PlayerLoginPage() {
       {/* Forgot Password Modal */}
       {showForgotPassword && (
         <>
-          <div 
+          <div
             onClick={() => setShowForgotPassword(false)}
             style={{
               position: 'fixed',
@@ -226,7 +226,7 @@ export default function PlayerLoginPage() {
                 <button
                   onClick={() => setShowForgotPassword(false)}
                   className="btn"
-                  style={{ background: 'var(--surface-elevated)', border: '2px solid var(--border)', color: "var(--text-primary)"}}
+                  style={{ background: 'var(--surface-elevated)', border: '2px solid var(--border)', color: "var(--text-primary)" }}
                 >
                   Cancel
                 </button>

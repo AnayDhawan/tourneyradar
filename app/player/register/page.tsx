@@ -83,9 +83,9 @@ export default function PlayerRegisterPage() {
             <div className="nav-links">
               <Link href="/tournaments" style={{ textDecoration: "none" }}>Tournaments</Link>
               <Link href="/player/login" style={{ textDecoration: "none" }}>Login</Link>
+              <ThemeToggle/>
             </div>
           </div>
-          <ThemeToggle />
         </nav>
 
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>

@@ -7,7 +7,6 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/AuthContext";
 import Footer from "@/components/Footer";
 import { useThemePreference } from "@/lib/theme";
-import ThemeToggle from "@/components/ThemeToggle";
 
 type WishlistTournament = {
   id: string;
@@ -118,7 +117,6 @@ export default function WishlistPage() {
               <Link href="/player/wishlist" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>My Wishlist</Link>
             </div>
           </div>
-          <ThemeToggle />
         </nav>
 
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
