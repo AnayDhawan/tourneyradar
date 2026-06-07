@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import { trackEvent } from "@/lib/track";
-import { useThemePreference } from "@/lib/theme";
 
 export default function Footer() {
-  const { theme, setTheme } = useThemePreference();
 
   return (
     <footer style={{

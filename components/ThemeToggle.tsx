@@ -4,13 +4,17 @@ import { useThemePreference } from "@/lib/theme";
 
 
 
-export default function ThemeToggle() {
-  
+export default function ThemeToggle({
+  variant = "default",
+}: {
+  variant?: "default" | "hero";
+}) {
   const { resolvedTheme, toggleTheme } = useThemePreference();
   return (
     <button
       type="button"
       className="theme-toggle-btn"
+      data-variant={variant}
       aria-label="Toggle theme"
       title="Toggle theme"
       suppressHydrationWarning
