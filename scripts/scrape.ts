@@ -346,8 +346,9 @@ const REGION_MAP: Record<string, string[]> = {
     'CAN', 'MEX', 'COL', 'PER', 'CHI', 'VEN', 'ECU', 'URU', 'PAR', 'BOL', 'CUB', 'PUR', 'CRC', 'PAN', 'DOM',
     'TRI', 'JAM', 'BAR', 'GUY', 'SUR', 'HAI', 'NCA', 'ESA', 'HON', 'GUA',
   ],
+  india: ['IND'],
   'asia-oceania': [
-    'IND', 'CHN', 'AUS',
+    'CHN', 'AUS',
     'JPN', 'KOR', 'PHI', 'INA', 'VIE', 'MAS', 'SGP',
     'THA', 'MYA', 'BAN', 'SRI', 'PAK', 'IRI', 'IRQ', 'UAE', 'KSA', 'QAT', 'KUW', 'BRN', 'JOR', 'LBN',
     'SYR', 'UZB', 'KAZ', 'MGL', 'NEP', 'AFG', 'TKM', 'KGZ', 'TJK', 'MDV', 'BRU', 'CAM', 'LAO',
