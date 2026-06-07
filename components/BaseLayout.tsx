@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth } from "../lib/AuthContext";
 import Footer from "./Footer";
 import ScrollToTop from "./ScrollToTop";
-
+import ThemeToggle from "./ThemeToggle";
 interface BaseLayoutProps {
   children: React.ReactNode;
   showHero?: boolean;
@@ -13,24 +13,14 @@ interface BaseLayoutProps {
   heroDescription?: string;
 }
 
-export default function BaseLayout({ 
-  children, 
-  showHero = false, 
+export default function BaseLayout({
+  children,
+  showHero = false,
   heroTitle = "",
   heroDescription = ""
 }: BaseLayoutProps) {
-  const { user, userType, loading: authLoading } = useAuth();
+  const { userType, loading: authLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
-    if (savedTheme === 'light' || savedTheme === 'dark') {
-      document.documentElement.setAttribute("data-theme", savedTheme);
-    } else {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
-    }
-  }, []);
 
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
@@ -41,48 +31,48 @@ export default function BaseLayout({
     if (userType === "player") return { href: "/player/wishlist", label: "My Wishlist" };
     return { href: "/player/login", label: "Login" };
   };
-
   const dashboard = getDashboardLink();
 
   return (
     <div style={{ background: "var(--background)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      
+
       {/* ========== MOBILE MENU OVERLAY ========== */}
       {mobileMenuOpen && (
-        <div 
+        <div
           className="mobile-overlay"
           onClick={() => setMobileMenuOpen(false)}
         >
-          <div 
+          <div
             className="mobile-drawer"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mobile-drawer-header">
               <span className="mobile-drawer-brand font-display">TourneyRadar</span>
-              <button 
+              <button
                 className="mobile-drawer-close"
                 onClick={() => setMobileMenuOpen(false)}
                 aria-label="Close menu"
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </button>
             </div>
-            
+
             <nav className="mobile-drawer-nav">
               <Link href="/tournaments" onClick={() => setMobileMenuOpen(false)}>
                 Tournaments
               </Link>
               {!authLoading && (
-                <Link 
-                  href={dashboard.href} 
-                  className="mobile-drawer-cta"
-                  onClick={() => setMobileMenuOpen(false)}
+                <Link
+                href={dashboard.href}
+                className="mobile-drawer-cta"
+                onClick={() => setMobileMenuOpen(false)}
                 >
                   {dashboard.label}
                 </Link>
               )}
+              <ThemeToggle />
             </nav>
           </div>
         </div>
@@ -105,16 +95,16 @@ export default function BaseLayout({
                     {dashboard.label}
                   </Link>
                 )}
+                <ThemeToggle variant="hero" />
               </div>
 
-              {/* HAMBURGER BUTTON - THIS IS THE FIX */}
-              <button 
-                className="mobile-menu-btn" 
+              <button
+                className="mobile-menu-btn"
                 aria-label="Open menu"
                 onClick={() => setMobileMenuOpen(true)}
               >
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <path d="M4 7h16M4 12h16M4 17h16" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </button>
             </div>
@@ -151,16 +141,21 @@ export default function BaseLayout({
               )}
             </div>
 
-            {/* HAMBURGER BUTTON - THIS IS THE FIX */}
-            <button 
-              className="mobile-menu-btn" 
-              aria-label="Open menu"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
+            <div className="nav-actions">
+              <ThemeToggle />
+              <button
+                type="button"
+                className="mobile-menu-btn"
+                aria-label="Open menu"
+                onClick={() => setMobileMenuOpen(true)}
+                style={{ color: "var(--text-primary)" }}
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+
           </div>
         </nav>
       )}

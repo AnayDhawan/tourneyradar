@@ -2,13 +2,16 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/Toast";
+import { useThemePreference } from "@/lib/theme";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function PlayerLoginPage() {
   const router = useRouter();
   const { showToast } = useToast();
+  useThemePreference();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -40,18 +43,6 @@ export default function PlayerLoginPage() {
       setResetLoading(false);
     }
   };
-
-  useEffect(() => {
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
-
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = (e: MediaQueryListEvent) => {
-      document.documentElement.setAttribute("data-theme", e.matches ? "dark" : "light");
-    };
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +90,7 @@ export default function PlayerLoginPage() {
             <div className="nav-links">
               <Link href="/tournaments" style={{ textDecoration: "none" }}>Tournaments</Link>
               <Link href="/player/register" style={{ textDecoration: "none" }}>Register</Link>
+              <ThemeToggle />
             </div>
           </div>
         </nav>
@@ -193,7 +185,7 @@ export default function PlayerLoginPage() {
       {/* Forgot Password Modal */}
       {showForgotPassword && (
         <>
-          <div 
+          <div
             onClick={() => setShowForgotPassword(false)}
             style={{
               position: 'fixed',
@@ -234,7 +226,7 @@ export default function PlayerLoginPage() {
                 <button
                   onClick={() => setShowForgotPassword(false)}
                   className="btn"
-                  style={{ background: 'var(--surface-elevated)', border: '2px solid var(--border)', color: "var(--text-primary)"}}
+                  style={{ background: 'var(--surface-elevated)', border: '2px solid var(--border)', color: "var(--text-primary)" }}
                 >
                   Cancel
                 </button>
