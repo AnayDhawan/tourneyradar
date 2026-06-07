@@ -158,6 +158,54 @@
     .nav-links a:hover {
       color: white;
     }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .theme-toggle-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface-elevated);
+      color: var(--text-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+      flex: 0 0 auto;
+    }
+
+    .theme-toggle-btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--border-hover);
+    }
+
+    .theme-toggle-btn:focus-visible {
+      outline: 3px solid rgba(59, 130, 246, 0.35);
+      outline-offset: 2px;
+    }
+
+    .theme-toggle-btn svg {
+      width: 18px;
+      height: 18px;
+      flex: none;
+    }
+
+    .theme-toggle-btn[data-variant="hero"] {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+      color: white;
+    }
+
+    .theme-toggle-btn[data-variant="hero"]:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
     
     /* FIXED: Mobile Menu Button - hidden by default on desktop */
     .mobile-menu-btn {
@@ -662,6 +710,10 @@
       .nav-links {
         display: flex !important;
       }
+
+      .nav-actions {
+        gap: 0.75rem;
+      }
       
       .mobile-menu-btn {
         display: none !important;
@@ -682,6 +734,10 @@
       /* Mobile: hide nav links, show hamburger */
       .nav-links {
         display: none !important;
+      }
+
+      .nav-actions {
+        gap: 0.5rem;
       }
       
       .mobile-menu-btn {

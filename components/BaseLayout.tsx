@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useAuth } from "../lib/AuthContext";
 import Footer from "./Footer";
 import ScrollToTop from "./ScrollToTop";
-
+import ThemeToggle from "./ThemeToggle";
+import { useThemePreference } from "@/lib/theme";
 interface BaseLayoutProps {
   children: React.ReactNode;
   showHero?: boolean;
@@ -13,24 +14,15 @@ interface BaseLayoutProps {
   heroDescription?: string;
 }
 
-export default function BaseLayout({ 
-  children, 
-  showHero = false, 
+export default function BaseLayout({
+  children,
+  showHero = false,
   heroTitle = "",
   heroDescription = ""
 }: BaseLayoutProps) {
-  const { user, userType, loading: authLoading } = useAuth();
+  const { userType, loading: authLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
-    if (savedTheme === 'light' || savedTheme === 'dark') {
-      document.documentElement.setAttribute("data-theme", savedTheme);
-    } else {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
-    }
-  }, []);
+  const { resolvedTheme, toggleTheme } = useThemePreference();
 
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
@@ -41,42 +33,42 @@ export default function BaseLayout({
     if (userType === "player") return { href: "/player/wishlist", label: "My Wishlist" };
     return { href: "/player/login", label: "Login" };
   };
-
   const dashboard = getDashboardLink();
+  const isHeroNav = showHero;
 
   return (
     <div style={{ background: "var(--background)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      
+
       {/* ========== MOBILE MENU OVERLAY ========== */}
       {mobileMenuOpen && (
-        <div 
+        <div
           className="mobile-overlay"
           onClick={() => setMobileMenuOpen(false)}
         >
-          <div 
+          <div
             className="mobile-drawer"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mobile-drawer-header">
               <span className="mobile-drawer-brand font-display">TourneyRadar</span>
-              <button 
+              <button
                 className="mobile-drawer-close"
                 onClick={() => setMobileMenuOpen(false)}
                 aria-label="Close menu"
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </button>
             </div>
-            
+
             <nav className="mobile-drawer-nav">
               <Link href="/tournaments" onClick={() => setMobileMenuOpen(false)}>
                 Tournaments
               </Link>
               {!authLoading && (
-                <Link 
-                  href={dashboard.href} 
+                <Link
+                  href={dashboard.href}
                   className="mobile-drawer-cta"
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -84,6 +76,7 @@ export default function BaseLayout({
                 </Link>
               )}
             </nav>
+            <ThemeToggle />
           </div>
         </div>
       )}
@@ -106,17 +99,7 @@ export default function BaseLayout({
                   </Link>
                 )}
               </div>
-
-              {/* HAMBURGER BUTTON - THIS IS THE FIX */}
-              <button 
-                className="mobile-menu-btn" 
-                aria-label="Open menu"
-                onClick={() => setMobileMenuOpen(true)}
-              >
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <path d="M4 7h16M4 12h16M4 17h16" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
+              <ThemeToggle />
             </div>
           </nav>
 
@@ -151,16 +134,41 @@ export default function BaseLayout({
               )}
             </div>
 
-            {/* HAMBURGER BUTTON - THIS IS THE FIX */}
-            <button 
-              className="mobile-menu-btn" 
-              aria-label="Open menu"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
+            <div className="nav-actions">
+              <button
+                type="button"
+                className="theme-toggle-btn"
+                data-variant={isHeroNav ? "hero" : "default"}
+                aria-label="Toggle theme"
+                title="Toggle theme"
+                suppressHydrationWarning
+                onClick={toggleTheme}
+              >
+                <span suppressHydrationWarning>
+                  {resolvedTheme === "dark" ? (
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2" />
+                      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a7 7 0 1 0 9.8 9.8Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </span>
+              </button>
+
+              {/* HAMBURGER BUTTON - THIS IS THE FIX */}
+              <button
+                className="mobile-menu-btn"
+                aria-label="Open menu"
+                onClick={() => setMobileMenuOpen(true)}
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
           </div>
         </nav>
       )}

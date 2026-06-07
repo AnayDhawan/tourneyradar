@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/AuthContext";
 import Footer from "@/components/Footer";
+import { useThemePreference } from "@/lib/theme";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type WishlistTournament = {
   id: string;
@@ -31,24 +33,9 @@ function formatDate(dateStr: string): string {
 export default function WishlistPage() {
   const router = useRouter();
   const { user, userType, loading: authLoading } = useAuth();
+  useThemePreference();
   const [tournaments, setTournaments] = useState<WishlistTournament[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Detect system theme preference
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const theme = prefersDark ? "dark" : "light";
-    document.documentElement.setAttribute("data-theme", theme);
-
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = (e: MediaQueryListEvent) => {
-      document.documentElement.setAttribute("data-theme", e.matches ? "dark" : "light");
-    };
-    mediaQuery.addEventListener("change", handleChange);
-
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -61,7 +48,7 @@ export default function WishlistPage() {
       if (!user || userType !== "player") return;
 
       setLoading(true);
-      
+
       // Get wishlist items
       const { data: wishlistData, error: wishlistError } = await supabase
         .from("player_favorite_tournaments")
@@ -131,6 +118,7 @@ export default function WishlistPage() {
               <Link href="/player/wishlist" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>My Wishlist</Link>
             </div>
           </div>
+          <ThemeToggle />
         </nav>
 
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>

@@ -3,7 +3,6 @@
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -11,6 +10,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import Footer from "@/components/Footer";
 import { trackEvent } from "@/lib/track";
+import ThemeToggle from "@/components/ThemeToggle";
+import { useThemePreference } from "@/lib/theme";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -95,10 +96,10 @@ function KnightSvg() {
   return (
     <svg viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">
       <g fill="none" fillRule="evenodd" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18" fill="white"/>
-        <path d="M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26 C 6,24 12,14 12,14 C 12,14 13.89,12.1 14,10.5 C 13.27,9.506 13.5,8.5 13.5,7.5 C 14.5,6.5 16.5,10 16.5,10 L 18.5,10 C 18.5,10 19.28,8.008 21,7 C 22,7 22,10 22,10" fill="white"/>
-        <path d="M 9.5 25.5 A 0.5 0.5 0 1 1 8.5,25.5 A 0.5 0.5 0 1 1 9.5 25.5 z" fill="black"/>
-        <path d="M 15 15.5 A 0.5 1.5 0 1 1 14,15.5 A 0.5 1.5 0 1 1 15 15.5 z" transform="matrix(0.866,0.5,-0.5,0.866,9.693,-5.173)" fill="black"/>
+        <path d="M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18" fill="white" />
+        <path d="M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26 C 6,24 12,14 12,14 C 12,14 13.89,12.1 14,10.5 C 13.27,9.506 13.5,8.5 13.5,7.5 C 14.5,6.5 16.5,10 16.5,10 L 18.5,10 C 18.5,10 19.28,8.008 21,7 C 22,7 22,10 22,10" fill="white" />
+        <path d="M 9.5 25.5 A 0.5 0.5 0 1 1 8.5,25.5 A 0.5 0.5 0 1 1 9.5 25.5 z" fill="black" />
+        <path d="M 15 15.5 A 0.5 1.5 0 1 1 14,15.5 A 0.5 1.5 0 1 1 15 15.5 z" transform="matrix(0.866,0.5,-0.5,0.866,9.693,-5.173)" fill="black" />
       </g>
     </svg>
   );
@@ -108,6 +109,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
   const { user, userType, loading: authLoading } = useAuth();
   const [mapView, setMapView] = useState<MapView>("europe");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  useThemePreference();
 
   const [filters, setFilters] = useState<FilterState>({
     search: "",
@@ -144,27 +146,6 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
 
     return () => clearInterval(timer);
   }, [stats]);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
-    if (savedTheme === 'light' || savedTheme === 'dark') {
-      document.documentElement.setAttribute("data-theme", savedTheme);
-    } else {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
-    }
-
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = (e: MediaQueryListEvent) => {
-      const currentTheme = localStorage.getItem('theme');
-      if (!currentTheme || currentTheme === 'system') {
-        document.documentElement.setAttribute("data-theme", e.matches ? "dark" : "light");
-      }
-    };
-    mediaQuery.addEventListener("change", handleChange);
-
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
 
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
@@ -276,34 +257,34 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
     <>
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div 
+        <div
           className="mobile-overlay"
           onClick={() => setMobileMenuOpen(false)}
         >
-          <div 
+          <div
             className="mobile-drawer"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mobile-drawer-header">
               <span className="mobile-drawer-brand font-display">TourneyRadar</span>
-              <button 
+              <button
                 className="mobile-drawer-close"
                 onClick={() => setMobileMenuOpen(false)}
                 aria-label="Close menu"
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </button>
             </div>
-            
+
             <nav className="mobile-drawer-nav">
               <Link href="/tournaments" onClick={() => setMobileMenuOpen(false)}>
                 Tournaments
               </Link>
               {!authLoading && (
-                <Link 
-                  href={dashboard.href} 
+                <Link
+                  href={dashboard.href}
                   className="mobile-drawer-cta"
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -329,8 +310,8 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               )}
             </div>
 
-            <button 
-              className="mobile-menu-btn" 
+            <button
+              className="mobile-menu-btn"
               aria-label="Open menu"
               onClick={() => setMobileMenuOpen(true)}
             >
@@ -338,6 +319,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                 <path d="M4 7h16M4 12h16M4 17h16" stroke="white" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </button>
+            <ThemeToggle />
           </div>
         </nav>
 
@@ -349,7 +331,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               </h1>
 
               <p className="hero-description">
-                A platform aggregating over-the-board chess tournaments 
+                A platform aggregating over-the-board chess tournaments
                 from around the world. Find your next event.
               </p>
 
@@ -371,7 +353,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               <div className="stats-container" aria-label="Site statistics">
                 <div className="stat-item">
                   <div className="stat-number">{animatedStats.total}</div>
-                  <div className="stat-label">Upcoming Events</div> 
+                  <div className="stat-label">Upcoming Events</div>
                 </div>
                 <div className="stat-divider" />
                 <div className="stat-item">

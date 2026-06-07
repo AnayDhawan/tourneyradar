@@ -1,34 +1,11 @@
 "use client";
 
-import { useState, useEffect } from 'react';
 import Link from "next/link";
 import { trackEvent } from "@/lib/track";
+import { useThemePreference } from "@/lib/theme";
 
 export default function Footer() {
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
-    if (savedTheme) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTheme(savedTheme);
-    }
-  }, []);
-
-  const applyTheme = (newTheme: 'light' | 'dark' | 'system') => {
-    if (newTheme === 'system') {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
-    } else {
-      document.documentElement.setAttribute("data-theme", newTheme);
-    }
-    localStorage.setItem('theme', newTheme);
-  };
-
-  const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
-    setTheme(newTheme);
-    applyTheme(newTheme);
-  };
+  const { theme, setTheme } = useThemePreference();
 
   return (
     <footer style={{
@@ -107,62 +84,8 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Theme Toggle & Contact */}
+        {/* Contact */}
         <div>
-          <h4 style={{ fontWeight: 700, color: "var(--text-primary)", marginBottom: "1rem", fontSize: "1rem" }}>
-            Theme
-          </h4>
-          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
-            <button
-              onClick={() => handleThemeChange('light')}
-              style={{
-                padding: "0.5rem 0.75rem",
-                fontSize: "0.875rem",
-                borderRadius: "8px",
-                border: "2px solid var(--border)",
-                background: theme === 'light' ? 'var(--primary)' : 'var(--surface-elevated)',
-                color: theme === 'light' ? 'white' : 'var(--text-primary)',
-                cursor: "pointer",
-                fontWeight: theme === 'light' ? 600 : 400,
-                transition: "all 0.2s"
-              }}
-            >
-              Light
-            </button>
-            <button
-              onClick={() => handleThemeChange('dark')}
-              style={{
-                padding: "0.5rem 0.75rem",
-                fontSize: "0.875rem",
-                borderRadius: "8px",
-                border: "2px solid var(--border)",
-                background: theme === 'dark' ? 'var(--primary)' : 'var(--surface-elevated)',
-                color: theme === 'dark' ? 'white' : 'var(--text-primary)',
-                cursor: "pointer",
-                fontWeight: theme === 'dark' ? 600 : 400,
-                transition: "all 0.2s"
-              }}
-            >
-              Dark
-            </button>
-            <button
-              onClick={() => handleThemeChange('system')}
-              style={{
-                padding: "0.5rem 0.75rem",
-                fontSize: "0.875rem",
-                borderRadius: "8px",
-                border: "2px solid var(--border)",
-                background: theme === 'system' ? 'var(--primary)' : 'var(--surface-elevated)',
-                color: theme === 'system' ? 'white' : 'var(--text-primary)',
-                cursor: "pointer",
-                fontWeight: theme === 'system' ? 600 : 400,
-                transition: "all 0.2s"
-              }}
-            >
-              System
-            </button>
-          </div>
-        
           <div>
             <h4 style={{ fontWeight: 700, color: "var(--text-primary)", marginBottom: "1rem", fontSize: "1rem" }}>
               Connect With Us
