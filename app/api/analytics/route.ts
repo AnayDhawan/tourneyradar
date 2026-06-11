@@ -25,11 +25,22 @@ export async function GET(request: NextRequest) {
   const headers: Record<string, string> = { 'x-umami-api-key': apiKey };
   const base = `startAt=${startAt}&endAt=${endAt}`;
 
-  const [stats, pageviews, topCountries] = await Promise.all([
-    fetch(`${BASE_URL}/websites/${WEBSITE_ID}/stats?${base}`, { headers }).then(r => r.json()),
-    fetch(`${BASE_URL}/websites/${WEBSITE_ID}/pageviews?${base}&unit=${unit}&timezone=Asia/Kolkata`, { headers }).then(r => r.json()),
-    fetch(`${BASE_URL}/websites/${WEBSITE_ID}/metrics?${base}&type=country&limit=100`, { headers }).then(r => r.json()),
+  const [statsRes, pageviewsRes, countriesRes] = await Promise.all([
+    fetch(`${BASE_URL}/websites/${WEBSITE_ID}/stats?${base}`, { headers }),
+    fetch(`${BASE_URL}/websites/${WEBSITE_ID}/pageviews?${base}&unit=${unit}&timezone=Asia/Kolkata`, { headers }),
+    fetch(`${BASE_URL}/websites/${WEBSITE_ID}/metrics?${base}&type=country&limit=100`, { headers }),
   ]);
+
+  const [stats, pageviews, topCountries] = await Promise.all([
+    statsRes.json(),
+    pageviewsRes.json(),
+    countriesRes.json(),
+  ]);
+
+  console.log('[analytics] HTTP statuses:', statsRes.status, pageviewsRes.status, countriesRes.status);
+  console.log('[analytics] raw stats:', JSON.stringify(stats));
+  console.log('[analytics] raw pageviews keys:', Object.keys(pageviews ?? {}));
+  console.log('[analytics] raw topCountries type:', Array.isArray(topCountries) ? 'array' : typeof topCountries, JSON.stringify(topCountries)?.slice(0, 200));
 
   const normalizedPageviews = {
     pageviews: Array.isArray(pageviews?.pageviews) ? pageviews.pageviews : [],
