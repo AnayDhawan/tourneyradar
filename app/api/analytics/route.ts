@@ -31,8 +31,14 @@ export async function GET(request: NextRequest) {
     fetch(`${BASE_URL}/websites/${WEBSITE_ID}/metrics?${base}&type=country&limit=100`, { headers }).then(r => r.json()),
   ]);
 
+  const normalizedPageviews = {
+    pageviews: Array.isArray(pageviews?.pageviews) ? pageviews.pageviews : [],
+    sessions: Array.isArray(pageviews?.sessions) ? pageviews.sessions : [],
+  };
+  const normalizedCountries = Array.isArray(topCountries) ? topCountries : [];
+
   return NextResponse.json(
-    { stats, pageviews, topCountries },
+    { stats, pageviews: normalizedPageviews, topCountries: normalizedCountries },
     { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } },
   );
 }

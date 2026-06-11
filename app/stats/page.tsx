@@ -249,19 +249,22 @@ export default function StatsPage() {
       .catch(() => setTournamentsLoading(false));
   }, []);
 
-  const countryRows = (data?.topCountries ?? []).map((r: { x: string; y: number }) => ({
+  const topCountries = Array.isArray(data?.topCountries) ? data.topCountries : [];
+  const countryRows = topCountries.map((r: { x: string; y: number }) => ({
     x: `${flagEmoji(r.x)} ${COUNTRY_NAMES[r.x] ?? r.x}`,
     y: r.y,
   }));
 
   const visitorsByCountry: Record<string, number> = {};
-  (data?.topCountries ?? []).forEach((r) => {
+  topCountries.forEach((r) => {
     if (r.x) visitorsByCountry[r.x] = r.y;
   });
 
+  const pageviewSeries = Array.isArray(data?.pageviews?.pageviews) ? data.pageviews.pageviews : [];
+  const sessionSeries = Array.isArray(data?.pageviews?.sessions) ? data.pageviews.sessions : [];
   const chartData = data
-    ? data.pageviews.pageviews.map((pv) => {
-        const session = data.pageviews.sessions.find((s) => s.x === pv.x);
+    ? pageviewSeries.map((pv) => {
+        const session = sessionSeries.find((s) => s.x === pv.x);
         return { date: pv.x, pageviews: pv.y, sessions: session?.y ?? 0 };
       })
     : [];
