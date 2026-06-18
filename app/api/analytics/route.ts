@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const WEBSITE_ID = '5807c73a-efa2-41ec-8b88-f8708a429f75';
-const BASE_URL = 'https://api.umami.is/v1';
+const WEBSITE_ID = process.env.UMAMI_WEBSITE_ID ?? '';
+const BASE_URL = process.env.UMAMI_BASE_URL ?? '';
 
 function getDateRange(range: string): { startAt: number; endAt: number; unit: string } {
   const now = Date.now();
@@ -15,8 +15,8 @@ function getDateRange(range: string): { startAt: number; endAt: number; unit: st
 
 export async function GET(request: NextRequest) {
   const apiKey = process.env.UMAMI_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
+  if (!apiKey || !WEBSITE_ID || !BASE_URL) {
+    return NextResponse.json({ error: 'Analytics not configured' }, { status: 500 });
   }
 
   const range = request.nextUrl.searchParams.get('range') ?? '7d';
@@ -37,11 +37,6 @@ export async function GET(request: NextRequest) {
     countriesRes.json(),
   ]);
 
-  console.log('[analytics] HTTP statuses:', statsRes.status, pageviewsRes.status, countriesRes.status);
-  console.log('[analytics] raw stats:', JSON.stringify(stats));
-  console.log('[analytics] raw pageviews keys:', Object.keys(pageviews ?? {}));
-  console.log('[analytics] raw topCountries type:', Array.isArray(topCountries) ? 'array' : typeof topCountries, JSON.stringify(topCountries)?.slice(0, 200));
-
   const normalizedPageviews = {
     pageviews: Array.isArray(pageviews?.pageviews) ? pageviews.pageviews : [],
     sessions: Array.isArray(pageviews?.sessions) ? pageviews.sessions : [],
@@ -50,6 +45,6 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json(
     { stats, pageviews: normalizedPageviews, topCountries: normalizedCountries },
-    { headers: { 'Cache-Control': 'no-store' } },
+    { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } },
   );
 }
