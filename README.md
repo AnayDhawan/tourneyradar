@@ -12,7 +12,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
 [![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?logo=vercel)](https://vercel.com/)
 [![CI](https://github.com/AnayDhawan/tourneyradar/actions/workflows/ci.yml/badge.svg)](https://github.com/AnayDhawan/tourneyradar/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/AnayDhawan/tourneyradar?style=social)](https://github.com/AnayDhawan/tourneyradar/stargazers)
 
 **[→ Live site: tourneyradar.com](https://www.tourneyradar.com)**
@@ -200,7 +200,7 @@ Good first issues: add a new data source, add a missing country, improve the map
 
 ## License
 
-[MIT](LICENSE). Use freely, give credit where it's due.
+[Apache-2.0](LICENSE). Use freely, give credit where it's due.
 
 ---
 
