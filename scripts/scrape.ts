@@ -70,8 +70,12 @@ function detectCategory(name: string): 'Classical' | 'Rapid' | 'Blitz' {
   // Check for Blitz keywords
   if (
     n.includes('blitz') || 
-    n.includes('bullet') || 
+    n.includes('bijli') || 
     n.includes('lightning') ||
+    n.includes('bullet') || 
+    n.includes('ultra fast') || 
+    n.includes('superfast') || 
+    n.includes('super fast') || 
     n.includes('speed chess')
   ) {
     return 'Blitz';
@@ -81,6 +85,11 @@ function detectCategory(name: string): 'Classical' | 'Rapid' | 'Blitz' {
   if (
     n.includes('classical') || 
     n.includes('standard') || 
+    n.includes('std') || 
+    n.includes('shastriya') || 
+    n.includes('long') || 
+    n.includes('long format') || 
+    n.includes('classical format') || 
     n.includes('long play') ||
     n.includes('klassisch') ||    // German
     n.includes('classique') ||    // French
@@ -93,6 +102,14 @@ function detectCategory(name: string): 'Classical' | 'Rapid' | 'Blitz' {
   // Check for Rapid keywords
   if (
     n.includes('rapid') || 
+    n.includes('rapids') || 
+    n.includes('tez') || 
+    n.includes('tezz') || 
+    n.includes('jaldi') || 
+    n.includes('fast') || 
+    n.includes('quick') || 
+    n.includes('speed') || 
+    n.includes('rapido') || 
     n.includes('schnell') ||      // German
     n.includes('rapide') ||       // French
     n.includes('rápido') ||       // Spanish
@@ -112,6 +129,17 @@ function detectFideRated(name: string): boolean {
   const n = (name || '').toLowerCase();
   if (n.includes('fide')) return true;
   if (n.includes('rated')) return true;
+  if (n.includes('fide rated')) return true;
+  if (n.includes('fide rating')) return true;
+  if (n.includes('rating')) return true;
+  if (n.includes('rating tournament')) return true;
+  if (n.includes('rating event')) return true;
+  if (n.includes('international rating')) return true;
+  if (n.includes('elo')) return true;
+  if (n.includes('elo rated')) return true;
+  if (n.includes('ankit')) return true;
+  if (n.includes('rating open')) return true;
+  if (n.includes('rating championship')) return true;
   if (n.includes('bewertet') || n.includes('gewertet')) return true; // German
   if (n.includes('noté') || n.includes('notée') || n.includes('homologué')) return true; // French
   if (n.includes('valorado')) return true; // Spanish
