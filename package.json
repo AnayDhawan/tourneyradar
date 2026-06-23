@@ -20,7 +20,7 @@
     "@supabase/supabase-js": "^2.89.0",
     "@tanstack/react-query": "^5.101.0",
     "@vercel/analytics": "^2.0.1",
-    "cheerio": "^1.1.2",
+    "cheerio": "^1.2.0",
     "firebase": "^12.15.0",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
@@ -35,7 +35,7 @@
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
-    "@types/cheerio": "^0.22.35",
+    "@types/cheerio": "^1.0.0",
     "@types/leaflet": "^1.9.21",
     "@types/node": "^20.19.28",
     "@types/react": "^19",
