@@ -75,7 +75,6 @@ Chess tournaments are scattered across Chess-Results.com, federation websites, a
 | **Backend** | Supabase (PostgreSQL) |
 | **Data Pipeline** | Puppeteer scraper (GitHub Actions weekly) |
 | **Deployment** | Vercel |
-| **Analytics** | Umami (privacy-first) |
 
 ---
 
@@ -184,7 +183,6 @@ A Puppeteer scraper hits Chess-Results.com weekly across 140+ federation codes, 
 |-------|--------|-------------|
 | `/api/tournaments` | GET | List tournaments |
 | `/api/tournaments/upcoming` | GET/POST | Paginated upcoming tournaments |
-| `/api/analytics` | GET | Proxied Umami analytics |
 | `/api/wishlist` | GET/POST/DELETE | Player favorites |
 | `/api/cron/scrape-tournaments` | POST | Vercel cron trigger |
 
