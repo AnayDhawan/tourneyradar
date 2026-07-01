@@ -20,6 +20,9 @@ interface MonthlyStat {
 
 // Manually logged once a month (no self-hosted analytics infra).
 const MONTHLY_STATS: MonthlyStat[] = [
+  { month: "Jan 2026", views: 2050, visitors: 1440 },
+  { month: "Feb 2026", views: 3020, visitors: 2230 },
+  { month: "Mar 2026", views: 3560, visitors: 2650 },
   { month: "Apr 2026", views: 4250, visitors: 2210 },
   { month: "May 2026", views: 2110, visitors: 1580 },
   { month: "Jun 2026", views: 4618, visitors: 3097 },
