@@ -22,6 +22,7 @@ interface MonthlyStat {
 const MONTHLY_STATS: MonthlyStat[] = [
   { month: "Apr 2026", views: 4250, visitors: 2210 },
   { month: "May 2026", views: 2110, visitors: 1580 },
+  { month: "Jun 2026", views: 4618, visitors: 3097 },
 ];
 
 function CustomTooltip({ active, payload, label }: any) {
