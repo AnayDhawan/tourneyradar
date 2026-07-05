@@ -2,18 +2,18 @@
 
 <div align="center">
 
-<img src="./public/favicon.svg" alt="TourneyRadar Logo" width="120" height="120">
+<img src="./public/og-image.png" alt="TourneyRadar" width="640">
 
 **Find chess tournaments happening near you and around the world.**
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript)](https://typescriptlang.org/)
-[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?logo=supabase)](https://supabase.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
-[![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?logo=vercel)](https://vercel.com/)
-[![CI](https://github.com/AnayDhawan/tourneyradar/actions/workflows/ci.yml/badge.svg)](https://github.com/AnayDhawan/tourneyradar/actions/workflows/ci.yml)
-[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/AnayDhawan/tourneyradar?style=social)](https://github.com/AnayDhawan/tourneyradar/stargazers)
+<a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-15-black?logo=next.js" alt="Next.js" height="28"></a>
+<a href="https://typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript" alt="TypeScript" height="28"></a>
+<a href="https://supabase.com/"><img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?logo=supabase" alt="Supabase" height="28"></a>
+<a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss" alt="Tailwind CSS" height="28"></a>
+<a href="https://vercel.com/"><img src="https://img.shields.io/badge/Deployed-Vercel-black?logo=vercel" alt="Vercel" height="28"></a>
+<a href="https://github.com/AnayDhawan/tourneyradar/actions/workflows/ci.yml"><img src="https://github.com/AnayDhawan/tourneyradar/actions/workflows/ci.yml/badge.svg" alt="CI" height="28"></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="License: Apache 2.0" height="28"></a>
+<a href="https://github.com/AnayDhawan/tourneyradar/stargazers"><img src="https://img.shields.io/github/stars/AnayDhawan/tourneyradar?style=social" alt="Stars" height="28"></a>
 
 **[→ Live site: tourneyradar.com](https://www.tourneyradar.com)**
 
