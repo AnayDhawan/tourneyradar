@@ -13,7 +13,7 @@
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="License: Apache 2.0" height="28"></a>
 <a href="https://github.com/AnayDhawan/tourneyradar/stargazers"><img src="https://img.shields.io/github/stars/AnayDhawan/tourneyradar?style=social" alt="Stars" height="28"></a>
 
-**[→ Live site: tourneyradar.com](https://www.tourneyradar.com)**
+**[tourneyradar.com](https://www.tourneyradar.com)**
 
 </div>
 
