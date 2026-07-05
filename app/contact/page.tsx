@@ -32,7 +32,7 @@ export default function ContactPage() {
                 Send Email
               </a>
               <a
-                href="https://wa.me/918976191515"
+                href="https://wa.me/919326503299"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn"
