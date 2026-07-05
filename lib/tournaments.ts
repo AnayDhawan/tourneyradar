@@ -1,5 +1,13 @@
 import { supabase } from './supabase';
 
+// Listings hide tournaments starting within the next `days` days: players need
+// lead time to register and travel, so anything too imminent is noise. Returns
+// the lower-bound date (YYYY-MM-DD) a tournament's `date` must be >= to. Rolling
+// window — the daily scrape cron makes this self-refresh.
+function leadTimeCutoff(days = 7): string {
+  return new Date(Date.now() + days * 86_400_000).toISOString().split('T')[0];
+}
+
 export interface TournamentListItem {
   id: string;
   name: string;
@@ -62,12 +70,12 @@ export async function getUpcomingTournaments(
 ): Promise<PaginatedTournaments> {
   const start = (page - 1) * limit;
   const end = start + limit - 1;
-  const today = new Date().toISOString().split('T')[0];
+  const cutoff = leadTimeCutoff();
 
   let query = supabase
     .from('tournaments')
     .select(TOURNAMENT_SELECT_FIELDS, { count: 'exact' })
-    .gte('date', today)
+    .gte('date', cutoff)
     .eq('status', 'published')
     .order('date', { ascending: true })
     .order('created_at', { ascending: false })
@@ -104,25 +112,25 @@ export async function getUpcomingTournaments(
 }
 
 export async function getTournamentStats(): Promise<TournamentStats> {
-  const today = new Date().toISOString().split('T')[0];
+  const cutoff = leadTimeCutoff();
 
   const [totalResult, countriesResult, mappedResult] = await Promise.all([
     supabase
       .from('tournaments')
       .select('*', { count: 'exact', head: true })
-      .gte('date', today)
+      .gte('date', cutoff)
       .eq('status', 'published'),
     
     supabase
       .from('tournaments')
       .select('country_code')
-      .gte('date', today)
+      .gte('date', cutoff)
       .eq('status', 'published'),
     
     supabase
       .from('tournaments')
       .select('*', { count: 'exact', head: true })
-      .gte('date', today)
+      .gte('date', cutoff)
       .eq('status', 'published')
       .not('lat', 'is', null)
       .not('lng', 'is', null)
@@ -142,12 +150,12 @@ export async function getTournamentStats(): Promise<TournamentStats> {
 export async function getAllUpcomingTournaments(
   limit = 1000
 ): Promise<TournamentListItem[]> {
-  const today = new Date().toISOString().split('T')[0];
+  const cutoff = leadTimeCutoff();
 
   const { data, error } = await supabase
     .from('tournaments')
     .select(TOURNAMENT_SELECT_FIELDS)
-    .gte('date', today)
+    .gte('date', cutoff)
     .eq('status', 'published')
     .order('date', { ascending: true })
     .limit(limit);
