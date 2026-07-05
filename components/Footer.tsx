@@ -75,6 +75,9 @@ export default function Footer() {
             <Link href="/about" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
               About
             </Link>
+            <Link href="/support" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
+              Support Us
+            </Link>
             <Link href="/contact" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem" }}>
               Contact
             </Link>

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { trackEvent } from "@/lib/track";
 
 const REPO_URL = "https://github.com/AnayDhawan/tourneyradar";
@@ -136,6 +137,18 @@ export default function StarPrompt() {
     setShow(false);
   }, []);
 
+  // Non-devs bail at GitHub's login wall; route them to the how-to page instead
+  // of losing them. Snooze (not dismiss) so they still get asked again later.
+  const handleHelp = useCallback(() => {
+    trackEvent("star_popup_help_link");
+    try {
+      localStorage.setItem("tr_star_snooze", String(Date.now()));
+    } catch {
+      /* ignore */
+    }
+    setShow(false);
+  }, []);
+
   if (!show) return null;
 
   return (
@@ -216,6 +229,19 @@ export default function StarPrompt() {
         >
           Don&apos;t show again
         </button>
+        <Link
+          href="/support"
+          onClick={handleHelp}
+          style={{
+            color: "var(--text-muted)",
+            fontSize: "0.75rem",
+            textAlign: "center",
+            textDecoration: "underline",
+            marginTop: "0.25rem",
+          }}
+        >
+          New to GitHub? How to star &rarr;
+        </Link>
       </div>
     </div>
   );
