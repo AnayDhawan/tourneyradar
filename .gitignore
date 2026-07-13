@@ -37,3 +37,8 @@ yarn-error.log*
 # Claude files
 Claude
 .claude/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
