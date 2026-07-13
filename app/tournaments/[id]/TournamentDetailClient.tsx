@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import BaseLayout from "@/components/BaseLayout";
+import { downloadTournamentIcs } from "@/lib/ics";
 
 interface Tournament {
   id: string;
@@ -114,7 +115,22 @@ export default function TournamentDetailClient({ tournament }: Props) {
                 Official Website
               </a>
             )}
-            
+
+            <button
+              type="button"
+              onClick={() => downloadTournamentIcs({
+                id: tournament.id,
+                name: tournament.name,
+                date: tournament.date,
+                end_date: tournament.end_date,
+                location: locationDisplay,
+              })}
+              className="btn"
+              style={{ background: "var(--surface-elevated)", border: "2px solid var(--border)", color: "var(--text-primary)" }}
+            >
+              Add to Calendar
+            </button>
+
             <Link href="/tournaments" className="btn" style={{ background: "transparent", border: "2px solid var(--border)", color: "var(--text-secondary)" }}>
               ← Back
             </Link>
