@@ -363,11 +363,14 @@ function getArg(flag: string): string | null {
 
 // ========== REGIONAL FEDERATION MAP ==========
 const REGION_MAP: Record<string, string[]> = {
-  europe: [
-    'RUS', 'GER', 'FRA', 'ESP', 'ENG', 'NED', 'POL',
-    'ITA', 'AUT', 'SUI', 'CZE', 'HUN', 'SWE', 'NOR', 'DEN', 'UKR', 'TUR', 'GRE', 'SRB', 'CRO', 'ROU',
-    'FIN', 'BEL', 'POR', 'SLO', 'SVK', 'BUL', 'GEO', 'ARM', 'AZE', 'LTU', 'LAT', 'EST', 'BLR', 'MDA',
-    'MKD', 'BIH', 'MNE', 'ALB', 'ISL', 'IRL', 'SCO', 'WLS', 'CYP', 'LUX', 'MLT', 'AND', 'SMR', 'FRO',
+  'europe-west': [
+    'GER', 'FRA', 'ESP', 'ENG', 'NED', 'ITA', 'AUT', 'SUI', 'SWE', 'NOR', 'DEN',
+    'FIN', 'BEL', 'POR', 'ISL', 'IRL', 'SCO', 'WLS', 'LUX', 'MLT', 'AND', 'SMR', 'FRO', 'CYP',
+  ],
+  'europe-east': [
+    'RUS', 'POL', 'CZE', 'HUN', 'UKR', 'TUR', 'GRE', 'SRB', 'CRO', 'ROU',
+    'SLO', 'SVK', 'BUL', 'GEO', 'ARM', 'AZE', 'LTU', 'LAT', 'EST', 'BLR', 'MDA',
+    'MKD', 'BIH', 'MNE', 'ALB',
   ],
   americas: [
     'USA', 'ARG', 'BRA',
