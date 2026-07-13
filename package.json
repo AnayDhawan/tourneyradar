@@ -10,7 +10,8 @@
     "lint": "eslint",
     "scrape": "npx tsx --env-file=.env.local scripts/scrape.ts",
     "scrape:ci": "npx tsx scripts/scrape.ts",
-    "scrape:region": "npx tsx scripts/scrape.ts"
+    "scrape:region": "npx tsx scripts/scrape.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.9",
