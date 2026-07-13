@@ -11,6 +11,8 @@ import { useAuth } from "@/lib/AuthContext";
 import Footer from "@/components/Footer";
 import { trackEvent } from "@/lib/track";
 import { useThemePreference } from "@/lib/theme";
+import MobileMenuButton from "@/components/MobileMenuButton";
+import MobileNavDrawer from "@/components/MobileNavDrawer";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -255,45 +257,11 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
   return (
     <>
       {/* Mobile Menu Overlay */}
-      {mobileMenuOpen && (
-        <div
-          className="mobile-overlay"
-          onClick={() => setMobileMenuOpen(false)}
-        >
-          <div
-            className="mobile-drawer"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mobile-drawer-header">
-              <span className="mobile-drawer-brand font-display">TourneyRadar</span>
-              <button
-                className="mobile-drawer-close"
-                onClick={() => setMobileMenuOpen(false)}
-                aria-label="Close menu"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
-            </div>
-
-            <nav className="mobile-drawer-nav">
-              <Link href="/tournaments" onClick={() => setMobileMenuOpen(false)}>
-                Tournaments
-              </Link>
-              {!authLoading && (
-                <Link
-                  href={dashboard.href}
-                  className="mobile-drawer-cta"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {dashboard.label}
-                </Link>
-              )}
-            </nav>
-          </div>
-        </div>
-      )}
+      <MobileNavDrawer
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        dashboard={authLoading ? null : dashboard}
+      />
 
       <section className="hero-bg">
         <nav className="glass">
@@ -309,15 +277,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               )}
             </div>
 
-            <button
-              className="mobile-menu-btn"
-              aria-label="Open menu"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                <path d="M4 7h16M4 12h16M4 17h16" stroke="white" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
+            <MobileMenuButton onClick={() => setMobileMenuOpen(true)} />
           </div>
         </nav>
 

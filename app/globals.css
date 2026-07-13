@@ -693,6 +693,19 @@
   to { transform: translateX(0); }
 }
 
+.mobile-overlay.closing { animation: fadeOut 0.2s ease-out forwards; }
+.mobile-drawer.closing { animation: slideOut 0.25s ease-out forwards; }
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
 /* =============================================
    RESPONSIVE BREAKPOINTS - SINGLE SOURCE OF TRUTH
    ============================================= */

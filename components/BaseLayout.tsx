@@ -6,6 +6,8 @@ import { useAuth } from "../lib/AuthContext";
 import Footer from "./Footer";
 import ScrollToTop from "./ScrollToTop";
 import ThemeToggle from "./ThemeToggle";
+import MobileMenuButton from "./MobileMenuButton";
+import MobileNavDrawer from "./MobileNavDrawer";
 interface BaseLayoutProps {
   children: React.ReactNode;
   showHero?: boolean;
@@ -37,46 +39,12 @@ export default function BaseLayout({
     <div style={{ background: "var(--background)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
 
       {/* ========== MOBILE MENU OVERLAY ========== */}
-      {mobileMenuOpen && (
-        <div
-          className="mobile-overlay"
-          onClick={() => setMobileMenuOpen(false)}
-        >
-          <div
-            className="mobile-drawer"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mobile-drawer-header">
-              <span className="mobile-drawer-brand font-display">TourneyRadar</span>
-              <button
-                className="mobile-drawer-close"
-                onClick={() => setMobileMenuOpen(false)}
-                aria-label="Close menu"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
-            </div>
-
-            <nav className="mobile-drawer-nav">
-              <Link href="/tournaments" onClick={() => setMobileMenuOpen(false)}>
-                Tournaments
-              </Link>
-              {!authLoading && (
-                <Link
-                href={dashboard.href}
-                className="mobile-drawer-cta"
-                onClick={() => setMobileMenuOpen(false)}
-                >
-                  {dashboard.label}
-                </Link>
-              )}
-              <ThemeToggle />
-            </nav>
-          </div>
-        </div>
-      )}
+      <MobileNavDrawer
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        dashboard={authLoading ? null : dashboard}
+        showThemeToggle
+      />
 
       {showHero ? (
         <section className="hero-bg" style={{ minHeight: "40vh", display: "flex", flexDirection: "column" }}>
@@ -98,15 +66,7 @@ export default function BaseLayout({
                 <ThemeToggle variant="hero" />
               </div>
 
-              <button
-                className="mobile-menu-btn"
-                aria-label="Open menu"
-                onClick={() => setMobileMenuOpen(true)}
-              >
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
+              <MobileMenuButton onClick={() => setMobileMenuOpen(true)} />
             </div>
           </nav>
 
@@ -143,17 +103,7 @@ export default function BaseLayout({
 
             <div className="nav-actions">
               <ThemeToggle />
-              <button
-                type="button"
-                className="mobile-menu-btn"
-                aria-label="Open menu"
-                onClick={() => setMobileMenuOpen(true)}
-                style={{ color: "var(--text-primary)" }}
-              >
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
+              <MobileMenuButton onClick={() => setMobileMenuOpen(true)} style={{ color: "var(--text-primary)" }} />
             </div>
 
           </div>
