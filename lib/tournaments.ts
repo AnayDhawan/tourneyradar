@@ -220,7 +220,10 @@ export async function queryTournaments({
   }
 
   if (q && q.trim()) {
-    const term = q.trim().replace(/[%_\\]/g, '\\$&');
+    // Strip PostgREST .or() delimiter/grouping characters ( , ( ) " ) before
+    // escaping SQL LIKE wildcards, otherwise a crafted query could inject
+    // extra filter clauses and be used as a boolean oracle.
+    const term = q.trim().replace(/[,()"]/g, '').replace(/[%_\\]/g, '\\$&');
     query = query.or(
       `name.ilike.%${term}%,location.ilike.%${term}%,city.ilike.%${term}%,state.ilike.%${term}%,country.ilike.%${term}%,organizer_name.ilike.%${term}%`
     );
