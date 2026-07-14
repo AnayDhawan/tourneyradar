@@ -21,12 +21,12 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 })
 
-interface PrizeDistribution {
+export interface PrizeDistribution {
   place: number
   prize: string
 }
 
-interface Schedule {
+export interface Schedule {
   date: string
   time: string
   round: number
@@ -65,8 +65,9 @@ export type Tournament = {
   external_link?: string
   rules: string[]
   amenities: string[]
-  prize_distribution: PrizeDistribution[]
-  schedule: Schedule[]
+  // Not yet populated by the scraper (scripts/scrape.ts never sets these) — optional until it does.
+  prize_distribution?: PrizeDistribution[]
+  schedule?: Schedule[]
   status: string
   created_at?: string
   scraped_at?: string
