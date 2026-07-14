@@ -21,6 +21,18 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 })
 
+export interface PrizeDistribution {
+  category: string
+  amount: string
+}
+
+export interface ScheduleItem {
+  date: string
+  time?: string
+  round?: number
+  description?: string
+}
+
 export type Tournament = {
   id: string
   name: string
@@ -54,8 +66,8 @@ export type Tournament = {
   external_link?: string
   rules: string[]
   amenities: string[]
-  prize_distribution: any
-  schedule: any[]
+  prize_distribution?: PrizeDistribution[] | null
+  schedule?: ScheduleItem[] | null
   status: string
   created_at?: string
   scraped_at?: string
