@@ -167,3 +167,88 @@ export async function getAllUpcomingTournaments(
 
   return data || [];
 }
+
+const TOURNAMENT_MAX_LIMIT = 200;
+const TOURNAMENT_DEFAULT_LIMIT = 100;
+
+export interface TournamentQuery {
+  page?: number;
+  limit?: number;
+  country?: string | null;
+  q?: string | null;
+}
+
+export interface TournamentPage {
+  tournaments: TournamentListItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasMore: boolean;
+}
+
+// Shared, validated query used by both the /api/tournaments endpoint and the
+// tournaments page. Clamps `limit` to a safe range, derives `page` from a
+// 1-based index, supports optional country filtering and free-text search, and
+// returns the total count so callers can render real pagination.
+export async function queryTournaments({
+  page = 1,
+  limit = TOURNAMENT_DEFAULT_LIMIT,
+  country,
+  q,
+}: TournamentQuery = {}): Promise<TournamentPage> {
+  const safeLimit =
+    Number.isInteger(limit) && limit > 0
+      ? Math.min(limit, TOURNAMENT_MAX_LIMIT)
+      : TOURNAMENT_DEFAULT_LIMIT;
+  const safePage = Number.isInteger(page) && page > 0 ? page : 1;
+  const start = (safePage - 1) * safeLimit;
+  const end = start + safeLimit - 1;
+  const today = new Date().toISOString().split('T')[0];
+
+  let query = supabase
+    .from('tournaments')
+    .select(TOURNAMENT_SELECT_FIELDS, { count: 'exact' })
+    .eq('status', 'published')
+    .gte('date', today)
+    .order('date', { ascending: true })
+    .order('created_at', { ascending: false })
+    .range(start, end);
+
+  if (country) {
+    query = query.eq('country_code', country.toUpperCase());
+  }
+
+  if (q && q.trim()) {
+    const term = q.trim().replace(/[%_\\]/g, '\\$&');
+    query = query.or(
+      `name.ilike.%${term}%,location.ilike.%${term}%,city.ilike.%${term}%,state.ilike.%${term}%,country.ilike.%${term}%,organizer_name.ilike.%${term}%`
+    );
+  }
+
+  const { data, error, count } = await query;
+
+  if (error) {
+    console.error('Error fetching tournaments:', error);
+    return {
+      tournaments: [],
+      total: 0,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: 0,
+      hasMore: false,
+    };
+  }
+
+  const total = count || 0;
+  const totalPages = Math.max(1, Math.ceil(total / safeLimit));
+
+  return {
+    tournaments: data || [],
+    total,
+    page: safePage,
+    limit: safeLimit,
+    totalPages,
+    hasMore: safePage < totalPages,
+  };
+}

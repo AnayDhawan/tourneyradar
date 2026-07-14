@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo, useEffect } from "react";
 import BaseLayout from "@/components/BaseLayout";
-import TournamentCardSkeleton from "@/components/TournamentCardSkeleton";
 import { getCountdown, isNewTournament } from "@/lib/countdown";
 import { trackEvent } from "@/lib/track";
 
@@ -27,6 +25,10 @@ interface Tournament {
 
 interface Props {
   initialTournaments: Tournament[];
+  page: number;
+  totalPages: number;
+  total: number;
+  q: string;
 }
 
 function formatDate(dateStr: string): string {
@@ -39,36 +41,7 @@ function formatDate(dateStr: string): string {
   }).format(d);
 }
 
-export default function TournamentsClient({ initialTournaments }: Props) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  const safeIncludes = (str: string | null | undefined, search: string): boolean => {
-    return str?.toLowerCase().includes(search.toLowerCase()) ?? false;
-  };
-
-  const filteredTournaments = useMemo(() => {
-    return initialTournaments.filter((t: Tournament) => {
-      if (!debouncedSearch) return true;
-      const query = debouncedSearch.toLowerCase();
-      return (
-        safeIncludes(t.name, query) ||
-        safeIncludes(t.location, query) ||
-        safeIncludes(t.city, query) ||
-        safeIncludes(t.state, query) ||
-        safeIncludes(t.country, query) ||
-        safeIncludes(t.organizer_name, query)
-      );
-    });
-  }, [initialTournaments, debouncedSearch]);
-
+export default function TournamentsClient({ initialTournaments, page, totalPages, total, q }: Props) {
   // Signal StarPrompt that the user got value (searched / opened a tournament).
   const markEngaged = () => {
     if (typeof window !== "undefined") {
@@ -76,40 +49,56 @@ export default function TournamentsClient({ initialTournaments }: Props) {
     }
   };
 
+  const buildHref = (targetPage: number) => {
+    const params = new URLSearchParams();
+    if (q.trim()) params.set("q", q.trim());
+    if (targetPage > 1) params.set("page", String(targetPage));
+    const qs = params.toString();
+    return qs ? `/tournaments?${qs}` : "/tournaments";
+  };
+
   return (
-    <BaseLayout 
-      showHero 
+    <BaseLayout
+      showHero
       heroTitle={<>Upcoming <span className="highlight">Tournaments</span></>}
       heroDescription="Browse over-the-board chess tournaments from around the world. Data sourced from Chess-Results.com."
     >
       <section className="tournament-section">
         <div className="section-container">
           <div style={{ marginBottom: "2rem" }}>
-            <div style={{ position: "relative", maxWidth: "600px", margin: "0 auto" }}>
+            <form
+              method="get"
+              action="/tournaments"
+              onSubmit={markEngaged}
+              style={{ position: "relative", maxWidth: "600px", margin: "0 auto" }}
+            >
               <input
                 type="text"
+                name="q"
+                defaultValue={q}
                 placeholder="Search tournaments, locations, organizers..."
-                value={searchQuery}
-                onChange={(e) => { markEngaged(); setSearchQuery(e.target.value); }}
                 className="form-input"
                 style={{
                   width: "100%",
                   paddingLeft: "3rem",
-                  fontSize: "1rem"
+                  fontSize: "1rem",
                 }}
               />
-              <span style={{
-                position: "absolute",
-                left: "1rem",
-                top: "50%",
-                transform: "translateY(-50%)",
-                fontSize: "1.25rem",
-                color: "var(--text-secondary)"
-              }}>                
+              <span
+                style={{
+                  position: "absolute",
+                  left: "1rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  fontSize: "1.25rem",
+                  color: "var(--text-secondary)",
+                }}
+              >
               </span>
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
+              {q && (
+                <Link
+                  href="/tournaments"
+                  onClick={markEngaged}
                   style={{
                     position: "absolute",
                     right: "1rem",
@@ -119,32 +108,33 @@ export default function TournamentsClient({ initialTournaments }: Props) {
                     border: "none",
                     fontSize: "1.25rem",
                     cursor: "pointer",
-                    color: "var(--text-secondary)"
+                    color: "var(--text-secondary)",
                   }}
                 >
                   ×
-                </button>
+                </Link>
               )}
-            </div>
-            {debouncedSearch && (
-              <p style={{ 
-                textAlign: "center", 
-                marginTop: "1rem", 
+            </form>
+
+            <p
+              style={{
+                textAlign: "center",
+                marginTop: "1rem",
                 color: "var(--text-secondary)",
-                fontSize: "0.875rem"
-              }}>
-                Found {filteredTournaments.length} tournament{filteredTournaments.length !== 1 ? 's' : ''}
-              </p>
-            )}
+                fontSize: "0.875rem",
+              }}
+            >
+              {total} tournament{total !== 1 ? "s" : ""} found{q ? ` for "${q}"` : ""}
+            </p>
           </div>
 
-          {filteredTournaments.length === 0 ? (
+          {initialTournaments.length === 0 ? (
             <div className="loading-message">
-              {debouncedSearch ? `No tournaments found for "${debouncedSearch}"` : "No tournaments found."}
+              {q ? `No tournaments found for "${q}"` : "No tournaments found."}
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 350px), 1fr))", gap: "1.5rem" }}>
-              {filteredTournaments.map((tournament: Tournament) => (
+              {initialTournaments.map((tournament: Tournament) => (
                 <div key={tournament.id} className="card" style={{ display: "flex", flexDirection: "column" }}>
                   <div style={{ marginBottom: "1rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.75rem", flexWrap: "wrap", alignItems: "center" }}>
@@ -208,7 +198,34 @@ export default function TournamentsClient({ initialTournaments }: Props) {
             </div>
           )}
 
-          {filteredTournaments.length > 0 && (
+          {totalPages > 1 && (
+            <nav
+              aria-label="Tournament pagination"
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "1rem",
+                marginTop: "2rem",
+              }}
+            >
+              {page > 1 ? (
+                <Link href={buildHref(page - 1)} className="btn">← Previous</Link>
+              ) : (
+                <span className="btn" style={{ opacity: 0.5, pointerEvents: "none" }}>← Previous</span>
+              )}
+              <span style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>
+                Page {page} of {totalPages}
+              </span>
+              {page < totalPages ? (
+                <Link href={buildHref(page + 1)} className="btn">Next →</Link>
+              ) : (
+                <span className="btn" style={{ opacity: 0.5, pointerEvents: "none" }}>Next →</span>
+              )}
+            </nav>
+          )}
+
+          {initialTournaments.length > 0 && (
             <p style={{ textAlign: "center", marginTop: "2rem", fontSize: "0.875rem", color: "var(--text-secondary)" }}>
               Find this useful?{' '}
               <a
