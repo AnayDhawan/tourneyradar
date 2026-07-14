@@ -439,10 +439,12 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
 
             <div className="filters-grid">
               <div className="filter-group">
-                <label>Search</label>
+                <label htmlFor="tournament-search">Search</label>
                 <input
+                  id="tournament-search"
                   className="form-input"
                   placeholder="Tournament name..."
+                  aria-label="Search tournaments by name"
                   value={filters.search}
                   onChange={(e) => { markEngaged(); setFilters((p) => ({ ...p, search: e.target.value })); }}
                 />
@@ -552,6 +554,24 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               >
                 ⭐ Star us on GitHub
               </a>
+            </div>
+
+            <div
+              aria-live="polite"
+              role="status"
+              style={{
+                position: 'absolute',
+                width: 1,
+                height: 1,
+                padding: 0,
+                margin: -1,
+                overflow: 'hidden',
+                clip: 'rect(0, 0, 0, 0)',
+                whiteSpace: 'nowrap',
+                border: 0,
+              }}
+            >
+              Showing {filtered.length} of {initialTournaments.length} tournaments
             </div>
 
             <div className="table-container">
