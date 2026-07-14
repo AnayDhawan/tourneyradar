@@ -89,6 +89,7 @@ export default function TournamentsClient({ initialTournaments }: Props) {
               <input
                 type="text"
                 placeholder="Search tournaments, locations, organizers..."
+                aria-label="Search tournaments by name, location, or organizer"
                 value={searchQuery}
                 onChange={(e) => { markEngaged(); setSearchQuery(e.target.value); }}
                 className="form-input"
@@ -98,17 +99,22 @@ export default function TournamentsClient({ initialTournaments }: Props) {
                   fontSize: "1rem"
                 }}
               />
-              <span style={{
-                position: "absolute",
-                left: "1rem",
-                top: "50%",
-                transform: "translateY(-50%)",
-                fontSize: "1.25rem",
-                color: "var(--text-secondary)"
-              }}>                
+              <span
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  left: "1rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  fontSize: "1.25rem",
+                  color: "var(--text-secondary)"
+                }}
+              >
               </span>
               {searchQuery && (
                 <button
+                  type="button"
+                  aria-label="Clear search"
                   onClick={() => setSearchQuery('')}
                   style={{
                     position: "absolute",
@@ -127,12 +133,16 @@ export default function TournamentsClient({ initialTournaments }: Props) {
               )}
             </div>
             {debouncedSearch && (
-              <p style={{ 
-                textAlign: "center", 
-                marginTop: "1rem", 
-                color: "var(--text-secondary)",
-                fontSize: "0.875rem"
-              }}>
+              <p
+                aria-live="polite"
+                role="status"
+                style={{ 
+                  textAlign: "center", 
+                  marginTop: "1rem", 
+                  color: "var(--text-secondary)",
+                  fontSize: "0.875rem"
+                }}
+              >
                 Found {filteredTournaments.length} tournament{filteredTournaments.length !== 1 ? 's' : ''}
               </p>
             )}
