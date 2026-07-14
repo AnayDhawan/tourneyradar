@@ -4,7 +4,7 @@
 
 **Find chess tournaments happening near you and around the world.**
 
-<a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-15-black?logo=next.js" alt="Next.js" height="28"></a>
+<a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-16-black?logo=next.js" alt="Next.js" height="28"></a>
 <a href="https://typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript" alt="TypeScript" height="28"></a>
 <a href="https://supabase.com/"><img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?logo=supabase" alt="Supabase" height="28"></a>
 <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss" alt="Tailwind CSS" height="28"></a>
@@ -67,7 +67,7 @@ Chess tournaments are scattered across Chess-Results.com, federation websites, a
 
 | Component | Technology |
 |-----------|-----------|
-| **Frontend** | Next.js 15, React 19, TypeScript |
+| **Frontend** | Next.js 16, React 19, TypeScript |
 | **Styling** | Tailwind CSS v4 |
 | **Maps** | Leaflet + react-leaflet-cluster |
 | **Backend** | Supabase (PostgreSQL) |
