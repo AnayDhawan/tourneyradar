@@ -93,8 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setUserType(null);
       setLoading(false);
-    } catch (error) {
-      console.error("Auth check error:", error);
+    } catch {
       setUser(null);
       setUserType(null);
       setLoading(false);

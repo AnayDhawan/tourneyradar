@@ -88,8 +88,6 @@ export async function geocodeAddress(address: string): Promise<{ lat: number; ln
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   
   if (!apiKey) {
-    console.error("❌ Google Maps API key not found in environment variables");
-    console.log("Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env.local file");
     return null;
   }
 
@@ -101,24 +99,14 @@ export async function geocodeAddress(address: string): Promise<{ lat: number; ln
     
     if (data.status === "OK" && data.results.length > 0) {
       const location = data.results[0].geometry.location;
-      console.log("✓ Geocoding successful:", {
-        address,
-        coordinates: location,
-        formatted_address: data.results[0].formatted_address
-      });
       return {
         lat: location.lat,
         lng: location.lng
       };
     } else {
-      console.error("❌ Geocoding failed:", {
-        status: data.status,
-        error_message: data.error_message || "No results found"
-      });
       return null;
     }
-  } catch (error) {
-    console.error("❌ Geocoding request error:", error);
+  } catch {
     return null;
   }
 }
@@ -233,8 +221,8 @@ async function geocodeWithNominatim(city: string, country?: string): Promise<{ l
         lng: parseFloat(data[0].lon)
       };
     }
-  } catch (error) {
-    console.error(`[Geocoding] Nominatim error for "${city}":`, error);
+  } catch {
+    // Silently ignore Nominatim errors
   }
   
   return null;
@@ -281,7 +269,6 @@ export async function geocodeTournaments(tournaments: any[]): Promise<any[]> {
   
   // Batch geocode unknown cities with Nominatim (rate limited)
   if (unknownCities.size > 0) {
-    console.log(`[Geocoding] ${unknownCities.size} unknown cities, using Nominatim...`);
     
     const cityCoords: Map<string, { lat: number; lng: number }> = new Map();
     

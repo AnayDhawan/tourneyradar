@@ -92,7 +92,6 @@ export async function getUpcomingTournaments(
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching tournaments:', error);
     return {
       tournaments: [],
       total: 0,
@@ -161,7 +160,6 @@ export async function getAllUpcomingTournaments(
     .limit(limit);
 
   if (error) {
-    console.error('Error fetching all tournaments:', error);
     return [];
   }
 
