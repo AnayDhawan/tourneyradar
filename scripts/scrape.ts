@@ -15,6 +15,26 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
+// ========== FAILURE LOGGING ==========
+// Records scraper failures to the `scraper_logs` table instead of swallowing
+// them, so failures are visible without digging through console output.
+async function logScraperFailure(source: string, reason: string): Promise<void> {
+  try {
+    await supabase.from('scraper_logs').insert({
+      started_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(),
+      status: 'failed',
+      message: `[${source}] ${reason}`,
+    });
+  } catch {
+    // Logging must never crash the scraper itself.
+  }
+}
+
+function errorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
 interface ScrapedTournament {
   id: string;
   name: string;
@@ -46,7 +66,9 @@ async function geocode(address: string): Promise<{ lat: number; lng: number } | 
         lng: data.results[0].geometry.location.lng
       };
     }
-  } catch {}
+  } catch (err) {
+    await logScraperFailure(`geocode:${address}`, errorMessage(err));
+  }
   return null;
 }
 
@@ -295,7 +317,8 @@ async function scrapeTournament(browser: Browser, url: string): Promise<ScrapedT
       lat: null,
       lng: null
     };
-  } catch {
+  } catch (err) {
+    await logScraperFailure(`scrapeTournament:${url}`, errorMessage(err));
     return null;
   } finally {
     if (page) try { await page.close(); } catch {}
@@ -322,7 +345,8 @@ async function getLinks(browser: Browser, fed: string): Promise<string[]> {
       });
       return [...new Set(links)];
     });
-  } catch {
+  } catch (err) {
+    await logScraperFailure(`getLinks:${fed}`, errorMessage(err));
     return [];
   } finally {
     if (page) try { await page.close(); } catch {}
@@ -421,7 +445,11 @@ async function pushTournaments(tournaments: ScrapedTournament[]): Promise<number
       fide_rated: detectFideRated(t.name),
       scraped_at: new Date().toISOString()
     }, { onConflict: 'id' });
-    if (!error) saved++;
+    if (!error) {
+      saved++;
+    } else {
+      await logScraperFailure(`pushTournaments:${t.id}`, error.message);
+    }
   }
   return saved;
 }
@@ -609,4 +637,8 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+main().catch(async (err) => {
+  console.error(err);
+  await logScraperFailure('main', errorMessage(err));
+  process.exit(1);
+});
