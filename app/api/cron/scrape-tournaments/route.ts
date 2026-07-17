@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const CRON_SECRET = process.env.CRON_SECRET;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+function getSupabase() {
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+}
 
 const SCRAPER_CONFIG = {
   top10: ['IN', 'RU', 'US', 'DE', 'CN', 'FR', 'ES', 'NL', 'GB', 'PL'],
@@ -37,7 +39,8 @@ export async function GET(request: NextRequest) {
 
   try {
     const startTime = Date.now();
-    
+    const supabase = getSupabase();
+
     const { error: logError } = await supabase
       .from('scraper_logs')
       .insert({
@@ -89,9 +92,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
+
     try {
-      await supabase
+      await getSupabase()
         .from('scraper_logs')
         .insert({
           started_at: new Date().toISOString(),
