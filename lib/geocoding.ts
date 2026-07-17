@@ -89,7 +89,6 @@ export async function geocodeAddress(address: string): Promise<{ lat: number; ln
   
   if (!apiKey) {
     console.error("❌ Google Maps API key not found in environment variables");
-    console.log("Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env.local file");
     return null;
   }
 
@@ -101,11 +100,6 @@ export async function geocodeAddress(address: string): Promise<{ lat: number; ln
     
     if (data.status === "OK" && data.results.length > 0) {
       const location = data.results[0].geometry.location;
-      console.log("✓ Geocoding successful:", {
-        address,
-        coordinates: location,
-        formatted_address: data.results[0].formatted_address
-      });
       return {
         lat: location.lat,
         lng: location.lng
@@ -281,8 +275,6 @@ export async function geocodeTournaments(tournaments: any[]): Promise<any[]> {
   
   // Batch geocode unknown cities with Nominatim (rate limited)
   if (unknownCities.size > 0) {
-    console.log(`[Geocoding] ${unknownCities.size} unknown cities, using Nominatim...`);
-    
     const cityCoords: Map<string, { lat: number; lng: number }> = new Map();
     
     for (const cityKey of unknownCities) {
