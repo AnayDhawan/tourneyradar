@@ -39,7 +39,7 @@ Include in your report:
 **Out of scope:**
 - Vulnerabilities in third-party services (report to them directly)
 - Social engineering
-- Theoretical vulnerabilities without proof of concept
+- Theoretical vulnerabilities (without proof of concept).
 
 ## Security Hall of Fame
 
