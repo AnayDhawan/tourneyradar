@@ -14,6 +14,12 @@
       --primary-light: #3B82F6;
       --secondary: #0F172A; /* Rich Dark */
       --accent: #F59E0B; /* Golden Orange */
+      /* Hero gradient's dark anchor - deliberately NOT redefined in
+         [data-theme="dark"] below. The hero is a fixed brand-blue surface,
+         not theme-reactive; --secondary flips to white in dark mode for
+         other purposes, and reusing it here used to fade the hero to
+         solid white on the right in dark mode. */
+      --hero-gradient-end: #0F172A;
       --background: #FFFFFF;
       --surface: #F8FAFC;
       --surface-elevated: #F1F5F9;
@@ -69,7 +75,7 @@
     
     /* Hero Section */
     .hero-bg {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 50%, var(--secondary) 100%);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 50%, var(--hero-gradient-end) 100%);
       position: relative;
       overflow: hidden;
       min-height: 100vh;
