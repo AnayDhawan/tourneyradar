@@ -246,34 +246,14 @@
       font-size: 0.875rem;
     }
 
-    .home-nav .nav-links a:not(.btn):not(.nav-icon-link) {
+    .home-nav .nav-links a:not(.btn) {
       padding: 0.5rem 0.625rem;
       border-radius: 0.375rem;
       transition: color 0.2s, background-color 0.2s;
     }
 
-    .home-nav .nav-links a:not(.btn):not(.nav-icon-link):hover {
+    .home-nav .nav-links a:not(.btn):hover {
       background: rgba(255, 255, 255, 0.1);
-    }
-
-    .nav-icon-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 2.25rem;
-      height: 2.25rem;
-      border-radius: 0.375rem;
-      color: inherit;
-      transition: background-color 0.2s;
-      flex: 0 0 auto;
-    }
-
-    .home-nav .nav-icon-link:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .home-nav--scrolled .nav-icon-link:hover {
-      background: var(--surface-elevated);
     }
 
     .home-nav--scrolled {

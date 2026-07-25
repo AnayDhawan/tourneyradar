@@ -69,12 +69,6 @@ export default function MobileNavDrawer({ open, onClose, dashboard, showThemeTog
           <Link href="/support" onClick={onClose}>
             Support Us
           </Link>
-          <Link href="/contact" onClick={onClose}>
-            Contact
-          </Link>
-          <a href="https://github.com/AnayDhawan/tourneyradar" target="_blank" rel="noopener noreferrer" onClick={onClose}>
-            GitHub
-          </a>
           {dashboard && (
             <Link href={dashboard.href} className="mobile-drawer-cta" onClick={onClose}>
               {dashboard.label}
