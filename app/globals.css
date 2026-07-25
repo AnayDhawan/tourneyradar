@@ -289,29 +289,36 @@
 
     /* Homepage hero only, scoped so BaseLayout's other-page mini-heroes
        (which reuse .hero-title without .hero-content) keep their size.
-       Sized down since the headline now breaks into 3 short lines
-       (Discover Chess / Tournaments / Worldwide) and needs to read as one
-       tight block, not 3 sprawling lines. */
+       Sized to read as one wide block spanning roughly as far as the
+       subtext line below it. */
     .hero-content .hero-title {
-      font-size: clamp(1.875rem, 3.5vw, 2.75rem);
+      font-size: clamp(2.5rem, 5.5vw, 4rem);
       line-height: 1.05;
       margin-bottom: 1rem;
     }
 
     .hero-description {
-      font-size: clamp(0.9375rem, 1.5vw, 1.0625rem);
+      font-size: clamp(0.8125rem, 1.1vw, 0.9375rem);
       color: rgba(255, 255, 255, 0.8);
       margin-bottom: 1.5rem;
       line-height: 1.6;
       max-width: 560px;
     }
-    
+
+    .hero-cta-block {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
     /* Buttons */
     .btn {
-      padding: 0.75rem 2rem;
+      padding: 0.5rem 1.25rem;
       border-radius: 12px;
       font-weight: 600;
-      font-size: clamp(0.9rem, 1.5vw, 1rem);
+      font-size: clamp(0.8125rem, 1.2vw, 0.875rem);
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
       border: none;
@@ -362,6 +369,14 @@
       margin-bottom: 1.5rem;
     }
 
+    .hero-cta-block .btn-group {
+      margin-bottom: 0;
+    }
+
+    .hero-cta-block .btn-signup {
+      text-align: center;
+    }
+
     /* Stats Section */
     .stats-container {
       display: flex;
@@ -376,13 +391,13 @@
     }
 
     .stat-number {
-      font-size: clamp(1.375rem, 2.5vw, 1.75rem);
+      font-size: clamp(1.625rem, 3vw, 2.125rem);
       font-weight: bold;
       color: #F59E0B;
     }
 
     .stat-label {
-      font-size: 0.75rem;
+      font-size: 0.875rem;
     }
 
     .stat-divider {

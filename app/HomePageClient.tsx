@@ -306,22 +306,22 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                 Chess tournaments worldwide, updated weekly. Free and open-source.
               </p>
 
-              <div className="btn-group">
-                <Link href="/tournaments" className="btn btn-primary">
-                  Explore Tournaments
-                </Link>
-                <a
-                  href="https://github.com/AnayDhawan/tourneyradar"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-outline"
-                  onClick={() => trackEvent("star_link", { src: "hero" })}
-                >
-                  View on GitHub
-                </a>
-              </div>
+              <div className="hero-cta-block">
+                <div className="btn-group">
+                  <Link href="/tournaments" className="btn btn-primary">
+                    Explore Tournaments
+                  </Link>
+                  <a
+                    href="https://github.com/AnayDhawan/tourneyradar"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-outline"
+                    onClick={() => trackEvent("star_link", { src: "hero" })}
+                  >
+                    View on GitHub
+                  </a>
+                </div>
 
-              <div className="btn-group">
                 <Link href="/player/register" className="btn btn-signup">
                   Sign up, it&apos;s Free!
                 </Link>
