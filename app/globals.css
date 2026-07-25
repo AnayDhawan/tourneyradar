@@ -285,13 +285,16 @@
     
     .hero-title .highlight {
       color: #F59E0B;
-      white-space: nowrap;
     }
 
     /* Homepage hero only, scoped so BaseLayout's other-page mini-heroes
-       (which reuse .hero-title without .hero-content) keep their size. */
+       (which reuse .hero-title without .hero-content) keep their size.
+       Sized down since the headline now breaks into 3 short lines
+       (Discover Chess / Tournaments / Worldwide) and needs to read as one
+       tight block, not 3 sprawling lines. */
     .hero-content .hero-title {
-      font-size: clamp(2.125rem, 4.5vw, 3.25rem);
+      font-size: clamp(1.875rem, 3.5vw, 2.75rem);
+      line-height: 1.05;
       margin-bottom: 1rem;
     }
 
@@ -300,7 +303,7 @@
       color: rgba(255, 255, 255, 0.8);
       margin-bottom: 1.5rem;
       line-height: 1.6;
-      max-width: 480px;
+      max-width: 560px;
     }
     
     /* Buttons */
@@ -786,6 +789,10 @@
       
       .hero-content-wrapper {
         padding: 3rem;
+      }
+
+      .hero-description {
+        white-space: nowrap;
       }
 
       /* Desktop: show nav links, hide hamburger */
