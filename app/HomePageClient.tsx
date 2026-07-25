@@ -11,9 +11,8 @@ import { useAuth } from "@/lib/AuthContext";
 import Footer from "@/components/Footer";
 import { trackEvent } from "@/lib/track";
 import { useThemePreference } from "@/lib/theme";
-import MobileMenuButton from "@/components/MobileMenuButton";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
-import ThemeToggle from "@/components/ThemeToggle";
+import SiteNav from "@/components/SiteNav";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -290,25 +289,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
       />
 
       <section className="hero-bg">
-        <nav className="home-nav">
-          <div className="nav-container">
-            <Link href="/" className="nav-brand font-display" style={{ textDecoration: "none" }}>
-              TourneyRadar
-            </Link>
-
-            <div className="nav-links">
-              <Link href="/tournaments">Tournaments</Link>
-              {!authLoading && (
-                <Link href={dashboard.href} className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", marginLeft: "0.5rem" }}>{dashboard.label}</Link>
-              )}
-              <Link href="/about" style={{ marginLeft: "0.5rem" }}>About</Link>
-              <Link href="/support">Support Us</Link>
-              <ThemeToggle variant="hero" />
-            </div>
-
-            <MobileMenuButton onClick={() => setMobileMenuOpen(true)} />
-          </div>
-        </nav>
+        <SiteNav onMenuClick={() => setMobileMenuOpen(true)} />
 
         <div className="hero-content-wrapper">
           <div className="hero-container">
@@ -338,6 +319,12 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                 >
                   View on GitHub
                 </a>
+              </div>
+
+              <div className="btn-group">
+                <Link href="/player/register" className="btn btn-signup">
+                  Sign up, it&apos;s Free!
+                </Link>
               </div>
 
               <HeroStats stats={stats} />

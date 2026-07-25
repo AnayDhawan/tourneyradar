@@ -7,7 +7,8 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/AuthContext";
 import Footer from "@/components/Footer";
 import { useThemePreference } from "@/lib/theme";
-import ThemeToggle from "@/components/ThemeToggle";
+import MobileNavDrawer from "@/components/MobileNavDrawer";
+import SiteNav from "@/components/SiteNav";
 
 type WishlistTournament = {
   id: string;
@@ -34,6 +35,7 @@ export default function WishlistPage() {
   const router = useRouter();
   const { user, userType, loading: authLoading } = useAuth();
   useThemePreference();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [tournaments, setTournaments] = useState<WishlistTournament[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -105,21 +107,10 @@ export default function WishlistPage() {
 
   return (
     <div style={{ background: "var(--background)", minHeight: "100vh" }}>
-      <section className="hero-bg" style={{ minHeight: "30vh", display: "flex", flexDirection: "column" }}>
-        <nav className="glass">
-          <div className="nav-container">
-            <Link href="/" className="nav-brand font-display" style={{ textDecoration: "none" }}>
-              TourneyRadar
-            </Link>
+      <MobileNavDrawer open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} dashboard={null} showThemeToggle />
 
-            <div className="nav-links">
-              <Link href="/tournaments" style={{ textDecoration: "none" }}>Tournaments</Link>
-              <Link href="/about" style={{ textDecoration: "none" }}>About</Link>
-              <Link href="/player/wishlist" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>My Wishlist</Link>
-              <ThemeToggle />
-            </div>
-          </div>
-        </nav>
+      <section className="hero-bg" style={{ minHeight: "30vh", display: "flex", flexDirection: "column" }}>
+        <SiteNav onMenuClick={() => setMobileMenuOpen(true)} />
 
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
           <h1 className="hero-title font-display" style={{ textAlign: "center" }}>

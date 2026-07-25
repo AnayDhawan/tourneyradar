@@ -6,12 +6,14 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/Toast";
 import { useThemePreference } from "@/lib/theme";
-import ThemeToggle from "@/components/ThemeToggle";
+import MobileNavDrawer from "@/components/MobileNavDrawer";
+import SiteNav from "@/components/SiteNav";
 
 export default function PlayerLoginPage() {
   const router = useRouter();
   const { showToast } = useToast();
   useThemePreference();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -80,20 +82,10 @@ export default function PlayerLoginPage() {
 
   return (
     <div style={{ background: "var(--background)", minHeight: "100vh" }}>
-      <section className="hero-bg" style={{ minHeight: "30vh", display: "flex", flexDirection: "column" }}>
-        <nav className="glass">
-          <div className="nav-container">
-            <Link href="/" className="nav-brand font-display" style={{ textDecoration: "none" }}>
-              TourneyRadar
-            </Link>
+      <MobileNavDrawer open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} dashboard={null} showThemeToggle />
 
-            <div className="nav-links">
-              <Link href="/tournaments" style={{ textDecoration: "none" }}>Tournaments</Link>
-              <Link href="/player/register" style={{ textDecoration: "none" }}>Register</Link>
-              <ThemeToggle />
-            </div>
-          </div>
-        </nav>
+      <section className="hero-bg" style={{ minHeight: "30vh", display: "flex", flexDirection: "column" }}>
+        <SiteNav onMenuClick={() => setMobileMenuOpen(true)} />
 
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
           <h1 className="hero-title font-display" style={{ textAlign: "center" }}>

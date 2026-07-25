@@ -1,13 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useAuth } from "../lib/AuthContext";
 import Footer from "./Footer";
 import ScrollToTop from "./ScrollToTop";
-import ThemeToggle from "./ThemeToggle";
-import MobileMenuButton from "./MobileMenuButton";
 import MobileNavDrawer from "./MobileNavDrawer";
+import SiteNav from "./SiteNav";
 interface BaseLayoutProps {
   children: React.ReactNode;
   showHero?: boolean;
@@ -48,27 +46,7 @@ export default function BaseLayout({
 
       {showHero ? (
         <section className="hero-bg" style={{ minHeight: "40vh", display: "flex", flexDirection: "column" }}>
-          <nav className="glass">
-            <div className="nav-container">
-              <Link href="/" className="nav-brand font-display" style={{ textDecoration: "none" }}>
-                TourneyRadar
-              </Link>
-
-              <div className="nav-links">
-                <Link href="/tournaments" style={{ textDecoration: "none", color: "inherit" }}>
-                  Tournaments
-                </Link>
-                {!authLoading && (
-                  <Link href={dashboard.href} className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>
-                    {dashboard.label}
-                  </Link>
-                )}
-                <ThemeToggle variant="hero" />
-              </div>
-
-              <MobileMenuButton onClick={() => setMobileMenuOpen(true)} />
-            </div>
-          </nav>
+          <SiteNav onMenuClick={() => setMobileMenuOpen(true)} />
 
           {heroTitle && (
             <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
@@ -86,28 +64,7 @@ export default function BaseLayout({
           )}
         </section>
       ) : (
-        <nav className="glass" style={{ position: "sticky", top: 0, zIndex: 100 }}>
-          <div className="nav-container">
-            <Link href="/" className="nav-brand font-display" style={{ textDecoration: "none" }}>
-              TourneyRadar
-            </Link>
-
-            <div className="nav-links">
-              <Link href="/tournaments" style={{ textDecoration: "none", color: "inherit" }}>Tournaments</Link>
-              {!authLoading && (
-                <Link href={dashboard.href} className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>
-                  {dashboard.label}
-                </Link>
-              )}
-            </div>
-
-            <div className="nav-actions">
-              <ThemeToggle />
-              <MobileMenuButton onClick={() => setMobileMenuOpen(true)} style={{ color: "var(--text-primary)" }} />
-            </div>
-
-          </div>
-        </nav>
+        <SiteNav onMenuClick={() => setMobileMenuOpen(true)} />
       )}
 
       <main style={{ flex: 1 }}>{children}</main>

@@ -88,14 +88,6 @@
     }
     
 
-    /* Glass Morphism for Navigation */
-    .glass {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
     /* Navigation */
     nav {
       position: relative;
@@ -135,12 +127,6 @@
     
     .nav-links a:hover {
       color: white;
-    }
-
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
     }
 
     .theme-toggle-group {
@@ -299,6 +285,7 @@
     
     .hero-title .highlight {
       color: #F59E0B;
+      white-space: nowrap;
     }
 
     /* Homepage hero only, scoped so BaseLayout's other-page mini-heroes
@@ -352,6 +339,17 @@
       background: white;
       color: var(--primary);
       transform: translateY(-2px);
+    }
+
+    .btn-signup {
+      background: #F59E0B;
+      color: #1a1200;
+    }
+
+    .btn-signup:hover {
+      background: #fbbf24;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
     }
     
     .btn-group {
@@ -795,10 +793,6 @@
         display: flex !important;
       }
 
-      .nav-actions {
-        gap: 0.75rem;
-      }
-      
       .mobile-menu-btn {
         display: none !important;
       }
@@ -816,10 +810,6 @@
         display: none !important;
       }
 
-      .nav-actions {
-        gap: 0.5rem;
-      }
-      
       .mobile-menu-btn {
         display: flex !important;
         align-items: center;
