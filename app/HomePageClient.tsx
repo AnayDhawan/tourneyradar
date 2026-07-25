@@ -13,6 +13,7 @@ import { trackEvent } from "@/lib/track";
 import { useThemePreference } from "@/lib/theme";
 import MobileMenuButton from "@/components/MobileMenuButton";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -93,37 +94,10 @@ function isWithinDateRange(dateStr: string, start: string, end: string): boolean
   return true;
 }
 
-function KnightSvg() {
-  return (
-    <svg viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">
-      <g fill="none" fillRule="evenodd" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18" fill="white" />
-        <path d="M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26 C 6,24 12,14 12,14 C 12,14 13.89,12.1 14,10.5 C 13.27,9.506 13.5,8.5 13.5,7.5 C 14.5,6.5 16.5,10 16.5,10 L 18.5,10 C 18.5,10 19.28,8.008 21,7 C 22,7 22,10 22,10" fill="white" />
-        <path d="M 9.5 25.5 A 0.5 0.5 0 1 1 8.5,25.5 A 0.5 0.5 0 1 1 9.5 25.5 z" fill="black" />
-        <path d="M 15 15.5 A 0.5 1.5 0 1 1 14,15.5 A 0.5 1.5 0 1 1 15 15.5 z" transform="matrix(0.866,0.5,-0.5,0.866,9.693,-5.173)" fill="black" />
-      </g>
-    </svg>
-  );
-}
-
-export default function HomePageClient({ initialTournaments, stats }: Props) {
-  const { user, userType, loading: authLoading } = useAuth();
-  const [mapView, setMapView] = useState<MapView>("europe");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  useThemePreference();
-
-  const [filters, setFilters] = useState<FilterState>({
-    search: "",
-    category: "All",
-    state: "All",
-    fideRated: "all",
-    startDate: "",
-    endDate: "",
-  });
-
-  const [markerIcon, setMarkerIcon] = useState<import("leaflet").DivIcon | null>(null);
-
-  // Animated stats
+// Isolated in its own component so the 60-tick count-up interval only
+// re-renders this small subtree, not the whole page (map + tournament
+// table included) on every tick.
+function HeroStats({ stats }: { stats: Props["stats"] }) {
   const [animatedStats, setAnimatedStats] = useState({ total: 0, countries: 0, mapped: 0 });
 
   useEffect(() => {
@@ -147,6 +121,64 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
 
     return () => clearInterval(timer);
   }, [stats]);
+
+  return (
+    <div className="stats-container" aria-label="Site statistics">
+      <div className="stat-item">
+        <div className="stat-number">{animatedStats.total}</div>
+        <div className="stat-label">Upcoming Events</div>
+      </div>
+      <div className="stat-divider" />
+      <div className="stat-item">
+        <div className="stat-number">{animatedStats.countries}</div>
+        <div className="stat-label">Countries</div>
+      </div>
+      <div className="stat-divider" />
+      <div className="stat-item">
+        <div className="stat-number">{animatedStats.mapped}</div>
+        <div className="stat-label">On Map</div>
+      </div>
+    </div>
+  );
+}
+
+function KnightSvg() {
+  return (
+    <svg viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">
+      <g fill="none" fillRule="evenodd" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18" fill="white" />
+        <path d="M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26 C 6,24 12,14 12,14 C 12,14 13.89,12.1 14,10.5 C 13.27,9.506 13.5,8.5 13.5,7.5 C 14.5,6.5 16.5,10 16.5,10 L 18.5,10 C 18.5,10 19.28,8.008 21,7 C 22,7 22,10 22,10" fill="white" />
+        <path d="M 9.5 25.5 A 0.5 0.5 0 1 1 8.5,25.5 A 0.5 0.5 0 1 1 9.5 25.5 z" fill="black" />
+        <path d="M 15 15.5 A 0.5 1.5 0 1 1 14,15.5 A 0.5 1.5 0 1 1 15 15.5 z" transform="matrix(0.866,0.5,-0.5,0.866,9.693,-5.173)" fill="black" />
+      </g>
+    </svg>
+  );
+}
+
+export default function HomePageClient({ initialTournaments, stats }: Props) {
+  const { user, userType, loading: authLoading } = useAuth();
+  const [mapView, setMapView] = useState<MapView>("europe");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [navScrolled, setNavScrolled] = useState(false);
+  useThemePreference();
+
+  useEffect(() => {
+    const onScroll = () => setNavScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const [filters, setFilters] = useState<FilterState>({
+    search: "",
+    category: "All",
+    state: "All",
+    fideRated: "all",
+    startDate: "",
+    endDate: "",
+  });
+
+  const [markerIcon, setMarkerIcon] = useState<import("leaflet").DivIcon | null>(null);
 
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
@@ -201,6 +233,9 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
     return ["All", ...Array.from(unique)];
   }, [initialTournaments]);
 
+  const TABLE_PAGE_SIZE = 24;
+  const [tablePage, setTablePage] = useState(1);
+
   const filtered = useMemo(() => {
     const search = filters.search.trim().toLowerCase();
 
@@ -232,6 +267,17 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
     });
   }, [filters, initialTournaments]);
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / TABLE_PAGE_SIZE));
+
+  useEffect(() => {
+    setTablePage(1);
+  }, [filters]);
+
+  const paginated = useMemo(
+    () => filtered.slice((tablePage - 1) * TABLE_PAGE_SIZE, tablePage * TABLE_PAGE_SIZE),
+    [filtered, tablePage],
+  );
+
   const mapConfig = useMemo(() => {
     if (mapView === "europe") {
       return { center: [48.8566, 2.3522] as [number, number], zoom: 4 };
@@ -261,10 +307,11 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
         open={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
         dashboard={authLoading ? null : dashboard}
+        showThemeToggle
       />
 
       <section className="hero-bg">
-        <nav className="glass">
+        <nav className={`home-nav${navScrolled ? " home-nav--scrolled" : ""}`}>
           <div className="nav-container">
             <Link href="/" className="nav-brand font-display" style={{ textDecoration: "none" }}>
               TourneyRadar
@@ -272,6 +319,22 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
 
             <div className="nav-links">
               <Link href="/tournaments">Tournaments</Link>
+              <Link href="/about">About</Link>
+              <Link href="/support">Support Us</Link>
+              <Link href="/contact">Contact</Link>
+              <a
+                href="https://github.com/AnayDhawan/tourneyradar"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                onClick={() => trackEvent("star_link", { src: "nav" })}
+                className="nav-icon-link"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                </svg>
+              </a>
+              <ThemeToggle variant={navScrolled ? "default" : "hero"} />
               {!authLoading && (
                 <Link href={dashboard.href} className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>{dashboard.label}</Link>
               )}
@@ -308,22 +371,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                 </a>
               </div>
 
-              <div className="stats-container" aria-label="Site statistics">
-                <div className="stat-item">
-                  <div className="stat-number">{animatedStats.total}</div>
-                  <div className="stat-label">Upcoming Events</div>
-                </div>
-                <div className="stat-divider" />
-                <div className="stat-item">
-                  <div className="stat-number">{animatedStats.countries}</div>
-                  <div className="stat-label">Countries</div>
-                </div>
-                <div className="stat-divider" />
-                <div className="stat-item">
-                  <div className="stat-number">{animatedStats.mapped}</div>
-                  <div className="stat-label">On Map</div>
-                </div>
-              </div>
+              <HeroStats stats={stats} />
             </div>
           </div>
 
@@ -571,7 +619,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                 border: 0,
               }}
             >
-              Showing {filtered.length} of {initialTournaments.length} tournaments
+              Showing {paginated.length} of {filtered.length} tournaments, page {tablePage} of {totalPages}
             </div>
 
             <div className="table-container">
@@ -590,7 +638,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                       </tr>
                     </thead>
                     <tbody>
-                      {filtered.map((t) => (
+                      {paginated.map((t) => (
                         <tr key={t.id} className="table-row">
                           <td>
                             <div style={{ fontWeight: 800, color: "var(--text-primary)" }}>
@@ -640,6 +688,32 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                   </table>
                 )}
               </div>
+
+              {filtered.length > 0 && totalPages > 1 && (
+                <div className="table-pagination" aria-label="Table pagination">
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    style={{ padding: "0.5rem 1rem", fontSize: 14 }}
+                    onClick={() => setTablePage((p) => Math.max(1, p - 1))}
+                    disabled={tablePage === 1}
+                  >
+                    Previous
+                  </button>
+                  <span style={{ fontSize: 14, color: "var(--text-secondary)" }}>
+                    Page {tablePage} of {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    style={{ padding: "0.5rem 1rem", fontSize: 14 }}
+                    onClick={() => setTablePage((p) => Math.min(totalPages, p + 1))}
+                    disabled={tablePage === totalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
