@@ -314,11 +314,15 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
           <div className="hero-container">
             <div className="hero-content">
               <h1 className="hero-title font-display">
-                Discover Chess <span className="highlight">Tournaments Worldwide</span>
+                Discover Chess
+                <br />
+                <span className="highlight">Tournaments Worldwide</span>
               </h1>
 
               <p className="hero-description">
-                Chess tournaments worldwide, updated daily. Free and open-source.
+                Chess tournaments worldwide, updated daily.
+                <br />
+                Free and open-source.
               </p>
 
               <div className="btn-group">
