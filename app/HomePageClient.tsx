@@ -302,7 +302,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               <Link href="/support">Support Us</Link>
               <ThemeToggle variant="hero" />
               {!authLoading && (
-                <Link href={dashboard.href} className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>{dashboard.label}</Link>
+                <Link href={dashboard.href} className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", marginLeft: "0.5rem" }}>{dashboard.label}</Link>
               )}
             </div>
 
