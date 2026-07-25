@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 export type ThemePreference = "light" | "dark" | "system";
 export type ResolvedTheme = "light" | "dark";
@@ -40,77 +40,72 @@ function applyTheme(theme: ThemePreference): ResolvedTheme {
   return resolvedTheme;
 }
 
+interface ThemeSnapshot {
+  theme: ThemePreference;
+  resolvedTheme: ResolvedTheme;
+}
+
+// Deterministic server-safe default — matches getStoredTheme()/getSystemTheme()'s
+// own SSR fallback, so the hydration render can't mismatch the server render.
+const SERVER_SNAPSHOT: ThemeSnapshot = { theme: "system", resolvedTheme: "light" };
+
+let cachedSnapshot: ThemeSnapshot = SERVER_SNAPSHOT;
+
+function computeSnapshot(): ThemeSnapshot {
+  const theme = getStoredTheme() ?? "system";
+  return { theme, resolvedTheme: resolveTheme(theme) };
+}
+
+// Reads external state (localStorage/system preference) and pushes it out
+// to the DOM/storage, all outside of React render/effect state-setting -
+// useSyncExternalStore, not a setState-in-effect, is what keeps this
+// synchronized with React.
+function refreshFromExternalSource() {
+  const next = computeSnapshot();
+  cachedSnapshot = next;
+  applyTheme(next.theme);
+}
+
+function getSnapshot(): ThemeSnapshot {
+  return cachedSnapshot;
+}
+
+function getServerSnapshot(): ThemeSnapshot {
+  return SERVER_SNAPSHOT;
+}
+
+function subscribe(callback: () => void) {
+  const handleExternalChange = () => {
+    refreshFromExternalSource();
+    callback();
+  };
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key === THEME_STORAGE_KEY) handleExternalChange();
+  };
+
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+  window.addEventListener(THEME_CHANGE_EVENT, handleExternalChange);
+  window.addEventListener("storage", handleStorage);
+  mediaQuery.addEventListener("change", handleExternalChange);
+
+  // Adopt the real stored/system value once mounted (server always renders
+  // SERVER_SNAPSHOT, so this is the one place the "real" value takes over).
+  handleExternalChange();
+
+  return () => {
+    window.removeEventListener(THEME_CHANGE_EVENT, handleExternalChange);
+    window.removeEventListener("storage", handleStorage);
+    mediaQuery.removeEventListener("change", handleExternalChange);
+  };
+}
+
 export function useThemePreference() {
-  // Deterministic server-safe defaults — matches getSystemTheme()'s own SSR
-  // fallback. Real stored preference (if any) is applied in the mount
-  // effect below, not read here, so hydration render matches the server.
-  const [theme, setTheme] = useState<ThemePreference>("system");
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("light");
-
-  const isMountedRef = useRef(false);
-
-  useEffect(() => {
-    // On the true first run, adopt whatever's actually in storage before
-    // persisting anything — otherwise this effect's own applyTheme() call
-    // below would stamp the "system" placeholder default over a real saved
-    // preference before the storage-sync effect ever gets to read it.
-    const themeToApply = isMountedRef.current ? theme : getStoredTheme() ?? theme;
-    isMountedRef.current = true;
-
-    if (themeToApply !== theme) {
-      setTheme(themeToApply);
-      setResolvedTheme(resolveTheme(themeToApply));
-    }
-
-    applyTheme(themeToApply);
-
-    if (themeToApply !== "system") return;
-
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const syncSystemTheme = () => {
-      const nextResolvedTheme = mediaQuery.matches ? "dark" : "light";
-      setResolvedTheme(nextResolvedTheme);
-      document.documentElement.setAttribute("data-theme", nextResolvedTheme);
-    };
-
-    syncSystemTheme();
-    mediaQuery.addEventListener("change", syncSystemTheme);
-
-    return () => mediaQuery.removeEventListener("change", syncSystemTheme);
-  }, [theme]);
-
-  useEffect(() => {
-    const syncFromStorage = () => {
-      const nextTheme = getStoredTheme();
-  
-      if (!nextTheme) return;
-  
-      setTheme(nextTheme);
-      setResolvedTheme(resolveTheme(nextTheme));
-      document.documentElement.setAttribute("data-theme", resolveTheme(nextTheme));
-    };
-  
-    const handleThemeChange = () => syncFromStorage();
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === THEME_STORAGE_KEY) {
-        syncFromStorage();
-      }
-    };
-
-    window.addEventListener(THEME_CHANGE_EVENT, handleThemeChange);
-    window.addEventListener("storage", handleStorage);
-
-    return () => {
-      window.removeEventListener(THEME_CHANGE_EVENT, handleThemeChange);
-      window.removeEventListener("storage", handleStorage);
-    };
-  }, []);
+  const { theme, resolvedTheme } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const setThemePreference = (nextTheme: ThemePreference) => {
     const currentResolvedTheme = applyTheme(nextTheme);
-
-    setTheme(nextTheme);
-    setResolvedTheme(currentResolvedTheme);
+    cachedSnapshot = { theme: nextTheme, resolvedTheme: currentResolvedTheme };
     window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
   };
 

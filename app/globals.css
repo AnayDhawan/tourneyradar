@@ -271,7 +271,7 @@
     }
     
     .hero-content {
-      max-width: 650px;
+      max-width: 820px;
       animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
@@ -302,7 +302,7 @@
       color: rgba(255, 255, 255, 0.8);
       margin-bottom: 1.5rem;
       line-height: 1.6;
-      max-width: 560px;
+      max-width: 700px;
     }
 
     .hero-cta-block {
