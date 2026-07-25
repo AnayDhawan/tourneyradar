@@ -295,15 +295,12 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
           <div className="hero-container">
             <div className="hero-content">
               <h1 className="hero-title font-display">
-                Discover Chess
-                <br />
-                <span className="highlight">Tournaments</span>
-                <br />
-                <span className="highlight">Worldwide</span>
+                Discover Chess <span className="highlight">Tournaments<br />Worldwide</span>
               </h1>
 
               <p className="hero-description">
-                Chess tournaments worldwide, updated weekly. Free and open-source.
+                A platform aggregating over-the-board chess tournaments
+                from around the world. Find your next event.
               </p>
 
               <div className="hero-cta-block">

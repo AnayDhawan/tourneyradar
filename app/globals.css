@@ -293,20 +293,10 @@
       color: #F59E0B;
     }
 
-    /* Homepage hero only, scoped so BaseLayout's other-page mini-heroes
-       (which reuse .hero-title without .hero-content) keep their size.
-       Sized to read as one wide block spanning roughly as far as the
-       subtext line below it. */
-    .hero-content .hero-title {
-      font-size: clamp(2.5rem, 5.5vw, 4rem);
-      line-height: 1.05;
-      margin-bottom: 1rem;
-    }
-
     .hero-description {
-      font-size: clamp(0.8125rem, 1.1vw, 0.9375rem);
+      font-size: clamp(1rem, 2vw, 1.25rem);
       color: rgba(255, 255, 255, 0.8);
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
       line-height: 1.6;
       max-width: 700px;
     }
@@ -315,16 +305,16 @@
       display: inline-flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
+      gap: 1rem;
+      margin-bottom: 3rem;
     }
 
     /* Buttons */
     .btn {
-      padding: 0.5rem 1.25rem;
+      padding: 0.75rem 2rem;
       border-radius: 12px;
       font-weight: 600;
-      font-size: clamp(0.8125rem, 1.2vw, 0.875rem);
+      font-size: clamp(0.9rem, 1.5vw, 1rem);
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
       border: none;
@@ -372,7 +362,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 1rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 3rem;
     }
 
     .hero-cta-block .btn-group {
@@ -387,7 +377,7 @@
     .stats-container {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 1.5rem;
       flex-wrap: wrap;
     }
 
@@ -397,18 +387,18 @@
     }
 
     .stat-number {
-      font-size: clamp(1.625rem, 3vw, 2.125rem);
+      font-size: clamp(1.5rem, 3vw, 2rem);
       font-weight: bold;
       color: #F59E0B;
     }
 
     .stat-label {
-      font-size: 0.875rem;
+      font-size: clamp(0.75rem, 1.5vw, 0.875rem);
     }
 
     .stat-divider {
       width: 1px;
-      height: 2rem;
+      height: 3rem;
       background: rgba(255, 255, 255, 0.2);
     }
 
@@ -810,10 +800,6 @@
       
       .hero-content-wrapper {
         padding: 3rem;
-      }
-
-      .hero-description {
-        white-space: nowrap;
       }
 
       /* Desktop: show nav links, hide hamburger */
