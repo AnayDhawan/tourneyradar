@@ -265,7 +265,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
 
   const getDashboardLink = () => {
     if (userType === "player") return { href: "/player/wishlist", label: "My Wishlist" };
-    return { href: "/player/login", label: "Login" };
+    return { href: "/player/register", label: "Sign Up" };
   };
 
   const dashboard = getDashboardLink();
@@ -592,7 +592,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                               ID: {t.id}
                             </div>
                           </td>
-                          <td>
+                          <td data-label="Location">
                             <div style={{
                               fontWeight: 600,
                               maxWidth: 200,
@@ -609,8 +609,8 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                               {t.state || t.country || ''}
                             </div>
                           </td>
-                          <td style={{ fontWeight: 600 }}>{formatDate(t.date)}</td>
-                          <td>
+                          <td data-label="Date" style={{ fontWeight: 600 }}>{formatDate(t.date)}</td>
+                          <td data-label="Category">
                             <span className="badge">{t.category}</span>
                           </td>
                           <td>

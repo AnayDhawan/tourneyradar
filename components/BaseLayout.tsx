@@ -29,7 +29,7 @@ export default function BaseLayout({
 
   const getDashboardLink = () => {
     if (userType === "player") return { href: "/player/wishlist", label: "My Wishlist" };
-    return { href: "/player/login", label: "Login" };
+    return { href: "/player/register", label: "Sign Up" };
   };
   const dashboard = getDashboardLink();
 

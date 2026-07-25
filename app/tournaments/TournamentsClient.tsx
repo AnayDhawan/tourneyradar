@@ -158,17 +158,19 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
                       )}
                       {tournament.fide_rated && <span className="badge badge-fide">FIDE</span>}
                       <span className="badge">{tournament.category}</span>
-                      <span style={{
-                        marginLeft: "auto",
-                        fontSize: "0.75rem",
-                        fontWeight: 600,
-                        color: "var(--primary)",
-                        background: "var(--surface-elevated)",
-                        padding: "0.25rem 0.75rem",
-                        borderRadius: "12px"
-                      }}>
-                        {getCountdown(tournament.date)}
-                      </span>
+                      {getCountdown(tournament.date) && (
+                        <span style={{
+                          marginLeft: "auto",
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                          color: "var(--primary)",
+                          background: "var(--surface-elevated)",
+                          padding: "0.25rem 0.75rem",
+                          borderRadius: "12px"
+                        }}>
+                          {getCountdown(tournament.date)}
+                        </span>
+                      )}
                     </div>
 
                     <h3 className="font-display" style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: "1rem", lineHeight: 1.3 }}>

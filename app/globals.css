@@ -755,10 +755,37 @@
 
 .mobile-drawer-cta {
   margin-top: 1rem !important;
+  padding: 0.7rem 1rem !important;
   background: var(--primary) !important;
   color: white !important;
   text-align: center;
   font-weight: 600 !important;
+}
+
+.mobile-drawer-theme {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.mobile-drawer-theme-label {
+  display: block;
+  margin-bottom: 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.mobile-drawer-theme .theme-toggle-group {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.mobile-drawer-theme .theme-toggle-option {
+  flex: 1;
+  height: 38px;
 }
 
 .mobile-drawer-cta:hover {
@@ -1125,16 +1152,96 @@
     text-align: center;
   }
   
-  /* Tables - horizontal scroll */
+  /* Tables -> stacked cards. Horizontal scroll on a narrow viewport hid every
+     column but Tournament behind an undiscoverable scrollbar; a card per row
+     with labeled fields keeps all the data visible without scrolling. */
   .table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: visible;
   }
-  
+
   .table-wrapper {
-    min-width: 600px;
+    min-width: 0;
   }
-  
+
+  .table-wrapper table,
+  .table-wrapper thead,
+  .table-wrapper tbody,
+  .table-wrapper th,
+  .table-wrapper td,
+  .table-wrapper tr {
+    display: block;
+  }
+
+  .table-wrapper thead {
+    display: none;
+  }
+
+  .table-wrapper tr.table-row {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .table-wrapper tr.table-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .table-wrapper td {
+    padding: 0 !important;
+  }
+
+  .table-wrapper td:first-child {
+    padding-bottom: 0.75rem !important;
+  }
+
+  .table-wrapper td[data-label] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-top: 1px solid var(--border);
+    padding: 0.5rem 0 !important;
+  }
+
+  .table-wrapper td[data-label]::before {
+    content: attr(data-label);
+    flex: none;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+  }
+
+  /* Location carries two stacked divs (name+country, state), not a single
+     value, so it gets its own label-above-value layout instead of the
+     label-left/value-right row used for the single-line fields. Its inner
+     divs also carry inline max-width/line-clamp sized for the old narrow
+     table column; freed of that column, let them use the full row width. */
+  .table-wrapper td[data-label="Location"] {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .table-wrapper td[data-label="Location"] > div {
+    max-width: none !important;
+    -webkit-line-clamp: unset !important;
+    display: block !important;
+    overflow: visible !important;
+    text-align: left;
+  }
+
+  .table-wrapper td:last-child {
+    border-top: 1px solid var(--border);
+    padding-top: 0.75rem !important;
+  }
+
+  .table-wrapper td:last-child .btn {
+    width: 100%;
+  }
+
   /* Dashboard cards */
   .card {
     padding: 1.25rem !important;

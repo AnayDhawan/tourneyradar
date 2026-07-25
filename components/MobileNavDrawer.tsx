@@ -74,7 +74,12 @@ export default function MobileNavDrawer({ open, onClose, dashboard, showThemeTog
               {dashboard.label}
             </Link>
           )}
-          {showThemeToggle && <ThemeToggle />}
+          {showThemeToggle && (
+            <div className="mobile-drawer-theme">
+              <span className="mobile-drawer-theme-label">Theme</span>
+              <ThemeToggle />
+            </div>
+          )}
         </nav>
       </div>
     </div>
