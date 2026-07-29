@@ -2,26 +2,13 @@ import { unstable_cache } from 'next/cache';
 import HomePageClient from './HomePageClient';
 import { generateOrganizationJsonLd, generateWebsiteJsonLd } from '@/app/lib/metadata';
 import { supabase } from '@/lib/supabase';
+import { getMapTournaments } from '@/lib/tournaments';
+
+const MAP_FIELDS =
+  'id, name, date, end_date, city, state, country, country_code, lat, lng, category, fide_rated, source_url, external_link, location';
 
 const getCachedTournaments = unstable_cache(
-  async () => {
-    const today = new Date().toISOString().split('T')[0];
-
-    const { data, error } = await supabase
-      .from('tournaments')
-      .select('id, name, date, end_date, city, state, country, country_code, lat, lng, category, fide_rated, source_url, external_link, location')
-      .gte('date', today)
-      .eq('status', 'published')
-      .order('date', { ascending: true })
-      .limit(1000);
-
-    if (error) {
-      console.error('Supabase error:', error);
-      return [];
-    }
-
-    return data || [];
-  },
+  async () => getMapTournaments(MAP_FIELDS),
   ['home-tournaments'],
   { revalidate: 86400, tags: ['tournaments'] }
 );
