@@ -1,32 +1,14 @@
-import { createClient } from '@supabase/supabase-js';
 import { unstable_cache } from 'next/cache';
 import HomePageClient from './HomePageClient';
 import { generateOrganizationJsonLd, generateWebsiteJsonLd } from '@/app/lib/metadata';
+import { supabase } from '@/lib/supabase';
+import { getMapTournaments } from '@/lib/tournaments';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://htohprkfygyzvgzijvnd.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0b2hwcmtmeWd5enZnemlqdm5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2NDY3MDMsImV4cCI6MjA4MjIyMjcwM30.4TYIhteDvauPVtWbWp_Dql3VgJcYsdhgYq65Z6kGDfA";
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const MAP_FIELDS =
+  'id, name, date, end_date, city, state, country, country_code, lat, lng, category, fide_rated, source_url, external_link, location';
 
 const getCachedTournaments = unstable_cache(
-  async () => {
-    const today = new Date().toISOString().split('T')[0];
-
-    const { data, error } = await supabase
-      .from('tournaments')
-      .select('id, name, date, end_date, city, state, country, country_code, lat, lng, category, fide_rated, source_url, external_link, location')
-      .gte('date', today)
-      .eq('status', 'published')
-      .order('date', { ascending: true })
-      .limit(1000);
-
-    if (error) {
-      console.error('Supabase error:', error);
-      return [];
-    }
-
-    return data || [];
-  },
+  async () => getMapTournaments(MAP_FIELDS),
   ['home-tournaments'],
   { revalidate: 86400, tags: ['tournaments'] }
 );

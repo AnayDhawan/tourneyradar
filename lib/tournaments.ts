@@ -168,6 +168,48 @@ export async function getAllUpcomingTournaments(
   return data || [];
 }
 
+// Supabase caps a single response, and the dataset has outgrown any one page,
+// so a bare .limit(n) silently truncates. Walks fixed-size pages instead and
+// stops on a short page, so every marker reaches the map without ever holding
+// an unbounded single query open. Callers are expected to cache the result.
+const MAP_PAGE_SIZE = 1000;
+const MAP_MAX_PAGES = 20;
+
+export async function getMapTournaments(
+  fields: string = TOURNAMENT_SELECT_FIELDS
+): Promise<TournamentListItem[]> {
+  const today = new Date().toISOString().split('T')[0];
+  const all: TournamentListItem[] = [];
+
+  for (let page = 0; page < MAP_MAX_PAGES; page++) {
+    const start = page * MAP_PAGE_SIZE;
+
+    const { data, error } = await supabase
+      .from('tournaments')
+      .select(fields)
+      .gte('date', today)
+      .eq('status', 'published')
+      .order('date', { ascending: true })
+      .order('id', { ascending: true })
+      .range(start, start + MAP_PAGE_SIZE - 1);
+
+    if (error) {
+      console.error('Error fetching map tournaments:', error);
+      break;
+    }
+
+    const rows = (data || []) as unknown as TournamentListItem[];
+    all.push(...rows);
+
+    if (rows.length < MAP_PAGE_SIZE) return all;
+  }
+
+  console.warn(
+    `getMapTournaments hit the ${MAP_MAX_PAGES}-page ceiling; results may be truncated`
+  );
+  return all;
+}
+
 const TOURNAMENT_MAX_LIMIT = 200;
 const TOURNAMENT_DEFAULT_LIMIT = 100;
 
