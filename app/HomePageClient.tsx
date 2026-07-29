@@ -560,7 +560,13 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                 border: 0,
               }}
             >
-              Showing {paginated.length} of {filtered.length} tournaments, page {tablePage} of {totalPages}
+              {filtered.length === 0
+                ? filters.search
+                  ? `No tournaments match "${filters.search}"`
+                  : "No tournaments match your filters"
+                : `${filtered.length} tournament${filtered.length === 1 ? "" : "s"} found${
+                    filters.search ? ` for "${filters.search}"` : ""
+                  }, showing ${paginated.length} on page ${tablePage} of ${totalPages}`}
             </div>
 
             <div className="table-container">
