@@ -194,6 +194,14 @@ Good first issues: add a new data source, add a missing country, improve the map
 
 ---
 
+## Contributors
+
+Thanks to everyone who has fixed a bug, hardened the CI, or improved the map.
+
+[![Contributors](https://contrib.rocks/image?repo=AnayDhawan/tourneyradar)](https://github.com/AnayDhawan/tourneyradar/graphs/contributors)
+
+---
+
 ## License
 
 [Apache-2.0](LICENSE). Use freely, give credit where it's due.
