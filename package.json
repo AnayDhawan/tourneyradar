@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "scrape": "npx tsx --env-file=.env.local scripts/scrape.ts",
     "scrape:ci": "npx tsx scripts/scrape.ts",
     "scrape:region": "npx tsx scripts/scrape.ts",

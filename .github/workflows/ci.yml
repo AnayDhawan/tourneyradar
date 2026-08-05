@@ -18,3 +18,9 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run lint
+      # Typecheck rather than `next build`: the build imports lib/supabase.ts,
+      # which throws without NEXT_PUBLIC_SUPABASE_* env vars, and those secrets
+      # are not exposed to Dependabot-triggered runs. `tsc --noEmit` needs no
+      # env at all, so it gates dependency bumps too. The full build is still
+      # exercised by the Vercel preview deployment on every PR.
+      - run: npm run typecheck
