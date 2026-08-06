@@ -49,6 +49,16 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
     }
   };
 
+  const handleSearchSubmit = () => {
+    markEngaged();
+    trackEvent("tournament_search_submitted");
+  };
+
+  const handleTournamentDetailOpen = () => {
+    markEngaged();
+    trackEvent("tournament_detail_viewed");
+  };
+
   const buildHref = (targetPage: number) => {
     const params = new URLSearchParams();
     if (q.trim()) params.set("q", q.trim());
@@ -69,7 +79,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
             <form
               method="get"
               action="/tournaments"
-              onSubmit={markEngaged}
+              onSubmit={handleSearchSubmit}
               style={{ position: "relative", maxWidth: "600px", margin: "0 auto" }}
             >
               <input
@@ -197,7 +207,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
                     </div>
                   </div>
 
-                  <Link href={`/tournaments/${tournament.id}`} className="btn btn-primary" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", textDecoration: "none" }} onClick={markEngaged}>
+                  <Link href={`/tournaments/${tournament.id}`} className="btn btn-primary" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", textDecoration: "none" }} onClick={handleTournamentDetailOpen}>
                     View Details →
                   </Link>
                 </div>

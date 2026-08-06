@@ -3,6 +3,7 @@
 import Link from "next/link";
 import BaseLayout from "@/components/BaseLayout";
 import { downloadTournamentIcs } from "@/lib/ics";
+import { trackEvent } from "@/lib/track";
 
 interface Tournament {
   id: string;
@@ -99,7 +100,7 @@ export default function TournamentDetailClient({ tournament }: Props) {
           <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
             {tournament.source_url && (
               <a href={tournament.source_url} target="_blank" rel="noopener noreferrer"
-                className="btn btn-primary" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+                className="btn btn-primary" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.5rem" }} onClick={() => trackEvent("tournament_source_opened", { source_type: "chess_results" })}>
                 View on Chess-Results
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
@@ -111,20 +112,23 @@ export default function TournamentDetailClient({ tournament }: Props) {
             
             {tournament.external_link && (
               <a href={tournament.external_link} target="_blank" rel="noopener noreferrer"
-                className="btn" style={{ textDecoration: "none", background: "var(--surface-elevated)", border: "2px solid var(--border)" }}>
+                className="btn" style={{ textDecoration: "none", background: "var(--surface-elevated)", border: "2px solid var(--border)" }} onClick={() => trackEvent("tournament_source_opened", { source_type: "official_website" })}>
                 Official Website
               </a>
             )}
 
             <button
               type="button"
-              onClick={() => downloadTournamentIcs({
-                id: tournament.id,
-                name: tournament.name,
-                date: tournament.date,
-                end_date: tournament.end_date,
-                location: locationDisplay,
-              })}
+              onClick={() => {
+                downloadTournamentIcs({
+                  id: tournament.id,
+                  name: tournament.name,
+                  date: tournament.date,
+                  end_date: tournament.end_date,
+                  location: locationDisplay,
+                });
+                trackEvent("tournament_calendar_downloaded");
+              }}
               className="btn"
               style={{ background: "var(--surface-elevated)", border: "2px solid var(--border)", color: "var(--text-primary)" }}
             >

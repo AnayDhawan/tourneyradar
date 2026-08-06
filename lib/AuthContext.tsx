@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import posthog from "posthog-js";
 import { supabase } from "./supabase";
 
 type UserType = "player" | "admin" | null;
@@ -41,6 +42,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<Player | Admin | null>(null);
   const [userType, setUserType] = useState<UserType>(null);
   const [loading, setLoading] = useState(true);
+  const identifiedUserIdRef = useRef<string | null>(null);
+
+  const identifyUser = (
+    userId: string,
+    properties: { email?: string; name?: string; user_type?: Exclude<UserType, null> }
+  ) => {
+    if (
+      !process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN ||
+      !process.env.NEXT_PUBLIC_POSTHOG_HOST ||
+      identifiedUserIdRef.current === userId
+    ) return;
+
+    if (identifiedUserIdRef.current) {
+      posthog.reset();
+    }
+
+    posthog.identify(userId, properties);
+    identifiedUserIdRef.current = userId;
+  };
+
+  const resetIdentity = () => {
+    if (!identifiedUserIdRef.current) return;
+
+    posthog.reset();
+    identifiedUserIdRef.current = null;
+  };
 
   const checkAuth = async () => {
     try {
@@ -62,7 +89,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .maybeSingle();
 
         if (player && !playerError) {
-          setUser(player as Player);
+          const playerProfile = player as Player;
+          identifyUser(session.user.id, {
+            email: session.user.email,
+            name: playerProfile.name,
+            user_type: "player",
+          });
+          setUser(playerProfile);
           setUserType("player");
           setLoading(false);
           return;
@@ -80,7 +113,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .maybeSingle();
 
         if (admin && !adminError) {
-          setUser(admin as Admin);
+          const adminProfile = admin as Admin;
+          identifyUser(session.user.id, {
+            email: session.user.email,
+            name: adminProfile.name,
+            user_type: "admin",
+          });
+          setUser(adminProfile);
           setUserType("admin");
           setLoading(false);
           return;
@@ -102,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    resetIdentity();
     await supabase.auth.signOut();
     setUser(null);
     setUserType(null);
@@ -124,6 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session) {
         await checkAuth();
       } else {
+        resetIdentity();
         setUser(null);
         setUserType(null);
         setLoading(false);

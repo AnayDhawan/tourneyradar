@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { trackEvent } from "@/lib/track";
 import { useAuth } from "@/lib/AuthContext";
 import Footer from "@/components/Footer";
 import { useThemePreference } from "@/lib/theme";
@@ -93,6 +94,7 @@ export default function WishlistPage() {
       .eq("tournament_id", tournamentId);
 
     if (!error) {
+      trackEvent("wishlist_tournament_removed");
       setTournaments(tournaments.filter(t => t.id !== tournamentId));
     }
   }

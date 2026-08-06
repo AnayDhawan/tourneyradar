@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { trackEvent } from "@/lib/track";
 import { useThemePreference } from "@/lib/theme";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
 import SiteNav from "@/components/SiteNav";
@@ -62,6 +63,10 @@ export default function PlayerRegisterPage() {
 
       if (profileError) throw profileError;
 
+      trackEvent("player_registration_completed", {
+        has_fide_id: Boolean(formData.fide_id),
+        has_rating: Boolean(formData.rating),
+      });
       setSuccess(true);
       setTimeout(() => {
         router.push("/player/dashboard");

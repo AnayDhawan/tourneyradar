@@ -278,6 +278,11 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
     }
   };
 
+  const handleTournamentDetailOpen = (source: "map" | "table") => {
+    markEngaged();
+    trackEvent("tournament_detail_viewed", { source });
+  };
+
   return (
     <>
       {/* Mobile Menu Overlay */}
@@ -394,6 +399,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                             </div>
                             <a
                               href={`/tournaments/${t.id}`}
+                              onClick={() => handleTournamentDetailOpen("map")}
                               style={{
                                 display: "inline-block",
                                 background: "#3b82f6",
@@ -624,7 +630,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                               href={`/tournaments/${t.id}`}
                               className="btn btn-primary"
                               style={{ padding: "0.5rem 0.9rem", borderRadius: 10, fontSize: 14 }}
-                              onClick={markEngaged}
+                              onClick={() => handleTournamentDetailOpen("table")}
                             >
                               View Details
                             </Link>
