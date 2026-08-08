@@ -28,6 +28,9 @@ Chess tournaments are scattered across Chess-Results.com, federation websites, a
 ---
 
 ## Feature Highlights
+<p align="center">
+  <img src="./docs/media/demo.gif" alt="TourneyRadar Demo" width="900" />
+</p>
 
 | | |
 |---|---|
