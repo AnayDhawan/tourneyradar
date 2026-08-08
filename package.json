@@ -12,7 +12,8 @@
     "scrape": "npx tsx --env-file=.env.local scripts/scrape.ts",
     "scrape:ci": "npx tsx scripts/scrape.ts",
     "scrape:region": "npx tsx scripts/scrape.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "demo:gif": "node scripts/record-demo.mjs"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.12",
