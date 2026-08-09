@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        region: [europe-west, europe-east, americas, india, asia-oceania, africa-me]
+        region: [europe-west, europe-east, americas, india, east-asia, southeast-asia, south-asia, middle-east-central-asia, oceania, africa-me]
 
     steps:
       - uses: actions/checkout@v4
@@ -75,7 +75,7 @@ jobs:
         run: |
           node -e "
             const fs = require('fs');
-            const regions = ['europe-west', 'europe-east', 'americas', 'india', 'asia-oceania', 'africa-me'];
+            const regions = ['europe-west', 'europe-east', 'americas', 'india', 'east-asia', 'southeast-asia', 'south-asia', 'middle-east-central-asia', 'oceania', 'africa-me'];
             let all = [];
             regions.forEach(r => {
               const file = 'artifacts/tournaments-' + r + '/tournaments-' + r + '.json';

@@ -402,13 +402,14 @@ const REGION_MAP: Record<string, string[]> = {
     'TRI', 'JAM', 'BAR', 'GUY', 'SUR', 'HAI', 'NCA', 'ESA', 'HON', 'GUA',
   ],
   india: ['IND'],
-  'asia-oceania': [
-    'CHN', 'AUS',
-    'JPN', 'KOR', 'PHI', 'INA', 'VIE', 'MAS', 'SGP',
-    'THA', 'MYA', 'BAN', 'SRI', 'PAK', 'IRI', 'IRQ', 'UAE', 'KSA', 'QAT', 'KUW', 'BRN', 'JOR', 'LBN',
-    'SYR', 'UZB', 'KAZ', 'MGL', 'NEP', 'AFG', 'TKM', 'KGZ', 'TJK', 'MDV', 'BRU', 'CAM', 'LAO',
-    'YEM', 'OMA', 'PLE', 'NZL', 'FIJ',
+  'east-asia': ['CHN', 'JPN', 'KOR', 'MGL'],
+  'southeast-asia': ['PHI', 'INA', 'VIE', 'MAS', 'SGP', 'THA', 'MYA', 'BRU', 'CAM', 'LAO'],
+  'south-asia': ['BAN', 'SRI', 'PAK', 'AFG', 'NEP', 'MDV'],
+  'middle-east-central-asia': [
+    'IRI', 'IRQ', 'UAE', 'KSA', 'QAT', 'KUW', 'BRN', 'JOR', 'LBN', 'SYR',
+    'UZB', 'KAZ', 'TKM', 'KGZ', 'TJK', 'YEM', 'OMA', 'PLE',
   ],
+  oceania: ['AUS', 'NZL', 'FIJ'],
   'africa-me': [
     'ISR',
     'RSA', 'EGY', 'MAR', 'TUN', 'ALG', 'NGR', 'KEN', 'UGA', 'ZIM', 'ZAM', 'BOT', 'NAM', 'GHA', 'CIV',
