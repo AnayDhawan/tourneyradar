@@ -29,7 +29,7 @@
     "posthog-js": "^1.413.2",
     "puppeteer": "^25.2.1",
     "react": "19.2.8",
-    "react-dom": "19.2.7",
+    "react-dom": "19.2.8",
     "react-leaflet": "^5.0.0",
     "react-leaflet-cluster": "^4.1.3",
     "recharts": "^3.9.0"
