@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import BaseLayout from '../../../components/BaseLayout';
-import { generateCountryMetadata, generateBreadcrumbJsonLd, getCountryName, COUNTRY_NAMES } from '../../lib/metadata';
+import { generateCountryMetadata, generateBreadcrumbJsonLd, generateEventListJsonLd, getCountryName, COUNTRY_NAMES } from '../../lib/metadata';
 import { supabase } from '@/lib/supabase';
 
 type Props = {
@@ -73,6 +73,7 @@ export default async function CountryPage({ params }: Props) {
     { name: 'Countries', url: 'https://www.tourneyradar.com/tournaments' },
     { name: countryName, url: `https://www.tourneyradar.com/country/${code}` },
   ]);
+  const eventListJsonLd = generateEventListJsonLd(tournaments);
 
   return (
     <>
@@ -80,6 +81,12 @@ export default async function CountryPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+      {tournaments.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(eventListJsonLd) }}
+        />
+      )}
       <BaseLayout
         showHero
         heroTitle={<>Chess Tournaments in <span className="highlight">{countryName}</span></>}

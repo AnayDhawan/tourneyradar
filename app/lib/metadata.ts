@@ -19,6 +19,8 @@ export interface TournamentMetadata {
   venue_address?: string;
   description?: string;
   source_url?: string;
+  lat?: number | null;
+  lng?: number | null;
 }
 
 export function generateTournamentMetadata(tournament: TournamentMetadata): Metadata {
@@ -145,7 +147,8 @@ export function generateCityMetadata(city: string, countryName: string, tourname
 
 export function generateTournamentJsonLd(tournament: TournamentMetadata) {
   const location = [tournament.city, tournament.state, tournament.country].filter(Boolean).join(', ');
-  
+  const hasCoords = Number.isFinite(tournament.lat) && Number.isFinite(tournament.lng);
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Event',
@@ -164,6 +167,17 @@ export function generateTournamentJsonLd(tournament: TournamentMetadata) {
         addressRegion: tournament.state,
         addressCountry: tournament.country_code,
       },
+      // Omitted entirely (not emitted as null) when the tournament has no
+      // geocoded coordinates, rather than claiming a location we don't have.
+      ...(hasCoords
+        ? {
+            geo: {
+              '@type': 'GeoCoordinates',
+              latitude: tournament.lat,
+              longitude: tournament.lng,
+            },
+          }
+        : {}),
     },
     organizer: tournament.organizer_name
       ? {
@@ -178,6 +192,36 @@ export function generateTournamentJsonLd(tournament: TournamentMetadata) {
       url: tournament.source_url || `${BASE_URL}/tournaments/${tournament.id}`,
       availability: 'https://schema.org/InStock',
     },
+  };
+}
+
+export interface EventListItem {
+  id: string;
+  name: string;
+  date: string;
+  end_date?: string;
+}
+
+/**
+ * Lighter-weight structured data for a listing page (e.g. /country/[code]):
+ * an ItemList of minimal Event stubs rather than a fully modeled Event block
+ * per tournament, which belongs on the tournament's own detail page.
+ */
+export function generateEventListJsonLd(tournaments: EventListItem[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: tournaments.map((tournament, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Event',
+        name: tournament.name,
+        startDate: tournament.date,
+        endDate: tournament.end_date || tournament.date,
+        url: `${BASE_URL}/tournaments/${tournament.id}`,
+      },
+    })),
   };
 }
 
