@@ -12,6 +12,7 @@
 <a href="https://github.com/AnayDhawan/tourneyradar/actions/workflows/ci.yml"><img src="https://github.com/AnayDhawan/tourneyradar/actions/workflows/ci.yml/badge.svg" alt="CI" height="28"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="License: Apache 2.0" height="28"></a>
 <a href="https://github.com/AnayDhawan/tourneyradar/stargazers"><img src="https://img.shields.io/github/stars/AnayDhawan/tourneyradar?style=social" alt="Stars" height="28"></a>
+<a href="https://www.tourneyradar.com/status"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fwww.tourneyradar.com%2Fapi%2Fscraper-last-success" alt="Last scrape" height="28"></a>
 
 **[tourneyradar.com](https://www.tourneyradar.com)**
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { trackEvent } from "@/lib/track";
 import { useThemePreference } from "@/lib/theme";
+import DataFreshness from "./DataFreshness";
 
 export default function Footer() {
   const { theme, setTheme } = useThemePreference();
@@ -215,6 +216,7 @@ export default function Footer() {
         <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", margin: 0 }}>
           © 2026 TourneyRadar. All rights reserved.
         </p>
+        <DataFreshness />
       </div>
     </footer>
   );
