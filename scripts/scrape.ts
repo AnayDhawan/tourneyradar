@@ -50,6 +50,8 @@ interface ScrapedTournament {
   external_link: string | null;
   lat: number | null;
   lng: number | null;
+  min_rating: number | null;
+  max_rating: number | null;
 }
 
 // ========== GEOCODING ==========
@@ -171,6 +173,45 @@ function detectFideRated(name: string): boolean {
   // "ELO" as a standalone word (not inside another word)
   if (/\belo\b/.test(n)) return true;
   return false;
+}
+
+// ========== RATING RESTRICTION DETECTION ==========
+// Parses rating restrictions out of tournament names, e.g. "Open U1600",
+// "Under 1600", "1400-1800", "Elo < 1600". Returns { min_rating, max_rating }
+// when parseable, 'unparseable' when restriction-like text is present but
+// unrecognised (the caller logs it so it is not silently dropped), or null
+// when no restriction is stated.
+function parseRatingRestriction(
+  text: string
+): { min_rating: number | null; max_rating: number | null } | 'unparseable' | null {
+  const t = (text || '').trim();
+  if (!t) return null;
+
+  // Range: "1400-1800", "1400 – 1800", "1400 to 1800"
+  const range = t.match(/(\d{3,4})\s*(?:-|–|—|to)\s*(\d{3,4})/i);
+  if (range) {
+    return {
+      min_rating: parseInt(range[1], 10),
+      max_rating: parseInt(range[2], 10),
+    };
+  }
+
+  // Upper bound: "U1600", "U-1600", "Under 1600", "Below 1600", "Elo < 1600", "<1600"
+  const upper = t.match(/(?:^|[^a-z])(?:u\s*-?\s*|under\s*|below\s*|(?:elo\s*)?[<]\s*)(\d{3,4})\b/i);
+  if (upper) return { min_rating: null, max_rating: parseInt(upper[1], 10) };
+
+  // Lower bound: "Over 1800", ">1800", "1800+"
+  const lower = t.match(/(?:^|[^a-z])(?:over\s*|(?:elo\s*)?[>]\s*)(\d{3,4})\b|(\d{3,4})\s*\+/i);
+  if (lower) return { min_rating: parseInt(lower[1] || lower[2], 10), max_rating: null };
+
+  // Restriction-like text present but unrecognised — surface it instead of
+  // silently dropping it. Keyword must sit near a 3-4 digit number so plain
+  // names like "FIDE Rated 2025" are not mistaken for restrictions.
+  if (/\b(?:u\s*-?\s*\d|under\b|below\b|over\b|elo\b|rating\s*limit|[<>])[^0-9]{0,12}\d{3,4}/i.test(t)) {
+    return 'unparseable';
+  }
+
+  return null;
 }
 
 // ========== COUNTRY CODES ==========
@@ -296,6 +337,16 @@ async function scrapeTournament(browser: Browser, url: string): Promise<ScrapedT
     const idMatch = url.match(/tnr(\d+)/);
     if (!idMatch) return null;
 
+    const rating = parseRatingRestriction(data.name);
+    if (rating === 'unparseable') {
+      await logScraperFailure(
+        `ratingRestriction:${url}`,
+        `Unrecognised rating restriction in tournament name: "${data.name}"`
+      );
+    }
+    const min_rating = rating === 'unparseable' || rating === null ? null : rating.min_rating;
+    const max_rating = rating === 'unparseable' || rating === null ? null : rating.max_rating;
+
     const countryCode = getCountryCode(data.federation);
     const country = getCountryName(data.federation);
     let city = data.location || country;
@@ -315,7 +366,9 @@ async function scrapeTournament(browser: Browser, url: string): Promise<ScrapedT
       source_url: url.split('&turdet')[0],
       external_link: data.externalLink || null,
       lat: null,
-      lng: null
+      lng: null,
+      min_rating,
+      max_rating
     };
   } catch (err) {
     await logScraperFailure(`scrapeTournament:${url}`, errorMessage(err));
@@ -444,6 +497,8 @@ async function pushTournaments(tournaments: ScrapedTournament[]): Promise<number
       category: detectCategory(t.name),
       format: 'Swiss',
       fide_rated: detectFideRated(t.name),
+      min_rating: t.min_rating,
+      max_rating: t.max_rating,
       scraped_at: new Date().toISOString()
     }, { onConflict: 'id' });
     if (!error) {

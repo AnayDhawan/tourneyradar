@@ -48,6 +48,8 @@ export type Tournament = {
   pdf: string
   prize_pool: string
   fide_rated: boolean
+  min_rating?: number | null
+  max_rating?: number | null
   description: string
   venue_name: string
   venue_address: string
