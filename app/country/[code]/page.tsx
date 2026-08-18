@@ -94,6 +94,7 @@ export default async function CountryPage({ params }: Props) {
       >
         <section className="tournament-section">
           <div className="section-container">
+            <SubscribeCard countryCode={countryCode} />
             {tournaments.length === 0 ? (
               <div className="loading-message">
                 <p>No upcoming tournaments found in {countryName}.</p>
@@ -147,5 +148,44 @@ export default async function CountryPage({ params }: Props) {
         </section>
       </BaseLayout>
     </>
+  );
+}
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.tourneyradar.com';
+
+function SubscribeCard({ countryCode }: { countryCode: string }) {
+  const icsUrl = `${SITE_URL}/api/calendar/${countryCode.toLowerCase()}.ics`;
+  const googleUrl = `https://calendar.google.com/calendar/render?cid=webcal://${SITE_URL.replace(/^https?:\/\//, '')}/api/calendar/${countryCode.toLowerCase()}.ics`;
+
+  return (
+    <div className="card" style={{ marginBottom: '2rem', padding: '1.25rem 1.5rem' }}>
+      <h3 className="font-display" style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+        Subscribe to this calendar
+      </h3>
+      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem', marginBottom: '1rem' }}>
+        Add upcoming {getCountryName(countryCode)} tournaments to your own calendar and get them automatically as new events are published.
+      </p>
+      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <a
+          href={googleUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn btn-primary"
+          style={{ textDecoration: 'none' }}
+        >
+          Google Calendar
+        </a>
+        <a
+          href={icsUrl}
+          className="btn"
+          style={{ background: 'var(--surface-elevated)', textDecoration: 'none' }}
+        >
+          Apple Calendar / iCal
+        </a>
+      </div>
+      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem', marginTop: '0.75rem' }}>
+        Apple Calendar: open the iCal link above, or copy the URL and use File → New Calendar Subscription. Updates automatically.
+      </p>
+    </div>
   );
 }
