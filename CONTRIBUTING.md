@@ -25,7 +25,16 @@ The biggest way to contribute is adding a new tournament data source.
 Chess-Results is the current only source, but FIDE, national federation
 websites, and Lichess broadcast data are all viable additions.
 
-The scraper lives in `scripts/scrape.ts`. To add a new source:
+**Propose it first.** Open a [Discussion](https://github.com/AnayDhawan/tourneyradar/discussions)
+or file a [New scraper source](./.github/ISSUE_TEMPLATE/new_scraper.md) issue before
+writing the scraper, so feasibility and coverage get a look before you spend time on it.
+
+See the README's [Contributing a data source](./README.md#contributing-a-data-source)
+section for a worked example covering both extension points below.
+
+The scraper lives in `scripts/scrape.ts` (federation code list + region mapping).
+New federations usually also need an entry in `lib/countryMap.ts` (country name to
+ISO code mapping) if the country isn't already covered. To add a new source:
 
 **1. Create `scripts/scrape-<source>.ts`**
 

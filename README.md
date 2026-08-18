@@ -207,6 +207,36 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 Good first issues: add a new data source, add a missing country, improve the map UI.
 
+### Contributing a data source
+
+The single highest-value contribution here: it puts a whole country's tournaments on the
+map. Start from the [New scraper source](./.github/ISSUE_TEMPLATE/new_scraper.md) issue
+template to propose one before writing code.
+
+Two extension points:
+
+| File | What it does |
+|------|--------------|
+| [`scripts/scrape.ts`](./scripts/scrape.ts) | The federation code list (`feds`, ~line 503) and the `REGION_MAP` used to scope a scrape run to one region (e.g. `--region south-asia`) |
+| [`lib/countryMap.ts`](./lib/countryMap.ts) | Bidirectional country name ↔ ISO 3166-1 alpha-2 mapping (`NAME_TO_CODE` / `CODE_TO_NAME`), extend this whenever a new federation covers a country that isn't mapped yet |
+
+**Worked example: adding Bhutan.**
+
+1. `lib/countryMap.ts`: add `'bhutan': 'BT'` to `NAME_TO_CODE` and `BT: 'Bhutan'` to
+   `CODE_TO_NAME`.
+2. `scripts/scrape.ts`: add Chess-Results' 3-letter federation code (e.g. `'BHU'`) to the
+   `feds` array, and to the relevant entry in `REGION_MAP` (Bhutan would go under
+   `south-asia`, alongside `BAN`, `SRI`, `PAK`).
+3. Run it locally against your own Supabase project:
+   `npx tsx --env-file=.env.local scripts/scrape.ts --region south-asia`, and confirm
+   tournaments upsert with `country_code: 'BT'`.
+4. Open a PR with one example tournament URL that scraped successfully, per
+   [CONTRIBUTING.md](./CONTRIBUTING.md#adding-a-new-data-source).
+
+For a source other than Chess-Results (FIDE, a national federation site, Lichess
+broadcasts), see the full walkthrough in
+[CONTRIBUTING.md](./CONTRIBUTING.md#adding-a-new-data-source).
+
 ---
 
 ## Contributors
