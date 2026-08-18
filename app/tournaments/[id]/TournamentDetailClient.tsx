@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import BaseLayout from "@/components/BaseLayout";
+import SaveButton from "@/components/SaveButton";
 import { downloadTournamentIcs } from "@/lib/ics";
 
 interface Tournament {
@@ -97,6 +98,8 @@ export default function TournamentDetailClient({ tournament }: Props) {
           </div>
 
           <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+            <SaveButton tournamentId={tournament.id} showLabel />
+
             {tournament.source_url && (
               <a href={tournament.source_url} target="_blank" rel="noopener noreferrer"
                 className="btn btn-primary" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>

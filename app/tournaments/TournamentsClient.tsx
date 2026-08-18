@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import BaseLayout from "@/components/BaseLayout";
+import SaveButton from "@/components/SaveButton";
 import { getCountdown, isNewTournament } from "@/lib/countdown";
 import { trackEvent } from "@/lib/track";
 
@@ -140,7 +141,8 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 350px), 1fr))", gap: "1.5rem" }}>
               {initialTournaments.map((tournament: Tournament) => (
-                <div key={tournament.id} className="card" style={{ display: "flex", flexDirection: "column" }}>
+                <div key={tournament.id} className="card" style={{ display: "flex", flexDirection: "column", position: "relative" }}>
+                  <SaveButton tournamentId={tournament.id} style={{ position: "absolute", top: "1.25rem", right: "1.25rem" }} />
                   <div style={{ marginBottom: "1rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.75rem", flexWrap: "wrap", alignItems: "center" }}>
                       {tournament.created_at && isNewTournament(tournament.created_at) && (

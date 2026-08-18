@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "@/lib/AuthContext";
 import Footer from "@/components/Footer";
+import SaveButton from "@/components/SaveButton";
 import { trackEvent } from "@/lib/track";
 import { useThemePreference } from "@/lib/theme";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
@@ -620,14 +621,17 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                             <span className="badge">{t.category}</span>
                           </td>
                           <td>
-                            <Link
-                              href={`/tournaments/${t.id}`}
-                              className="btn btn-primary"
-                              style={{ padding: "0.5rem 0.9rem", borderRadius: 10, fontSize: 14 }}
-                              onClick={markEngaged}
-                            >
-                              View Details
-                            </Link>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                              <Link
+                                href={`/tournaments/${t.id}`}
+                                className="btn btn-primary"
+                                style={{ padding: "0.5rem 0.9rem", borderRadius: 10, fontSize: 14 }}
+                                onClick={markEngaged}
+                              >
+                                View Details
+                              </Link>
+                              <SaveButton tournamentId={t.id} style={{ width: "2.25rem", height: "2.25rem" }} />
+                            </div>
                           </td>
                         </tr>
                       ))}
