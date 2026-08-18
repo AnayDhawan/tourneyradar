@@ -325,8 +325,8 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
 
   const dashboard = getDashboardLink();
 
-  // Tell StarPrompt the user got value (used a filter / opened a tournament),
-  // so it can fire the star nudge at a value moment instead of waiting on time.
+  // Tell FeedbackPrompt the user got value (used a filter / opened a tournament),
+  // so it can fire the feedback nudge at a value moment instead of waiting on time.
   const markEngaged = () => {
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("tr:engaged"));

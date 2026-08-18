@@ -6,7 +6,7 @@ import { GoogleAnalytics } from '@next/third-parties/google';
 import { QueryProvider } from "./providers";
 import { Analytics } from '@vercel/analytics/react';
 import { inter, poppins } from "./fonts";
-import StarPrompt from "@/components/StarPrompt";
+import FeedbackPrompt from "@/components/FeedbackPrompt";
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.tourneyradar.com'),
@@ -132,10 +132,14 @@ export default function RootLayout({
       <body>
         <QueryProvider>
           <AuthProvider>
-            <ToastProvider>{children}</ToastProvider>
+            <ToastProvider>
+              {children}
+              {/* Needs to live inside the providers: useAuth resolves player_id,
+                  useToast reports submit results. */}
+              <FeedbackPrompt />
+            </ToastProvider>
           </AuthProvider>
         </QueryProvider>
-        <StarPrompt />
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
         )}

@@ -33,7 +33,7 @@ async function main() {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 
-  // The StarPrompt nudge fires instantly on any tracked interaction (search,
+  // The FeedbackPrompt nudge fires instantly on any tracked interaction (search,
   // filter engagement) in a fresh (no localStorage) browser context. Dismiss
   // it before every screenshot so it doesn't cover the frame.
   const dismissStarPrompt = () =>
