@@ -31,6 +31,22 @@ async function logScraperFailure(source: string, reason: string): Promise<void> 
   }
 }
 
+// Records a completed run so the status page can show per-region freshness.
+// The region and row count ride in `message` because `scraper_logs` has no
+// dedicated columns for them (schema is dashboard-created, see supabase/README).
+async function logScraperSuccess(region: string, rowsWritten: number): Promise<void> {
+  try {
+    await supabase.from('scraper_logs').insert({
+      started_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(),
+      status: 'success',
+      message: `[region:${region}] success: ${rowsWritten} tournaments`,
+    });
+  } catch {
+    // Logging must never crash the scraper itself.
+  }
+}
+
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
@@ -466,6 +482,7 @@ async function main() {
     console.log(`\n  Pushing ${data.length} merged tournaments to Supabase...`);
     const saved = await pushTournaments(data);
     console.log(`  ✓ Saved ${saved}/${data.length}\n`);
+    await logScraperSuccess('merged', saved);
     return;
   }
 
@@ -632,6 +649,8 @@ async function main() {
     console.log(`  DONE: ${saved} new tournaments added`);
     console.log(`  With map coordinates: ${withCoords}`);
     console.log('═'.repeat(60) + '\n');
+
+    await logScraperSuccess(regionArg ?? 'all', saved);
 
   } finally {
     await browser.close();
