@@ -27,6 +27,18 @@ Chess tournaments are scattered across Chess-Results.com, federation websites, a
 
 ---
 
+## Project Status
+
+**Feature-complete, actively maintained, not actively developed.** TourneyRadar does what it set out to do: put tournaments on a map. It is not chasing a roadmap.
+
+- **Shipped:** currently at `v2.0.0` (tagged 2026-05-12; see [CHANGELOG.md](./CHANGELOG.md)). Core flows (map, list, tournament detail, public API, player wishlist) are done and stable.
+- **Maintained:** the scraper cron and dependency/security fixes land in most weeks (see recent commit history) — this is a maintenance cadence, not a feature-development one.
+- **Responsive:** issues and PRs are read and triaged, typically within a few days.
+- **Not actively planned:** no new major features are queued. Good first issues (new scrapers, small UI/API additions) are still welcome and get reviewed.
+- **Known gaps:** if a specific region's scraper is failing, it'll be reflected in `scraper_logs` and the [Unreleased] section of the changelog before it's claimed as fixed here — this file does not promise every region is always fresh.
+
+---
+
 ## Feature Highlights
 <p align="center">
   <img src="./docs/media/demo.gif" alt="TourneyRadar Demo" width="900" />
