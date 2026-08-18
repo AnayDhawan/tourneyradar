@@ -9,12 +9,12 @@ concurrency:
   cancel-in-progress: true
 jobs:
   e2e:
-    # GitHub does not expose repository secrets to Dependabot-triggered runs,
-    # so the Supabase vars below are empty there and the dev server refuses to
-    # boot. Dependency bumps are still gated by lint and typecheck in ci.yml
-    # plus the Vercel preview build, and e2e runs against main once the bump
-    # merges.
-    if: github.actor != 'dependabot[bot]'
+    # GitHub does not expose repository secrets to Dependabot-triggered runs
+    # or to pull_request runs from forks, so the Supabase vars below are empty
+    # there and the dev server refuses to boot. Those PRs are still gated by
+    # lint and typecheck in ci.yml plus the Vercel preview build, and e2e runs
+    # against main once they merge.
+    if: github.actor != 'dependabot[bot]' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
