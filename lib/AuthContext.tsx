@@ -13,6 +13,11 @@ type Player = {
   phone?: string;
   fide_id?: string;
   rating?: number;
+  home_country_code?: string;
+  home_state?: string;
+  notify_frequency?: "off" | "weekly";
+  notify_categories?: string[];
+  min_fide_rated?: boolean;
 };
 
 
