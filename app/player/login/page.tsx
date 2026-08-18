@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import posthog from "posthog-js";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/Toast";
 import { useThemePreference } from "@/lib/theme";
@@ -36,6 +37,7 @@ export default function PlayerLoginPage() {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) throw error;
+      posthog.capture("password_reset_requested");
       showToast('Password reset email sent! Check all email incase the mail is not visible', 'success');
       setShowForgotPassword(false);
       setResetEmail("");
@@ -72,6 +74,7 @@ export default function PlayerLoginPage() {
         throw new Error("No player account found. Please register first.");
       }
 
+      posthog.capture("player_logged_in");
       router.push("/player/wishlist");
     } catch (err: any) {
       setError(err.message || "Login failed");

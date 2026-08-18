@@ -53,7 +53,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        posthog.reset();
         setUser(null);
         setUserType(null);
         setLoading(false);
@@ -69,7 +68,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .maybeSingle();
 
         if (player && !playerError) {
-          posthog.identify(session.user.id, { email: player.email, user_type: "player" });
+          posthog.identify(session.user.id, {
+            email: player.email,
+            name: player.name,
+            user_type: "player",
+          });
           setUser(player as Player);
           setUserType("player");
           setLoading(false);
@@ -88,7 +91,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .maybeSingle();
 
         if (admin && !adminError) {
-          posthog.identify(session.user.id, { email: admin.email, user_type: "admin" });
+          posthog.identify(session.user.id, {
+            email: admin.email,
+            name: admin.name,
+            user_type: "admin",
+          });
           setUser(admin as Admin);
           setUserType("admin");
           setLoading(false);

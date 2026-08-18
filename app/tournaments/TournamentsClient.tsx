@@ -4,6 +4,7 @@ import Link from "next/link";
 import BaseLayout from "@/components/BaseLayout";
 import SaveButton from "@/components/SaveButton";
 import { getCountdown, isNewTournament } from "@/lib/countdown";
+import posthog from "posthog-js";
 import { trackEvent } from "@/lib/track";
 
 interface Tournament {
@@ -50,6 +51,21 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
     }
   };
 
+  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    markEngaged();
+    const searchQuery = new FormData(event.currentTarget).get("q");
+    posthog.capture("tournament_search_submitted", {
+      has_query: typeof searchQuery === "string" && Boolean(searchQuery.trim()),
+    });
+  };
+
+  const handleTournamentDetailOpen = (tournamentId: string) => {
+    markEngaged();
+    posthog.capture("tournament_detail_opened", {
+      tournament_id: tournamentId,
+    });
+  };
+
   const buildHref = (targetPage: number) => {
     const params = new URLSearchParams();
     if (q.trim()) params.set("q", q.trim());
@@ -70,7 +86,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
             <form
               method="get"
               action="/tournaments"
-              onSubmit={markEngaged}
+              onSubmit={handleSearchSubmit}
               style={{ position: "relative", maxWidth: "600px", margin: "0 auto" }}
             >
               <input
@@ -199,7 +215,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
                     </div>
                   </div>
 
-                  <Link href={`/tournaments/${tournament.id}`} className="btn btn-primary" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", textDecoration: "none" }} onClick={markEngaged}>
+                  <Link href={`/tournaments/${tournament.id}`} className="btn btn-primary" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", textDecoration: "none" }} onClick={() => handleTournamentDetailOpen(tournament.id)}>
                     View Details →
                   </Link>
                 </div>

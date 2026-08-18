@@ -4,6 +4,7 @@ import Link from "next/link";
 import BaseLayout from "@/components/BaseLayout";
 import SaveButton from "@/components/SaveButton";
 import { downloadTournamentIcs } from "@/lib/ics";
+import posthog from "posthog-js";
 
 interface Tournament {
   id: string;
@@ -131,13 +132,18 @@ export default function TournamentDetailClient({ tournament }: Props) {
 
             <button
               type="button"
-              onClick={() => downloadTournamentIcs({
-                id: tournament.id,
-                name: tournament.name,
-                date: tournament.date,
-                end_date: tournament.end_date,
-                location: locationDisplay,
-              })}
+              onClick={() => {
+                downloadTournamentIcs({
+                  id: tournament.id,
+                  name: tournament.name,
+                  date: tournament.date,
+                  end_date: tournament.end_date,
+                  location: locationDisplay,
+                });
+                posthog.capture("calendar_downloaded", {
+                  tournament_id: tournament.id,
+                });
+              }}
               className="btn"
               style={{ background: "var(--surface-elevated)", border: "2px solid var(--border)", color: "var(--text-primary)" }}
             >

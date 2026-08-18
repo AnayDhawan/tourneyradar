@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import posthog from "posthog-js";
 import { supabase } from "@/lib/supabase";
 import { useThemePreference } from "@/lib/theme";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
@@ -62,6 +63,7 @@ export default function PlayerRegisterPage() {
 
       if (profileError) throw profileError;
 
+      posthog.capture("player_registered");
       setSuccess(true);
       setTimeout(() => {
         router.push("/player/dashboard");

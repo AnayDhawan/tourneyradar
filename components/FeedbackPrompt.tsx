@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import posthog from "posthog-js";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/AuthContext";
 import { useToast } from "@/components/Toast";
@@ -43,7 +44,7 @@ export default function FeedbackPrompt() {
         visitsRef.current = parseInt(localStorage.getItem("tr_visits") || "1", 10);
       }
     } catch {
-      /* storage unavailable — treat as first visit */
+      /* storage unavailable, treat as first visit */
     }
   }, []);
 
@@ -130,6 +131,10 @@ export default function FeedbackPrompt() {
       });
       if (error) throw error;
       trackEvent("feedback_submitted", { rating, page: pathname });
+      posthog.capture("feedback_submitted", {
+        rating,
+        page: pathname,
+      });
       try {
         localStorage.setItem("tr_feedback_ok", "1");
       } catch {
@@ -209,7 +214,7 @@ export default function FeedbackPrompt() {
         How&apos;s TourneyRadar working for you?
       </div>
       <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
-        Rate your experience — it takes a second and helps improve the platform.
+        Rate your experience, it takes a second and helps improve the platform.
       </p>
       <div
         role="group"
