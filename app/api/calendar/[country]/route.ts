@@ -13,7 +13,7 @@ export async function GET(
   { params }: { params: Promise<{ country: string }> }
 ) {
   const { country } = await params;
-  const code = country.toUpperCase();
+  const code = country.replace(/\.ics$/i, '').toUpperCase();
 
   if (!/^[A-Z]{2,3}$/.test(code) || !countryCodeToName(code)) {
     return new Response('Unknown country code', { status: 404 });
