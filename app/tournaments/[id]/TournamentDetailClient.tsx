@@ -16,6 +16,8 @@ interface Tournament {
   country_code?: string;
   rounds?: number;
   fide_rated?: boolean;
+  min_rating?: number | null;
+  max_rating?: number | null;
   category?: string;
   format?: string;
   organizer_name?: string;
@@ -55,6 +57,13 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+function ratingDisplay(min: number | null | undefined, max: number | null | undefined): string {
+  if (min != null && max != null) return `${min}–${max}`;
+  if (max != null) return `U${max}`;
+  if (min != null) return `Over ${min}`;
+  return "";
+}
+
 export default function TournamentDetailClient({ tournament }: Props) {
   if (!tournament) {
     return (
@@ -92,6 +101,7 @@ export default function TournamentDetailClient({ tournament }: Props) {
                 <InfoRow label="Format" value={tournament.format || ""} />
                 <InfoRow label="Category" value={tournament.category || ""} />
                 <InfoRow label="FIDE Rated" value={tournament.fide_rated ? "Yes" : "No"} />
+                <InfoRow label="Rating" value={ratingDisplay(tournament.min_rating, tournament.max_rating)} />
                 <InfoRow label="Source" value={tournament.source || ""} />
               </tbody>
             </table>

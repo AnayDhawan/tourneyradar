@@ -19,6 +19,8 @@ export interface TournamentListItem {
   country_code?: string;
   category?: string;
   fide_rated?: boolean;
+  min_rating?: number | null;
+  max_rating?: number | null;
   lat?: number;
   lng?: number;
   source_url?: string;
@@ -52,6 +54,8 @@ const TOURNAMENT_SELECT_FIELDS = `
   country_code,
   category,
   fide_rated,
+  min_rating,
+  max_rating,
   lat,
   lng,
   source_url,
