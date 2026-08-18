@@ -43,7 +43,7 @@ function formatDate(dateStr: string): string {
 }
 
 export default function TournamentsClient({ initialTournaments, page, totalPages, total, q }: Props) {
-  // Signal StarPrompt that the user got value (searched / opened a tournament).
+  // Signal FeedbackPrompt that the user got value (searched / opened a tournament).
   const markEngaged = () => {
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("tr:engaged"));

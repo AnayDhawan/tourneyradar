@@ -2,21 +2,29 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/lib/AuthContext";
+import { useToast } from "@/components/Toast";
 import { trackEvent } from "@/lib/track";
 
-const REPO_URL = "https://github.com/AnayDhawan/tourneyradar";
 const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000; // re-ask 7 days after "maybe later"
 const FIRST_VISIT_DELAY = 20000; // first-time visitor: give them time to get value
 const RETURN_VISIT_DELAY = 8000; // returning visitor (warm lead): ask sooner
 const SCROLL_THRESHOLD = 0.5; // fire once half the page has been scrolled
+const MAX_RATING = 5;
 
-// Pages where a star nudge would be noise (auth flows, legal text).
+// Pages where a feedback nudge would be noise (auth flows, legal text).
 const EXCLUDED_PREFIXES = ["/player", "/legal"];
 
-export default function StarPrompt() {
+export default function FeedbackPrompt() {
   const pathname = usePathname();
+  const { user, userType } = useAuth();
+  const { showToast } = useToast();
   const [show, setShow] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const firedRef = useRef(false);
   const visitsRef = useRef(1);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
@@ -40,6 +48,8 @@ export default function StarPrompt() {
   }, []);
 
   // Trigger logic: time + scroll + engagement, tiered by visit count.
+  // Same mechanics as the old star prompt, fresh keys so users who dismissed
+  // the star nudge still get asked once for feedback.
   useEffect(() => {
     if (firedRef.current) return;
     if (EXCLUDED_PREFIXES.some((p) => pathname?.startsWith(p))) return;
@@ -48,10 +58,10 @@ export default function StarPrompt() {
     let snoozed = false;
     let shownThisSession = false;
     try {
-      dismissed = localStorage.getItem("tr_star_ok") === "1";
-      const snoozeTs = parseInt(localStorage.getItem("tr_star_snooze") || "0", 10);
+      dismissed = localStorage.getItem("tr_feedback_ok") === "1";
+      const snoozeTs = parseInt(localStorage.getItem("tr_feedback_snooze") || "0", 10);
       snoozed = snoozeTs > 0 && Date.now() - snoozeTs < SNOOZE_MS;
-      shownThisSession = sessionStorage.getItem("tr_star_shown") === "1";
+      shownThisSession = sessionStorage.getItem("tr_feedback_shown") === "1";
     } catch {
       /* storage unavailable */
     }
@@ -69,11 +79,11 @@ export default function StarPrompt() {
       if (firedRef.current) return;
       firedRef.current = true;
       try {
-        sessionStorage.setItem("tr_star_shown", "1");
+        sessionStorage.setItem("tr_feedback_shown", "1");
       } catch {
         /* ignore */
       }
-      trackEvent("star_popup_shown", { page: pathname, visits: visitsRef.current });
+      trackEvent("feedback_popup_shown", { page: pathname, visits: visitsRef.current });
       setShow(true);
       cleanup();
     };
@@ -107,20 +117,38 @@ export default function StarPrompt() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [show]);
 
-  const handleStar = useCallback(() => {
-    trackEvent("star_popup_star_clicked");
+  const handleSubmit = useCallback(async () => {
+    if (rating < 1 || submitting) return;
+    setSubmitting(true);
     try {
-      localStorage.setItem("tr_star_ok", "1");
-    } catch {
-      /* ignore */
+      const playerId = userType === "player" ? (user?.id ?? null) : null;
+      const { error } = await supabase.from("feedback").insert({
+        player_id: playerId,
+        rating,
+        comment: comment.trim() || null,
+        page_url: pathname ?? "/",
+      });
+      if (error) throw error;
+      trackEvent("feedback_submitted", { rating, page: pathname });
+      try {
+        localStorage.setItem("tr_feedback_ok", "1");
+      } catch {
+        /* ignore */
+      }
+      setShow(false);
+      showToast("Thanks for your feedback!");
+    } catch (err) {
+      console.error("Feedback submit failed:", err);
+      showToast("Couldn't send feedback. Please try again.", "error");
+    } finally {
+      setSubmitting(false);
     }
-    setShow(false);
-  }, []);
+  }, [rating, submitting, comment, pathname, user, userType, showToast]);
 
   const handleLater = useCallback(() => {
-    trackEvent("star_popup_maybe_later");
+    trackEvent("feedback_maybe_later");
     try {
-      localStorage.setItem("tr_star_snooze", String(Date.now()));
+      localStorage.setItem("tr_feedback_snooze", String(Date.now()));
     } catch {
       /* ignore */
     }
@@ -128,21 +156,9 @@ export default function StarPrompt() {
   }, []);
 
   const handleNever = useCallback(() => {
-    trackEvent("star_popup_never_again");
+    trackEvent("feedback_never_again");
     try {
-      localStorage.setItem("tr_star_ok", "1");
-    } catch {
-      /* ignore */
-    }
-    setShow(false);
-  }, []);
-
-  // Non-devs bail at GitHub's login wall; route them to the how-to page instead
-  // of losing them. Snooze (not dismiss) so they still get asked again later.
-  const handleHelp = useCallback(() => {
-    trackEvent("star_popup_help_link");
-    try {
-      localStorage.setItem("tr_star_snooze", String(Date.now()));
+      localStorage.setItem("tr_feedback_ok", "1");
     } catch {
       /* ignore */
     }
@@ -151,10 +167,12 @@ export default function StarPrompt() {
 
   if (!show) return null;
 
+  const displayed = hover || rating;
+
   return (
     <div
       role="dialog"
-      aria-label="Star TourneyRadar on GitHub"
+      aria-label="Rate TourneyRadar"
       style={{
         position: "fixed",
         bottom: "1.5rem",
@@ -188,22 +206,67 @@ export default function StarPrompt() {
         ×
       </button>
       <div style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>
-        Enjoying TourneyRadar?
+        How&apos;s TourneyRadar working for you?
       </div>
-      <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginBottom: "1rem" }}>
-        If this saved you time finding a tournament, a GitHub star helps more players discover it.
+      <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
+        Rate your experience — it takes a second and helps improve the platform.
       </p>
+      <div
+        role="group"
+        aria-label="Rating"
+        style={{ display: "flex", gap: "0.25rem", marginBottom: "0.75rem" }}
+      >
+        {Array.from({ length: MAX_RATING }, (_, i) => i + 1).map((n) => (
+          <button
+            key={n}
+            type="button"
+            aria-label={`Rate ${n} ${n === 1 ? "star" : "stars"}`}
+            aria-pressed={rating === n}
+            onClick={() => setRating(n)}
+            onMouseEnter={() => setHover(n)}
+            onMouseLeave={() => setHover(0)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 28,
+              lineHeight: 1,
+              padding: "0.25rem",
+              color: n <= displayed ? "#f59e0b" : "var(--text-muted)",
+            }}
+          >
+            {n <= displayed ? "★" : "☆"}
+          </button>
+        ))}
+      </div>
+      <textarea
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        placeholder="Anything we should know? (optional)"
+        rows={2}
+        aria-label="Feedback comment"
+        style={{
+          width: "100%",
+          resize: "vertical",
+          padding: "0.5rem",
+          fontSize: "0.8125rem",
+          borderRadius: 8,
+          border: "1px solid var(--border)",
+          background: "var(--surface-elevated)",
+          color: "var(--text-primary)",
+          boxSizing: "border-box",
+          marginBottom: "0.75rem",
+        }}
+      />
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <a
-          href={REPO_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
           className="btn btn-primary"
-          style={{ textAlign: "center", textDecoration: "none", fontSize: "0.875rem" }}
-          onClick={handleStar}
+          style={{ textAlign: "center", fontSize: "0.875rem" }}
+          onClick={handleSubmit}
+          disabled={rating < 1 || submitting}
         >
-          Star on GitHub
-        </a>
+          {submitting ? "Sending…" : "Submit feedback"}
+        </button>
         <button
           className="btn"
           style={{
@@ -229,19 +292,6 @@ export default function StarPrompt() {
         >
           Don&apos;t show again
         </button>
-        <Link
-          href="/support"
-          onClick={handleHelp}
-          style={{
-            color: "var(--text-muted)",
-            fontSize: "0.75rem",
-            textAlign: "center",
-            textDecoration: "underline",
-            marginTop: "0.25rem",
-          }}
-        >
-          New to GitHub? How to star &rarr;
-        </Link>
       </div>
     </div>
   );
