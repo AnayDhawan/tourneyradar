@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import Footer from "@/components/Footer";
 import SaveButton from "@/components/SaveButton";
+import { useToast } from "@/components/Toast";
 import { trackEvent } from "@/lib/track";
 import { useThemePreference } from "@/lib/theme";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
@@ -80,6 +81,48 @@ function normalizeString(v: unknown): string {
   return String(v ?? "").trim();
 }
 
+// Query param keys for shareable filter links. Kept short and separate from
+// the FilterState field names since these end up in a URL someone pastes.
+const FILTER_PARAMS = {
+  search: "q",
+  category: "category",
+  state: "state",
+  fideRated: "fide",
+  startDate: "start",
+  endDate: "end",
+} as const;
+
+function buildFilterQueryString(filters: FilterState): string {
+  const params = new URLSearchParams();
+  if (filters.search.trim()) params.set(FILTER_PARAMS.search, filters.search.trim());
+  if (filters.category !== "All") params.set(FILTER_PARAMS.category, filters.category);
+  if (filters.state !== "All") params.set(FILTER_PARAMS.state, filters.state);
+  if (filters.fideRated !== "all") params.set(FILTER_PARAMS.fideRated, filters.fideRated);
+  if (filters.startDate) params.set(FILTER_PARAMS.startDate, filters.startDate);
+  if (filters.endDate) params.set(FILTER_PARAMS.endDate, filters.endDate);
+  return params.toString();
+}
+
+function parseFiltersFromQuery(search: string): Partial<FilterState> | null {
+  const params = new URLSearchParams(search);
+  const next: Partial<FilterState> = {};
+
+  const q = params.get(FILTER_PARAMS.search);
+  if (q) next.search = q;
+  const category = params.get(FILTER_PARAMS.category);
+  if (category) next.category = category;
+  const state = params.get(FILTER_PARAMS.state);
+  if (state) next.state = state;
+  const fide = params.get(FILTER_PARAMS.fideRated);
+  if (fide === "yes" || fide === "no") next.fideRated = fide;
+  const start = params.get(FILTER_PARAMS.startDate);
+  if (start) next.startDate = start;
+  const end = params.get(FILTER_PARAMS.endDate);
+  if (end) next.endDate = end;
+
+  return Object.keys(next).length > 0 ? next : null;
+}
+
 function isWithinDateRange(dateStr: string, start: string, end: string): boolean {
   const d = new Date(dateStr);
   if (Number.isNaN(d.getTime())) return true;
@@ -144,6 +187,7 @@ function HeroStats({ stats }: { stats: Props["stats"] }) {
 
 export default function HomePageClient({ initialTournaments, stats }: Props) {
   const { user, userType, loading: authLoading } = useAuth();
+  const { showToast } = useToast();
   const [mapView, setMapView] = useState<MapView>("europe");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   useThemePreference();
@@ -163,6 +207,16 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
     document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileMenuOpen]);
+
+  // Pre-fill filters from a shared link's query params on first load, then
+  // scroll to the filtered results so the recipient doesn't land on the hero.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const parsed = parseFiltersFromQuery(window.location.search);
+    if (!parsed) return;
+    setFilters((prev) => ({ ...prev, ...parsed }));
+    document.getElementById("tournaments")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -529,6 +583,44 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                   }
                 >
                   Clear Filters
+                </button>
+              </div>
+
+              <div className="filter-group">
+                <label>&nbsp;</label>
+                <button
+                  type="button"
+                  className="btn"
+                  style={{
+                    width: "100%",
+                    background: "var(--surface-elevated)",
+                    border: "2px solid var(--border)",
+                    color: "var(--text-primary)",
+                  }}
+                  onClick={async () => {
+                    const qs = buildFilterQueryString(filters);
+                    const shareUrl = `${window.location.origin}${window.location.pathname}${qs ? `?${qs}` : ""}#tournaments`;
+                    trackEvent("share_filters", { has_filters: Boolean(qs) });
+
+                    if (navigator.share) {
+                      try {
+                        await navigator.share({ title: "TourneyRadar tournaments", url: shareUrl });
+                        return;
+                      } catch {
+                        // User cancelled the share sheet, or it's unsupported for this
+                        // context. Fall through to clipboard copy either way.
+                      }
+                    }
+
+                    try {
+                      await navigator.clipboard.writeText(shareUrl);
+                      showToast("Link copied, filters included", "success");
+                    } catch {
+                      showToast("Couldn't copy the link, copy it from the address bar instead", "error");
+                    }
+                  }}
+                >
+                  Share Filters
                 </button>
               </div>
             </div>
