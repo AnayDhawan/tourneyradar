@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import posthog from "posthog-js";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/AuthContext";
 import { useToast } from "@/components/Toast";
@@ -131,10 +130,6 @@ export default function FeedbackPrompt() {
       });
       if (error) throw error;
       trackEvent("feedback_submitted", { rating, page: pathname });
-      posthog.capture("feedback_submitted", {
-        rating,
-        page: pathname,
-      });
       try {
         localStorage.setItem("tr_feedback_ok", "1");
       } catch {
