@@ -1,3 +1,24 @@
+-- ⚠️ DO NOT APPLY THIS FILE AS-IS. Superseded in part; see supabase/README.md
+-- "Measured state, 2026-08-22".
+--
+-- This migration was written against an empty `players` table with no policies
+-- on it. Neither is true any more: there are 29 real rows, and RLS was turned
+-- on through the dashboard with policies whose names are not known here. This
+-- file was never applied (`current_player_id()` does not exist on the live
+-- project), so applying it now would:
+--
+--   1. add policies alongside the existing unknown ones. Policies OR together,
+--      so this can only widen access, never narrow it. The comment below about
+--      not touching `player_favorite_tournaments` for exactly this reason now
+--      applies to `players` too.
+--   2. run `revoke all on public.players from anon`, changing grants that
+--      currently work, which risks breaking registration for real users.
+--
+-- Its select/update/delete policies are also redundant: those three are already
+-- blocked, verified 2026-08-22. The part still worth having is the INSERT
+-- policy, because anon insert is currently unrestricted. Landing that means
+-- dropping the existing permissive insert policy by name first.
+
 -- Row Level Security for the players table.
 --
 -- Measured state on 2026-07-29, probed with the public anon key:

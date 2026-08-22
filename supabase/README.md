@@ -38,6 +38,53 @@ Probed with the public anon key against the live project:
 email, phone, `fide_id` and rating, and the moment a real person registers,
 that row is readable by anyone who opens the site's JS bundle.
 
+## Measured state, 2026-08-22
+
+**The 2026-07-29 table above is out of date. Read this one.** `players` now
+holds 29 real rows, and RLS on it *is* enforcing. The protection was applied
+through the dashboard: `20260729120000_players_rls.sql` was never run, and
+`current_player_id()` does not exist on the live project (`PGRST202`).
+
+Re-probed with the public anon key, then confirmed against the service role,
+using a synthetic row created and deleted for the purpose:
+
+| Operation on `players` | Anon result | Actually happened |
+|---|---|---|
+| `select` | `200 []` against 29 rows | nothing, RLS filtered it |
+| `update` | `204` | nothing, row unchanged |
+| `delete` | `204` | nothing, row survived |
+| `insert` | **`201`** | **row really was created** |
+| `insert` with a made-up `auth_user_id` | `23503` | blocked by the FK, not by a policy |
+
+Two things follow.
+
+Reads, updates and deletes are closed, so the disclosure the section above
+warns about is no longer live. Note that `204` on a blocked write is not a
+rejection: PostgREST returns it for "policy filtered every row" and for "your
+filter matched nothing" alike. Neither an anon `204` nor a `42501` tells you
+what happened; only re-reading with the service role does.
+
+Insert is wide open. Anyone holding the anon key, which is everyone, can write
+unlimited arbitrary rows into `players`. Since RLS is enabled, that can only
+mean a permissive INSERT policy exists that allows it. The FK to `auth.users`
+stops a *fabricated* `auth_user_id`, but it would not stop one belonging to a
+real auth user.
+
+**Fixing this needs the existing policy dropped by name, not a stricter policy
+added.** Policies OR together, so a new restrictive INSERT policy alongside the
+current permissive one changes nothing. Get the name first:
+
+```sql
+select policyname, roles, cmd, qual, with_check
+from pg_policies where schemaname = 'public' and tablename = 'players';
+```
+
+The insert policy in `20260729120000_players_rls.sql` is the intended shape and
+already handles the confirm-email case where `auth.uid()` is still null.
+
+Unrelated but worth a look: `players` has a `password_hash` column. Supabase
+Auth keeps credentials in `auth.users`, so it is not obvious what this is for.
+
 ## Applying a migration
 
 Against a branch or staging project **first**. Enabling RLS denies everything
