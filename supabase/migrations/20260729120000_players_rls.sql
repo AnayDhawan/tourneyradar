@@ -18,6 +18,11 @@
 -- blocked, verified 2026-08-22. The part still worth having is the INSERT
 -- policy, because anon insert is currently unrestricted. Landing that means
 -- dropping the existing permissive insert policy by name first.
+--
+-- Update 2026-08-22: that has now been done, in
+-- 20260822120000_players_insert_policy.sql, which drops players_insert_public
+-- and replaces it. Nothing in this file is outstanding any more. Keep it for
+-- the reasoning in the comments; do not run it.
 
 -- Row Level Security for the players table.
 --
