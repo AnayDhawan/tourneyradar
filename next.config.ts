@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
-const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST;
+// Defaulted, not required. This project is EU region (see .env.local and the
+// project token). Leaving it env-only meant one unset variable on the
+// deployment silently 404d the whole /ingest proxy and stopped posthog.init()
+// from ever running in production, with nothing in the UI to show for it.
+const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://eu.i.posthog.com";
 
 // PostHog serves its static assets from a sibling host: eu.i.posthog.com pairs
 // with eu-assets.i.posthog.com. Derive it rather than requiring a second

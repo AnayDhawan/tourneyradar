@@ -1,7 +1,9 @@
 import posthog from "posthog-js";
 
 const projectToken = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
-const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST;
+// Defaulted to the project's EU region so a missing deployment variable
+// cannot silently disable analytics again. Override via env for other regions.
+const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://eu.i.posthog.com";
 
 if (!projectToken || !posthogHost) {
   const missingVariable = !projectToken
