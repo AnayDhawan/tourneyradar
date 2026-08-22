@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST;
-const posthogAssetsHost = process.env.NEXT_PUBLIC_POSTHOG_ASSETS_HOST;
+
+// PostHog serves its static assets from a sibling host: eu.i.posthog.com pairs
+// with eu-assets.i.posthog.com. Derive it rather than requiring a second
+// variable, because the old code ANDed the two together and returned no
+// rewrites at all if either was missing, which silently 404s the entire
+// /ingest proxy.
+const posthogAssetsHost =
+  process.env.NEXT_PUBLIC_POSTHOG_ASSETS_HOST ??
+  posthogHost?.replace(/^(https:\/\/)([a-z0-9]+)\.i\.posthog\.com/, "$1$2-assets.i.posthog.com");
 
 // Umami is proxied for the same reason PostHog already is: a blocked analytics
 // request is indistinguishable from a visitor who never engaged, so the numbers
@@ -28,7 +36,9 @@ const nextConfig: NextConfig = {
       { source: "/relay/api/send", destination: `${umamiGatewayHost}/api/send` },
     ];
 
-    // PostHog stays gated: without a host there is nowhere to proxy to.
+    // PostHog stays gated on the host alone: without one there is nowhere to
+    // proxy to. The assets host is derived above and cannot independently
+    // disable this block.
     if (posthogHost && posthogAssetsHost) {
       rules.push(
         { source: "/ingest/static/:path*", destination: `${posthogAssetsHost}/static/:path*` },

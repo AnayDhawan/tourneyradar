@@ -4,15 +4,22 @@ const projectToken = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
 const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST;
 
 if (!projectToken || !posthogHost) {
-  if (process.env.NODE_ENV === "development") {
-    const missingVariable = !projectToken
-      ? "NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN"
-      : "NEXT_PUBLIC_POSTHOG_HOST";
+  const missingVariable = !projectToken
+    ? "NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN"
+    : "NEXT_PUBLIC_POSTHOG_HOST";
 
-    throw new Error(
-      `${missingVariable} variable required by PostHog is missing or un-configured, this causes events to be silently missed. This error stops appearing once ${missingVariable} is configured`,
-    );
+  const message = `${missingVariable} variable required by PostHog is missing or un-configured, this causes events to be silently missed. This error stops appearing once ${missingVariable} is configured`;
+
+  if (process.env.NODE_ENV === "development") {
+    throw new Error(message);
   }
+
+  // Production used to fall through here in total silence, which is how
+  // NEXT_PUBLIC_POSTHOG_HOST went missing on the deployment without anyone
+  // noticing that posthog.init() had stopped running and every capture() had
+  // become a no-op. Warn instead: still cannot break the page, but it now
+  // leaves a trace in the console.
+  console.warn(`[analytics] ${message}`);
 } else {
   posthog.init(projectToken, {
     api_host: "/ingest",
