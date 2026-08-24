@@ -32,6 +32,9 @@ All notable changes to this project are documented here. Format based on
   replacing the inline corner-popup form; the popup is now a teaser that routes there,
   and the footer gets a permanent Feedback link. Both fire a `feedback_button_click`
   event (Umami + PostHog) tagged by source.
+- In-app `/api-docs` page documenting the public `tourneyradar-api` (`/v1/*`)
+  endpoints, quick-start code samples (JS/curl/Python), and response shapes, linked
+  from nav, mobile drawer, and footer.
 
 ### Fixed
 - `/api/tournaments` `limit` param clamped to `[1, 200]` instead of silently accepting

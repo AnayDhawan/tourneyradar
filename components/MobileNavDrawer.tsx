@@ -74,6 +74,9 @@ export default function MobileNavDrawer({ open, onClose, userType, showThemeTogg
           <Link href="/support" onClick={onClose}>
             Support Us
           </Link>
+          <Link href="/api-docs" onClick={onClose}>
+            API Docs
+          </Link>
           {!loggedIn && (
             <Link href="/player/register" className="mobile-drawer-cta" onClick={onClose}>
               Sign Up

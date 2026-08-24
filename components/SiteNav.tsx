@@ -35,6 +35,7 @@ export default function SiteNav({ onMenuClick }: SiteNavProps) {
           <Link href="/tournaments">Tournaments</Link>
           <Link href="/about">About</Link>
           <Link href="/support">Support Us</Link>
+          <Link href="/api-docs">API Docs</Link>
           <ThemeToggle variant="hero" />
           {loggedIn && (
             <Link href="/player/wishlist" className="nav-account-link" aria-label="My account" title="My account">

@@ -477,6 +477,113 @@
       border-color: var(--border-hover);
     }
 
+    /* Code blocks (API docs) — fixed dark navy regardless of site theme,
+       same convention as most docs sites so code stays legible either way. */
+    .code-block-wrap {
+      margin-bottom: 1.25rem;
+    }
+
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0b1120;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: none;
+      border-radius: 10px 10px 0 0;
+      padding: 0.5rem 0.875rem;
+    }
+
+    .code-block-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .code-block-copy {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.625rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .code-block-copy:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .code-block {
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 0 0 10px 10px;
+      padding: 1rem 1.125rem;
+      margin: 0;
+      overflow-x: auto;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+    }
+
+    .code-block code {
+      font-family: inherit;
+      white-space: pre;
+    }
+
+    .inline-code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.85em;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.1rem 0.4rem;
+    }
+
+    /* Simple reference table (API docs) — deliberately separate from
+       .table-container/.table-wrapper, which the mobile breakpoint rewrites
+       into a tournament-row card layout this table doesn't match. Just
+       scrolls horizontally on narrow screens instead. */
+    .api-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .api-table {
+      width: 100%;
+      min-width: 480px;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    .api-table th,
+    .api-table td {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .api-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .api-table th {
+      background: var(--surface-elevated);
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .api-table td {
+      color: var(--text-secondary);
+    }
+
     /* Feedback page */
     .feedback-section {
       min-height: 65vh;
