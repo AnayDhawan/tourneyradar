@@ -244,3 +244,14 @@ export function countryCodeToName(code: string): string | null {
   if (!code) return null;
   return CODE_TO_NAME[code.trim().toUpperCase()] ?? null;
 }
+
+/**
+ * All known countries as { code, name } pairs, sorted by name. Filters out
+ * the stray non-ISO 'AT_' entry kept above for a Swiss-vs-Austria note.
+ */
+export function listCountries(): { code: string; name: string }[] {
+  return Object.entries(CODE_TO_NAME)
+    .filter(([code]) => code.length === 2)
+    .map(([code, name]) => ({ code, name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}

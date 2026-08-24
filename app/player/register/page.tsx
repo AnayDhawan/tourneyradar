@@ -66,7 +66,7 @@ export default function PlayerRegisterPage() {
       posthog.capture("player_registered");
       setSuccess(true);
       setTimeout(() => {
-        router.push("/player/dashboard");
+        router.push("/player/onboarding");
       }, 2000);
     } catch (err: any) {
       setError(err.message || "Registration failed");
@@ -99,7 +99,7 @@ export default function PlayerRegisterPage() {
                   Registration Successful!
                 </h2>
                 <p style={{ color: "var(--text-secondary)" }}>
-                  Redirecting to your dashboard...
+                  Redirecting you to set up your preferences...
                 </p>
               </div>
             ) : (
