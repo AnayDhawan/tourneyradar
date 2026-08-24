@@ -318,13 +318,6 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
     return { center: [30, 0] as [number, number], zoom: 2 };
   }, [mapView]);
 
-  const getDashboardLink = () => {
-    if (userType === "player") return { href: "/player/wishlist", label: "My Wishlist" };
-    return { href: "/player/register", label: "Sign Up" };
-  };
-
-  const dashboard = getDashboardLink();
-
   // Tell FeedbackPrompt the user got value (used a filter / opened a tournament),
   // so it can fire the feedback nudge at a value moment instead of waiting on time.
   const markEngaged = () => {
@@ -339,7 +332,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
       <MobileNavDrawer
         open={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
-        dashboard={authLoading ? null : dashboard}
+        userType={authLoading ? null : userType}
         showThemeToggle
       />
 
@@ -374,9 +367,11 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                   </a>
                 </div>
 
-                <Link href="/player/register" className="btn btn-signup">
-                  Sign up, it&apos;s Free!
-                </Link>
+                {!authLoading && userType !== "player" && (
+                  <Link href="/player/register" className="btn btn-signup">
+                    Sign up, it&apos;s Free!
+                  </Link>
+                )}
               </div>
 
               <HeroStats stats={stats} />

@@ -4,21 +4,26 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 
-export interface DashboardLink {
-  href: string;
-  label: string;
-}
-
 interface MobileNavDrawerProps {
   open: boolean;
   onClose: () => void;
-  dashboard: DashboardLink | null;
+  userType: "player" | "admin" | null;
   showThemeToggle?: boolean;
 }
 
 const CLOSE_ANIMATION_MS = 250;
 
-export default function MobileNavDrawer({ open, onClose, dashboard, showThemeToggle = false }: MobileNavDrawerProps) {
+function AccountIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" />
+      <path d="M4 20c0-4 3.5-6 8-6s8 2 8 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export default function MobileNavDrawer({ open, onClose, userType, showThemeToggle = false }: MobileNavDrawerProps) {
+  const loggedIn = userType === "player";
   const [rendered, setRendered] = useState(open);
   const [closing, setClosing] = useState(false);
   const [prevOpen, setPrevOpen] = useState(open);
@@ -69,9 +74,9 @@ export default function MobileNavDrawer({ open, onClose, dashboard, showThemeTog
           <Link href="/support" onClick={onClose}>
             Support Us
           </Link>
-          {dashboard && (
-            <Link href={dashboard.href} className="mobile-drawer-cta" onClick={onClose}>
-              {dashboard.label}
+          {!loggedIn && (
+            <Link href="/player/register" className="mobile-drawer-cta" onClick={onClose}>
+              Sign Up
             </Link>
           )}
           {showThemeToggle && (
@@ -79,6 +84,12 @@ export default function MobileNavDrawer({ open, onClose, dashboard, showThemeTog
               <span className="mobile-drawer-theme-label">Theme</span>
               <ThemeToggle />
             </div>
+          )}
+          {loggedIn && (
+            <Link href="/player/wishlist" className="mobile-drawer-account" onClick={onClose}>
+              <AccountIcon />
+              My Account
+            </Link>
           )}
         </nav>
       </div>

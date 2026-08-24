@@ -25,6 +25,13 @@ All notable changes to this project are documented here. Format based on
 - README contributors section: auto-updating avatar grid from the GitHub contributors
   graph, replacing nothing (there was no prior list).
 - Animated demo GIF referenced in the README.
+- Account icon in the nav (desktop top-right, mobile drawer bottom) linking to the
+  wishlist when a player is signed in; hero "Sign up, it's Free!" CTA hides once
+  they're signed in.
+- Dedicated `/feedback` page (centered card, star rating, GitHub-star nudge on thanks)
+  replacing the inline corner-popup form; the popup is now a teaser that routes there,
+  and the footer gets a permanent Feedback link. Both fire a `feedback_button_click`
+  event (Umami + PostHog) tagged by source.
 
 ### Fixed
 - `/api/tournaments` `limit` param clamped to `[1, 200]` instead of silently accepting

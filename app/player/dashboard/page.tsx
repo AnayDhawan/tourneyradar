@@ -90,7 +90,7 @@ export default function PlayerDashboardPage() {
 
   return (
     <div style={{ background: "var(--background)", minHeight: "100vh" }}>
-      <MobileNavDrawer open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} dashboard={null} showThemeToggle />
+      <MobileNavDrawer open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} userType={null} showThemeToggle />
 
       <section className="hero-bg" style={{ minHeight: "30vh", display: "flex", flexDirection: "column" }}>
         <SiteNav onMenuClick={() => setMobileMenuOpen(true)} />

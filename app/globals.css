@@ -198,7 +198,31 @@
       background: #22d3ee;
       color: #0b1120;
     }
-    
+
+    .nav-account-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.85);
+      flex: 0 0 auto;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .nav-account-link:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: white;
+    }
+
+    .nav-account-link svg {
+      width: 16px;
+      height: 16px;
+    }
+
     /* FIXED: Mobile Menu Button - hidden by default on desktop */
     .mobile-menu-btn {
       display: none;
@@ -452,7 +476,101 @@
       box-shadow: 0 20px 25px var(--shadow-lg);
       border-color: var(--border-hover);
     }
-    
+
+    /* Feedback page */
+    .feedback-section {
+      min-height: 65vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+    }
+
+    .feedback-card {
+      width: min(480px, 100%);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.75rem 2rem 2.25rem;
+      text-align: center;
+      box-shadow: 0 20px 60px var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feedback-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #2563eb, #F59E0B);
+    }
+
+    .feedback-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .feedback-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .feedback-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    .feedback-stars {
+      display: flex;
+      justify-content: center;
+      gap: 0.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .feedback-star-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 2.5rem;
+      line-height: 1;
+      padding: 0.15rem;
+      transition: transform 0.15s ease;
+    }
+
+    .feedback-star-btn:hover {
+      transform: scale(1.15);
+    }
+
+    .feedback-textarea {
+      width: 100%;
+      resize: vertical;
+      padding: 0.75rem;
+      font-size: 0.9375rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface-elevated);
+      color: var(--text-primary);
+      box-sizing: border-box;
+      margin-bottom: 1.25rem;
+      font-family: inherit;
+    }
+
+    .feedback-submit-btn {
+      width: 100%;
+    }
+
+    .feedback-card-thanks {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
     /* Map */
      #map {
       height: clamp(400px, 60vh, 650px);
@@ -791,6 +909,31 @@
 .mobile-drawer-cta:hover {
   background: var(--primary-dark) !important;
   color: white !important;
+}
+
+.mobile-drawer-account {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-top: 1.5rem;
+  padding: 0.875rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.mobile-drawer-account:hover {
+  background: var(--surface-elevated);
+}
+
+.mobile-drawer-account svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: var(--text-secondary);
 }
 
 @keyframes fadeIn {

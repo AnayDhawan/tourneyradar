@@ -1,30 +1,24 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
-import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/lib/AuthContext";
-import { useToast } from "@/components/Toast";
+import { usePathname, useRouter } from "next/navigation";
 import { trackEvent } from "@/lib/track";
 
 const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000; // re-ask 7 days after "maybe later"
 const FIRST_VISIT_DELAY = 20000; // first-time visitor: give them time to get value
 const RETURN_VISIT_DELAY = 8000; // returning visitor (warm lead): ask sooner
 const SCROLL_THRESHOLD = 0.5; // fire once half the page has been scrolled
-const MAX_RATING = 5;
 
 // Pages where a feedback nudge would be noise (auth flows, legal text).
-const EXCLUDED_PREFIXES = ["/player", "/legal"];
+const EXCLUDED_PREFIXES = ["/player", "/legal", "/feedback"];
 
+// Lightweight teaser that routes to the dedicated /feedback page rather than
+// collecting the rating inline, so the actual form gets the full-page,
+// more-appealing treatment instead of being squeezed into a corner card.
 export default function FeedbackPrompt() {
   const pathname = usePathname();
-  const { user, userType } = useAuth();
-  const { showToast } = useToast();
+  const router = useRouter();
   const [show, setShow] = useState(false);
-  const [rating, setRating] = useState(0);
-  const [hover, setHover] = useState(0);
-  const [comment, setComment] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const firedRef = useRef(false);
   const visitsRef = useRef(1);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
@@ -48,8 +42,6 @@ export default function FeedbackPrompt() {
   }, []);
 
   // Trigger logic: time + scroll + engagement, tiered by visit count.
-  // Same mechanics as the old star prompt, fresh keys so users who dismissed
-  // the star nudge still get asked once for feedback.
   useEffect(() => {
     if (firedRef.current) return;
     if (EXCLUDED_PREFIXES.some((p) => pathname?.startsWith(p))) return;
@@ -117,33 +109,16 @@ export default function FeedbackPrompt() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [show]);
 
-  const handleSubmit = useCallback(async () => {
-    if (rating < 1 || submitting) return;
-    setSubmitting(true);
+  const handleGiveFeedback = useCallback(() => {
+    trackEvent("feedback_button_click", { src: "popup", page: pathname });
     try {
-      const playerId = userType === "player" ? (user?.id ?? null) : null;
-      const { error } = await supabase.from("feedback").insert({
-        player_id: playerId,
-        rating,
-        comment: comment.trim() || null,
-        page_url: pathname ?? "/",
-      });
-      if (error) throw error;
-      trackEvent("feedback_submitted", { rating, page: pathname });
-      try {
-        localStorage.setItem("tr_feedback_ok", "1");
-      } catch {
-        /* ignore */
-      }
-      setShow(false);
-      showToast("Thanks for your feedback!");
-    } catch (err) {
-      console.error("Feedback submit failed:", err);
-      showToast("Couldn't send feedback. Please try again.", "error");
-    } finally {
-      setSubmitting(false);
+      localStorage.setItem("tr_feedback_snooze", String(Date.now()));
+    } catch {
+      /* ignore */
     }
-  }, [rating, submitting, comment, pathname, user, userType, showToast]);
+    setShow(false);
+    router.push(`/feedback?from=${encodeURIComponent(pathname || "/")}`);
+  }, [pathname, router]);
 
   const handleLater = useCallback(() => {
     trackEvent("feedback_maybe_later");
@@ -167,12 +142,10 @@ export default function FeedbackPrompt() {
 
   if (!show) return null;
 
-  const displayed = hover || rating;
-
   return (
     <div
       role="dialog"
-      aria-label="Rate TourneyRadar"
+      aria-label="Give feedback"
       style={{
         position: "fixed",
         bottom: "1.5rem",
@@ -182,7 +155,7 @@ export default function FeedbackPrompt() {
         border: "1px solid var(--border)",
         borderRadius: 16,
         padding: "1.25rem 1.5rem",
-        width: "min(320px, calc(100vw - 2rem))",
+        width: "min(300px, calc(100vw - 2rem))",
         boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         animation: "slideUp 0.3s ease",
       }}
@@ -205,67 +178,20 @@ export default function FeedbackPrompt() {
       >
         ×
       </button>
-      <div style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>
-        How&apos;s TourneyRadar working for you?
+      <div style={{ fontSize: 24, marginBottom: "0.5rem" }}>💬</div>
+      <div style={{ fontWeight: 700, marginBottom: "0.375rem", color: "var(--text-primary)" }}>
+        Got a sec for TourneyRadar?
       </div>
-      <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
-        Rate your experience, it takes a second and helps improve the platform.
+      <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginBottom: "1rem" }}>
+        30 seconds of feedback helps a ton.
       </p>
-      <div
-        role="group"
-        aria-label="Rating"
-        style={{ display: "flex", gap: "0.25rem", marginBottom: "0.75rem" }}
-      >
-        {Array.from({ length: MAX_RATING }, (_, i) => i + 1).map((n) => (
-          <button
-            key={n}
-            type="button"
-            aria-label={`Rate ${n} ${n === 1 ? "star" : "stars"}`}
-            aria-pressed={rating === n}
-            onClick={() => setRating(n)}
-            onMouseEnter={() => setHover(n)}
-            onMouseLeave={() => setHover(0)}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontSize: 28,
-              lineHeight: 1,
-              padding: "0.25rem",
-              color: n <= displayed ? "#f59e0b" : "var(--text-muted)",
-            }}
-          >
-            {n <= displayed ? "★" : "☆"}
-          </button>
-        ))}
-      </div>
-      <textarea
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
-        placeholder="Anything we should know? (optional)"
-        rows={2}
-        aria-label="Feedback comment"
-        style={{
-          width: "100%",
-          resize: "vertical",
-          padding: "0.5rem",
-          fontSize: "0.8125rem",
-          borderRadius: 8,
-          border: "1px solid var(--border)",
-          background: "var(--surface-elevated)",
-          color: "var(--text-primary)",
-          boxSizing: "border-box",
-          marginBottom: "0.75rem",
-        }}
-      />
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         <button
           className="btn btn-primary"
           style={{ textAlign: "center", fontSize: "0.875rem" }}
-          onClick={handleSubmit}
-          disabled={rating < 1 || submitting}
+          onClick={handleGiveFeedback}
         >
-          {submitting ? "Sending…" : "Submit feedback"}
+          Give Feedback
         </button>
         <button
           className="btn"

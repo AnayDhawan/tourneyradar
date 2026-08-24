@@ -27,12 +27,6 @@ export default function BaseLayout({
     return () => { document.body.style.overflow = ""; };
   }, [mobileMenuOpen]);
 
-  const getDashboardLink = () => {
-    if (userType === "player") return { href: "/player/wishlist", label: "My Wishlist" };
-    return { href: "/player/register", label: "Sign Up" };
-  };
-  const dashboard = getDashboardLink();
-
   return (
     <div style={{ background: "var(--background)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
 
@@ -40,7 +34,7 @@ export default function BaseLayout({
       <MobileNavDrawer
         open={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
-        dashboard={authLoading ? null : dashboard}
+        userType={authLoading ? null : userType}
         showThemeToggle
       />
 
