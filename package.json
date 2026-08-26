@@ -25,7 +25,7 @@
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "next": "^16.3.2",
-    "posthog-js": "^1.413.2",
+    "posthog-js": "^1.418.10",
     "puppeteer": "^25.2.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
