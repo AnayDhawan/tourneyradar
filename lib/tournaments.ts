@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { scoreTournamentForPlayer, type PlayerRankingPreferences } from './ranking';
 
 // Listings hide tournaments starting within the next `days` days: players need
 // lead time to register and travel, so anything too imminent is noise. Returns
@@ -300,4 +301,84 @@ export async function queryTournaments({
     totalPages,
     hasMore: safePage < totalPages,
   };
+}
+
+// Ranking sees a bounded candidate pool rather than the full upcoming table,
+// same reasoning as MAP_PAGE_SIZE above: score/sort work is O(n), and a
+// player's next few weeks of relevant tournaments are almost always in the
+// nearest chunk by date anyway.
+const RECOMMENDATION_CANDIDATE_POOL = 150;
+const RECOMMENDATION_DEFAULT_LIMIT = 6;
+
+const WISHLIST_SIGNAL_FIELDS = 'id, category, country_code';
+
+/**
+ * Personalized recommendations for one player (issue #127). Scores a bounded
+ * upcoming-tournament candidate pool with `scoreTournamentForPlayer` (see
+ * `lib/ranking.ts` for what that scoring actually is, and importantly, what
+ * it isn't) and returns the top `limit` by score, descending.
+ *
+ * Reads the player's own preference fields and wishlist via the shared
+ * browser client, matching the RLS-scoped read pattern already used by
+ * `app/player/dashboard/page.tsx` for its own wishlist section, rather than
+ * introducing a second, parallel auth path for this one query. Callers must
+ * only invoke this for the currently authenticated player's own id; there is
+ * no server-side authorization check inside this function.
+ *
+ * Errors (missing player row, failed queries) degrade to an empty
+ * preference set or an empty result rather than throwing, consistent with
+ * the other query functions in this file.
+ */
+export async function getPersonalizedTournaments(
+  playerId: string,
+  limit: number = RECOMMENDATION_DEFAULT_LIMIT
+): Promise<TournamentListItem[]> {
+  const [playerResult, wishlistIdsResult, candidatesResult] = await Promise.all([
+    supabase
+      .from('players')
+      .select('home_country_code, notify_categories, min_fide_rated, rating')
+      .eq('id', playerId)
+      .maybeSingle(),
+    supabase
+      .from('player_favorite_tournaments')
+      .select('tournament_id')
+      .eq('player_id', playerId),
+    getUpcomingTournaments(1, RECOMMENDATION_CANDIDATE_POOL),
+  ]);
+
+  if (playerResult.error) {
+    console.error('Error fetching player preferences for ranking:', playerResult.error);
+  }
+  if (wishlistIdsResult.error) {
+    console.error('Error fetching wishlist for ranking:', wishlistIdsResult.error);
+  }
+
+  const player: PlayerRankingPreferences = playerResult.data ?? {};
+
+  const wishlistTournamentIds = (wishlistIdsResult.data || []).map((row) => row.tournament_id);
+
+  let wishlist: TournamentListItem[] = [];
+  if (wishlistTournamentIds.length > 0) {
+    const { data: wishlistData, error: wishlistError } = await supabase
+      .from('tournaments')
+      .select(WISHLIST_SIGNAL_FIELDS)
+      .in('id', wishlistTournamentIds);
+
+    if (wishlistError) {
+      console.error('Error fetching wishlisted tournaments for ranking:', wishlistError);
+    } else {
+      wishlist = (wishlistData || []) as unknown as TournamentListItem[];
+    }
+  }
+
+  const candidates = candidatesResult.tournaments;
+
+  return candidates
+    .map((tournament) => ({
+      tournament,
+      score: scoreTournamentForPlayer(tournament, player, wishlist),
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((entry) => entry.tournament);
 }
