@@ -18,6 +18,7 @@ type Player = {
   notify_frequency?: "off" | "weekly";
   notify_categories?: string[];
   min_fide_rated?: boolean;
+  referral_code?: string;
 };
 
 

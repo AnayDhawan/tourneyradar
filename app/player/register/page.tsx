@@ -6,6 +6,7 @@ import { useState } from "react";
 import posthog from "posthog-js";
 import { supabase } from "@/lib/supabase";
 import { useThemePreference } from "@/lib/theme";
+import { readReferralCode } from "@/lib/referral";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
 import SiteNav from "@/components/SiteNav";
 export default function PlayerRegisterPage() {
@@ -52,6 +53,12 @@ export default function PlayerRegisterPage() {
       if (authError) throw authError;
       if (!authData.user) throw new Error("Registration failed");
 
+      // Issue #123: if a `?ref=CODE` link brought this visitor in (captured on
+      // the homepage, see lib/referral.ts), attach it as referred_by. No
+      // validation that the code belongs to a real player, an unmatched code
+      // just never counts toward anyone's referral total.
+      const referredBy = readReferralCode();
+
       const { error: profileError } = await supabase.from("players").insert({
         auth_user_id: authData.user.id,
         email: formData.email,
@@ -59,6 +66,7 @@ export default function PlayerRegisterPage() {
         phone: formData.phone || null,
         fide_id: formData.fide_id || null,
         rating: formData.rating ? parseInt(formData.rating) : null,
+        referred_by: referredBy,
       });
 
       if (profileError) throw profileError;

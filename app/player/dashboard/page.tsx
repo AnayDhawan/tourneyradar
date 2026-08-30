@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { getPersonalizedTournaments, type TournamentListItem } from "@/lib/tournaments";
 import Footer from "@/components/Footer";
 import { useThemePreference } from "@/lib/theme";
+import { useToast } from "@/components/Toast";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
 import SiteNav from "@/components/SiteNav";
 
@@ -34,11 +35,13 @@ export default function PlayerDashboardPage() {
   const router = useRouter();
   const { user, userType, loading: authLoading } = useAuth();
   useThemePreference();
+  const { showToast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [tournaments, setTournaments] = useState<WishlistTournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [recommended, setRecommended] = useState<TournamentListItem[]>([]);
   const [recommendedLoading, setRecommendedLoading] = useState(true);
+  const [referralCount, setReferralCount] = useState<number | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -106,6 +109,27 @@ export default function PlayerDashboardPage() {
       loadRecommendations();
     } else {
       setRecommendedLoading(false);
+    }
+  }, [user, userType]);
+
+  // Issue #123: invite-a-friend count. This has to go through an RPC rather
+  // than a plain `select count(*) from players where referred_by = ...`:
+  // RLS on players scopes select to the owning row, so a direct client query
+  // would just return 0 every time. my_referral_count() is SECURITY DEFINER
+  // for exactly that reason (see the migration), it hands back a number and
+  // nothing else.
+  useEffect(() => {
+    async function loadReferralCount() {
+      if (!user || userType !== "player") return;
+
+      const { data, error } = await supabase.rpc("my_referral_count");
+      if (!error && typeof data === "number") {
+        setReferralCount(data);
+      }
+    }
+
+    if (user && userType === "player") {
+      loadReferralCount();
     }
   }, [user, userType]);
 
@@ -194,6 +218,66 @@ export default function PlayerDashboardPage() {
               )}
             </div>
           )}
+
+          {/* Invite a friend (issue #123). Additive section, standalone card,
+              does not touch the welcome card or saved-tournaments list above
+              or below it. */}
+          {user && userType === "player" && (user as any).referral_code ? (
+            <div className="card" style={{ marginBottom: "2rem" }}>
+              <h2 className="font-display" style={{ fontSize: "1.25rem", fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>
+                Invite a friend
+              </h2>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", marginBottom: "1rem" }}>
+                Share your link. {referralCount !== null && referralCount > 0
+                  ? `${referralCount} ${referralCount === 1 ? "person has" : "people have"} joined so far.`
+                  : "Anyone who signs up through it will be counted here."}
+              </p>
+              <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center" }}>
+                <code
+                  style={{
+                    flex: "1 1 240px",
+                    padding: "0.6rem 0.9rem",
+                    background: "var(--surface-elevated)",
+                    border: "2px solid var(--border)",
+                    borderRadius: "8px",
+                    color: "var(--text-primary)",
+                    fontSize: "0.85rem",
+                    overflow: "auto",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {typeof window !== "undefined" ? window.location.origin : ""}/?ref={(user as any).referral_code}
+                </code>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={{ flexShrink: 0 }}
+                  onClick={async () => {
+                    const shareUrl = `${window.location.origin}/?ref=${(user as any).referral_code}`;
+
+                    if (navigator.share) {
+                      try {
+                        await navigator.share({ title: "TourneyRadar", url: shareUrl });
+                        return;
+                      } catch {
+                        // User cancelled the share sheet, or it's unsupported for this
+                        // context. Fall through to clipboard copy either way.
+                      }
+                    }
+
+                    try {
+                      await navigator.clipboard.writeText(shareUrl);
+                      showToast("Invite link copied", "success");
+                    } catch {
+                      showToast("Couldn't copy the link, copy it from the box above instead", "error");
+                    }
+                  }}
+                >
+                  Copy link
+                </button>
+              </div>
+            </div>
+          ) : null}
 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "0.5rem" }}>
             <h2 className="font-display" style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--text-primary)" }}>
