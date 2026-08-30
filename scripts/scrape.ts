@@ -1,6 +1,7 @@
 import puppeteer, { Browser } from 'puppeteer';
 import { createClient } from '@supabase/supabase-js';
 import { countryNameToCode } from '../lib/countryMap';
+import { dedupeTournaments, DuplicateGroup } from '../lib/dedup';
 import fs from 'fs';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -41,6 +42,26 @@ async function logScraperSuccess(region: string, rowsWritten: number): Promise<v
       completed_at: new Date().toISOString(),
       status: 'success',
       message: `[region:${region}] success: ${rowsWritten} tournaments`,
+    });
+  } catch {
+    // Logging must never crash the scraper itself.
+  }
+}
+
+// Records a dedup pass so how many cross-federation duplicates got merged
+// (and which tournaments were involved) is visible without digging through
+// CI logs. Same insert shape as logScraperSuccess/logScraperFailure.
+async function logDedupSummary(mergedCount: number, groups: DuplicateGroup[]): Promise<void> {
+  if (mergedCount === 0) return;
+  try {
+    const detail = groups
+      .map(g => `${g.keep.id} kept over ${g.drop.map(d => d.id).join('+')} (score ${g.score.toFixed(2)})`)
+      .join('; ');
+    await supabase.from('scraper_logs').insert({
+      started_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(),
+      status: 'success',
+      message: `[dedup] merged ${mergedCount} duplicate tournament(s): ${detail}`,
     });
   } catch {
     // Logging must never crash the scraper itself.
@@ -534,9 +555,23 @@ async function main() {
 
   if (pushFrom) {
     const data: ScrapedTournament[] = JSON.parse(fs.readFileSync(pushFrom, 'utf8'));
-    console.log(`\n  Pushing ${data.length} merged tournaments to Supabase...`);
-    const saved = await pushTournaments(data);
-    console.log(`  ✓ Saved ${saved}/${data.length}\n`);
+    console.log(`\n  Loaded ${data.length} merged tournaments from ${pushFrom}`);
+
+    console.log('  Deduping across regions (name + date + location similarity)...');
+    const { deduped, mergedCount, groups } = dedupeTournaments(data);
+    if (mergedCount > 0) {
+      console.log(`  ✓ Merged ${mergedCount} duplicate(s) found across ${groups.length} group(s):`);
+      for (const g of groups) {
+        console.log(`      kept ${g.keep.id} ("${g.keep.name}") over ${g.drop.map(d => d.id).join(', ')} [score ${g.score.toFixed(2)}]`);
+      }
+      await logDedupSummary(mergedCount, groups);
+    } else {
+      console.log('  ✓ No cross-region duplicates found');
+    }
+
+    console.log(`\n  Pushing ${deduped.length} tournaments to Supabase...`);
+    const saved = await pushTournaments(deduped);
+    console.log(`  ✓ Saved ${saved}/${deduped.length}\n`);
     await logScraperSuccess('merged', saved);
     return;
   }
@@ -695,8 +730,13 @@ async function main() {
       console.log(`  ✓ Wrote ${saved} tournaments\n`);
     } else {
       console.log('Phase 4: Saving to database...\n');
-      saved = await pushTournaments(tournaments);
-      console.log(`  ✓ Saved ${saved}/${tournaments.length}\n`);
+      const { deduped, mergedCount, groups } = dedupeTournaments(tournaments);
+      if (mergedCount > 0) {
+        console.log(`  Dedup: merged ${mergedCount} duplicate(s) found across ${groups.length} group(s)`);
+        await logDedupSummary(mergedCount, groups);
+      }
+      saved = await pushTournaments(deduped);
+      console.log(`  ✓ Saved ${saved}/${deduped.length}\n`);
     }
 
     const withCoords = tournaments.filter(t => t.lat && t.lng).length;
