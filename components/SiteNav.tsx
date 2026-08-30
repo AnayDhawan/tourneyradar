@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import MobileMenuButton from "@/components/MobileMenuButton";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/AuthContext";
@@ -8,6 +9,15 @@ import { useAuth } from "@/lib/AuthContext";
 interface SiteNavProps {
   onMenuClick: () => void;
 }
+
+const NAV_LINKS = [
+  { href: "/tournaments", label: "Tournaments" },
+  { href: "/docs", label: "Docs" },
+  { href: "/updates", label: "Updates" },
+  { href: "/about", label: "About" },
+  { href: "/support", label: "Support Us" },
+  { href: "/api-docs", label: "API Docs" },
+];
 
 function AccountIcon() {
   return (
@@ -22,6 +32,7 @@ function AccountIcon() {
 // BaseLayout) so the site has one consistent nav, not two diverging ones.
 export default function SiteNav({ onMenuClick }: SiteNavProps) {
   const { userType, loading: authLoading } = useAuth();
+  const pathname = usePathname();
   const loggedIn = !authLoading && userType === "player";
 
   return (
@@ -32,10 +43,14 @@ export default function SiteNav({ onMenuClick }: SiteNavProps) {
         </Link>
 
         <div className="nav-links">
-          <Link href="/tournaments">Tournaments</Link>
-          <Link href="/about">About</Link>
-          <Link href="/support">Support Us</Link>
-          <Link href="/api-docs">API Docs</Link>
+          {NAV_LINKS.map((link) => {
+            const active = pathname === link.href || pathname?.startsWith(`${link.href}/`);
+            return (
+              <Link key={link.href} href={link.href} className={active ? "active" : undefined}>
+                {link.label}
+              </Link>
+            );
+          })}
           <ThemeToggle variant="hero" />
           {loggedIn && (
             <Link href="/player/wishlist" className="nav-account-link" aria-label="My account" title="My account">

@@ -32,6 +32,11 @@
       --error: #EF4444;
       --shadow: rgba(0, 0, 0, 0.05);
       --shadow-lg: rgba(0, 0, 0, 0.1);
+      /* Homepage hero grid texture (structural pattern borrowed from
+         StudyMap's .graph-paper), tinted with our own primary blue instead
+         of their amber so it still reads as TR. */
+      --grid-line: rgba(37, 99, 235, 0.05);
+      --grid-line-bold: rgba(37, 99, 235, 0.09);
     }
 
     [data-theme="dark"] {
@@ -52,6 +57,8 @@
       --error: #EF4444;
       --shadow: rgba(0, 0, 0, 0.25);
       --shadow-lg: rgba(0, 0, 0, 0.4);
+      --grid-line: rgba(59, 130, 246, 0.07);
+      --grid-line-bold: rgba(59, 130, 246, 0.12);
     }
     
     * {
@@ -272,6 +279,11 @@
       background: rgba(255, 255, 255, 0.1);
     }
 
+    .home-nav .nav-links a.active {
+      background: rgba(255, 255, 255, 0.14);
+      color: white;
+    }
+
     @media (min-width: 640px) {
       .home-nav .nav-container {
         padding: 0 1.5rem;
@@ -368,6 +380,20 @@
     .btn-outline:hover {
       background: white;
       color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    /* Theme-aware outline variant for buttons that sit on plain
+       (non-gradient) surfaces, e.g. the new homepage hero — .btn-outline
+       assumes white-on-dark-gradient and is invisible outside the hero. */
+    .btn-outline-muted {
+      background: var(--surface-elevated);
+      color: var(--text-primary);
+      border: 2px solid var(--border);
+    }
+
+    .btn-outline-muted:hover {
+      border-color: var(--border-hover);
       transform: translateY(-2px);
     }
 
@@ -1811,4 +1837,303 @@ body > div[style*="position: fixed"][style*="bottom"][style*="left"] {
   margin-top: 0.5rem;
   color: #3b82f6;
   font-weight: 500;
+}
+
+/* =============================================
+   HOMEPAGE HERO (structural clone of StudyMap's
+   hero: compact grid-textured section, centered
+   content, map preview card. Own classes, kept
+   separate from .hero-* used by BaseLayout's
+   gradient hero on every other page.)
+   ============================================= */
+
+.home-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 3.5rem 1.5rem 4rem;
+}
+
+.home-hero-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(var(--grid-line-bold) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line-bold) 1px, transparent 1px);
+  background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
+  -webkit-mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, black 45%, transparent 100%);
+  mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, black 45%, transparent 100%);
+}
+
+.home-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.home-hero-content {
+  max-width: 48rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.home-hero-title {
+  font-size: clamp(2.25rem, 6vw, 4rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.home-hero-title .highlight {
+  color: var(--primary);
+}
+
+.home-hero-description {
+  font-size: clamp(0.9375rem, 1.5vw, 1.0625rem);
+  color: var(--text-secondary);
+  max-width: 34rem;
+  margin: 0 auto 1.5rem;
+  line-height: 1.6;
+}
+
+.home-hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.home-hero-signup {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+.home-hero-stats {
+  margin-top: 1.25rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.home-hero-map-wrap {
+  margin-top: 2.5rem;
+}
+
+@media (min-width: 768px) {
+  .home-hero-map-wrap {
+    margin-top: 3.5rem;
+  }
+}
+
+/* Map preview card (non-interactive snapshot) */
+.map-preview-card {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+@media (min-width: 640px) {
+  .map-preview-card {
+    aspect-ratio: 3 / 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .map-preview-card {
+    aspect-ratio: auto;
+    height: 480px;
+  }
+}
+
+.map-preview-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 1000;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.map-preview-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1001;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 1rem;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--surface) 78%, transparent) 0%,
+    transparent 55%
+  );
+  transition: background 0.2s;
+}
+
+.map-preview-overlay:hover {
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--surface) 90%, transparent) 0%,
+    transparent 55%
+  );
+}
+
+.map-preview-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: var(--primary);
+  color: white;
+  border-radius: 999px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  box-shadow: 0 4px 10px var(--shadow-lg);
+  transition: transform 0.2s;
+}
+
+.map-preview-overlay:hover .map-preview-pill {
+  transform: translateX(2px);
+}
+
+/* =============================================
+   HOMEPAGE MARKETING SECTIONS (after the
+   Tournament Explorer — untouched above this)
+   ============================================= */
+
+.marketing-band {
+  border-top: 1px solid var(--border);
+}
+
+.marketing-band-muted {
+  background: var(--surface);
+}
+
+.marketing-band-inner {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .marketing-band-inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.marketing-kicker {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 0.375rem;
+}
+
+.marketing-band h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.marketing-band p {
+  margin-top: 0.5rem;
+  max-width: 34rem;
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.marketing-band-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  flex: 0 0 auto;
+}
+
+.feature-grid-section {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+
+.feature-grid {
+  margin-top: 2rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .feature-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.feature-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-decoration: none;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.feature-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 10px 20px var(--shadow);
+  transform: translateY(-2px);
+}
+
+.feature-card h3 {
+  margin-top: 0.5rem;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.feature-card p {
+  margin-top: 0.5rem;
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.feature-card-cta {
+  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary);
 }

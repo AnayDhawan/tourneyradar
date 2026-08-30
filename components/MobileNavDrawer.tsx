@@ -68,6 +68,12 @@ export default function MobileNavDrawer({ open, onClose, userType, showThemeTogg
           <Link href="/tournaments" onClick={onClose}>
             Tournaments
           </Link>
+          <Link href="/docs" onClick={onClose}>
+            Docs
+          </Link>
+          <Link href="/updates" onClick={onClose}>
+            Updates
+          </Link>
           <Link href="/about" onClick={onClose}>
             About
           </Link>
