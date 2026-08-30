@@ -236,17 +236,65 @@ async function geocodeWithNominatim(city: string, country?: string): Promise<{ l
 
 export function geocodeCity(city: string, countryCode?: string): { lat: number; lng: number } | null {
   const normalizedCity = city.toLowerCase().trim();
-  
+
   // Check hardcoded cities first
   if (CITY_COORDINATES[normalizedCity]) {
     return CITY_COORDINATES[normalizedCity];
   }
-  
+
   // Check country fallback
   if (countryCode && COUNTRY_COORDINATES[countryCode]) {
     return COUNTRY_COORDINATES[countryCode];
   }
-  
+
+  return null;
+}
+
+// ========== TIERED FALLBACK CHAIN (instrumentable) ==========
+// The real 4-tier chain: hardcoded city table, then hardcoded country
+// centroids, then the Google Maps API, then rate-limited Nominatim. This is
+// the version of the chain the live scraper (scripts/scrape.ts) calls, and it
+// reports which tier resolved each address so the scrape-observability
+// dashboard can show how often geocoding degrades past Google to Nominatim.
+export type GeocodeTier = 'city_table' | 'country_centroid' | 'google' | 'nominatim';
+
+export interface TieredCoordinates {
+  lat: number;
+  lng: number;
+  tier: GeocodeTier;
+}
+
+export async function geocodeWithFallback(
+  city: string,
+  country: string,
+  countryCode?: string
+): Promise<TieredCoordinates | null> {
+  const normalizedCity = city.toLowerCase().trim();
+
+  if (CITY_COORDINATES[normalizedCity]) {
+    return { ...CITY_COORDINATES[normalizedCity], tier: 'city_table' };
+  }
+
+  if (countryCode && COUNTRY_COORDINATES[countryCode]) {
+    return { ...COUNTRY_COORDINATES[countryCode], tier: 'country_centroid' };
+  }
+
+  // Only attempt the Google tier when a key is configured, otherwise skip
+  // straight to Nominatim instead of logging a noisy "key not found" error
+  // on every unresolved address.
+  if (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) {
+    const address = country ? `${city}, ${country}` : city;
+    const google = await geocodeAddress(address);
+    if (google) {
+      return { ...google, tier: 'google' };
+    }
+  }
+
+  const nominatim = await geocodeWithNominatim(city, country);
+  if (nominatim) {
+    return { ...nominatim, tier: 'nominatim' };
+  }
+
   return null;
 }
 

@@ -1,11 +1,11 @@
 import puppeteer, { Browser } from 'puppeteer';
 import { createClient } from '@supabase/supabase-js';
 import { countryNameToCode } from '../lib/countryMap';
+import { geocodeWithFallback, GeocodeTier, TieredCoordinates } from '../lib/geocoding';
 import fs from 'fs';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
   console.error('❌ Missing Supabase environment variables.');
@@ -47,6 +47,43 @@ async function logScraperSuccess(region: string, rowsWritten: number): Promise<v
   }
 }
 
+// Records a successful per-federation link-collection pass so the
+// observability dashboard can compute a per-federation success rate, not
+// just a per-region rollup. Mirrors the existing `getLinks:${fed}` failure
+// tag emitted by `logScraperFailure` in `getLinks` below.
+async function logFedSuccess(fed: string, linksFound: number): Promise<void> {
+  try {
+    await supabase.from('scraper_logs').insert({
+      started_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(),
+      status: 'success',
+      message: `[fed:${fed}] success: ${linksFound} tournaments found`,
+    });
+  } catch {
+    // Logging must never crash the scraper itself.
+  }
+}
+
+// Records how the geocoding fallback chain (lib/geocoding.ts) resolved
+// addresses this run: how many hit the free hardcoded tiers vs. degraded to
+// the paid Google Maps API vs. degraded further to rate-limited Nominatim.
+// Logged with status 'completed' (not 'success'/'failed') so it never gets
+// counted by the existing per-region/per-federation success-rate logic.
+async function logGeocodeTierSummary(tiers: Record<GeocodeTier | 'unresolved', number>): Promise<void> {
+  try {
+    await supabase.from('scraper_logs').insert({
+      started_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(),
+      status: 'completed',
+      message:
+        `[geocode_tier] city_table:${tiers.city_table} country_centroid:${tiers.country_centroid} ` +
+        `google:${tiers.google} nominatim:${tiers.nominatim} unresolved:${tiers.unresolved}`,
+    });
+  } catch {
+    // Logging must never crash the scraper itself.
+  }
+}
+
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
@@ -68,26 +105,6 @@ interface ScrapedTournament {
   lng: number | null;
   min_rating: number | null;
   max_rating: number | null;
-}
-
-// ========== GEOCODING ==========
-async function geocode(address: string): Promise<{ lat: number; lng: number } | null> {
-  if (!GOOGLE_MAPS_API_KEY) return null;
-  try {
-    const res = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_MAPS_API_KEY}` 
-    );
-    const data = await res.json();
-    if (data.status === 'OK' && data.results[0]) {
-      return {
-        lat: data.results[0].geometry.location.lat,
-        lng: data.results[0].geometry.location.lng
-      };
-    }
-  } catch (err) {
-    await logScraperFailure(`geocode:${address}`, errorMessage(err));
-  }
-  return null;
 }
 
 // ========== DATE PARSING ==========
@@ -404,16 +421,18 @@ async function getLinks(browser: Browser, fed: string): Promise<string[]> {
       waitUntil: 'domcontentloaded', timeout: 15000 
     });
     
-    return await page.evaluate(() => {
-      const links: string[] = [];
+    const links = await page.evaluate(() => {
+      const found: string[] = [];
       document.querySelectorAll('a[href*="tnr"]').forEach(a => {
         let href = a.getAttribute('href') || '';
         if (!href.startsWith('http')) href = `https://chess-results.com/${href.replace(/^\//, '')}`;
         if (!href.includes('lan=')) href += href.includes('?') ? '&lan=1' : '?lan=1';
-        links.push(href);
+        found.push(href);
       });
-      return [...new Set(links)];
+      return [...new Set(found)];
     });
+    await logFedSuccess(fed, links.length);
+    return links;
   } catch (err) {
     await logScraperFailure(`getLinks:${fed}`, errorMessage(err));
     return [];
@@ -657,34 +676,59 @@ async function main() {
 
     console.log(`\n\n  ✓ Found ${tournaments.length} new tournaments\n`);
 
-    if (GOOGLE_MAPS_API_KEY && tournaments.length > 0) {
+    if (tournaments.length > 0) {
       console.log('Phase 3: Geocoding...\n');
-      const cache = new Map<string, { lat: number; lng: number } | null>();
+      const cache = new Map<string, TieredCoordinates | null>();
+      const tierCounts: Record<GeocodeTier | 'unresolved', number> = {
+        city_table: 0,
+        country_centroid: 0,
+        google: 0,
+        nominatim: 0,
+        unresolved: 0,
+      };
       let geocoded = 0;
 
       for (let i = 0; i < tournaments.length; i++) {
         const t = tournaments[i];
-        const key = `${t.city}, ${t.country}`;
-        
+        const key = `${t.city}|${t.country}|${t.country_code}`;
+
         if (!cache.has(key)) {
-          const coords = await geocode(key);
+          let coords: TieredCoordinates | null = null;
+          try {
+            coords = await geocodeWithFallback(t.city, t.country, t.country_code);
+          } catch (err) {
+            await logScraperFailure(`geocode:${key}`, errorMessage(err));
+          }
           cache.set(key, coords);
-          if (coords) geocoded++;
-          await new Promise(r => setTimeout(r, 50));
+          if (coords) {
+            geocoded++;
+            tierCounts[coords.tier]++;
+            // Only the two network-backed tiers need the request spacing.
+            if (coords.tier === 'google' || coords.tier === 'nominatim') {
+              await new Promise(r => setTimeout(r, 50));
+            }
+          } else {
+            tierCounts.unresolved++;
+          }
         }
-        
+
         const coords = cache.get(key);
         if (coords) {
           t.lat = coords.lat;
           t.lng = coords.lng;
         }
-        
+
         process.stdout.write(`\r  ${i + 1}/${tournaments.length}`);
       }
-      
+
       console.log(`\n\n  ✓ Geocoded ${geocoded} unique locations\n`);
-    } else if (!GOOGLE_MAPS_API_KEY) {
-      console.log('Phase 3: Skipped (no GOOGLE_MAPS_API_KEY)\n');
+      console.log(
+        `  Tiers: city_table=${tierCounts.city_table} country_centroid=${tierCounts.country_centroid} ` +
+        `google=${tierCounts.google} nominatim=${tierCounts.nominatim} unresolved=${tierCounts.unresolved}\n`
+      );
+      await logGeocodeTierSummary(tierCounts);
+    } else {
+      console.log('Phase 3: Skipped (no tournaments to geocode)\n');
     }
 
     let saved = 0;
