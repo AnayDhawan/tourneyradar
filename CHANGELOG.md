@@ -6,7 +6,35 @@ All notable changes to this project are documented here. Format based on
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-08-30
+
+Site revamp: rebuilt layout, a new homepage hero, an updates/changelog page, a
+docs knowledge base, and richer onboarding.
+
 ### Added
+- New homepage hero: compact grid-textured section, single-row CTAs, a
+  non-interactive live map preview card linking down to the Tournament
+  Explorer ([#152](https://github.com/AnayDhawan/tourneyradar/issues/152)).
+- Nav and footer rebuilt structurally after Pepiros's SiteHeader/SiteFooter:
+  theme-aware sticky nav (brand | links | utilities), Docs and About as
+  hover/click dropdowns, Log In/Sign Up for signed-out visitors, a
+  four-column footer with a brand+CTA block ([#151](https://github.com/AnayDhawan/tourneyradar/issues/151)).
+- Homepage marketing sections after the Tournament Explorer: a "Why
+  TourneyRadar" band, a feature card grid, and a closing CTA band
+  ([#153](https://github.com/AnayDhawan/tourneyradar/issues/153)).
+- `/updates`: parses the real `CHANGELOG.md` into release cards, plus a
+  "what's new" popup that nudges returning visitors once per new version
+  ([#154](https://github.com/AnayDhawan/tourneyradar/issues/154)).
+- `/docs`: a knowledge base with maintainer-written guides (FIDE
+  registration, how TR helps you register, finding a tournament near you,
+  how TR's data works, wishlist + digest, for organizers, understanding FIDE
+  ratings) and player-contributed docs, capped at 2 published per player per
+  week, enforced at the database level
+  ([#155](https://github.com/AnayDhawan/tourneyradar/issues/155)).
+- Onboarding: a new first step capturing self-reported role, referral
+  source, and intended use, ahead of the existing location/categories/digest
+  steps ([#156](https://github.com/AnayDhawan/tourneyradar/issues/156)).
+
 - ICS calendar export on tournament detail pages ([#20](https://github.com/AnayDhawan/tourneyradar/issues/20)).
 - Playwright E2E test harness + CI workflow ([#17](https://github.com/AnayDhawan/tourneyradar/issues/17)).
 - Shared `queryTournaments()` helper with real pagination (Previous/Next, page counts) and
@@ -69,6 +97,8 @@ All notable changes to this project are documented here. Format based on
 - `prize_distribution`/`schedule` fields properly typed, replacing `any`.
 
 ### Changed
+- Nav account icon is now a small dropdown (Wishlist, Sign out) instead of a
+  bare link straight to the wishlist.
 - Homepage nav and hero rebuilt: slim fixed nav, 3-mode theme toggle, signup CTA in
   place of the old login link, and a rebuilt mobile view (nav drawer, tournament
   table, drawer CTA).
@@ -96,4 +126,5 @@ reference.
 ### Changed
 - README and CONTRIBUTING rewritten; API reference and demo GIF placeholder added.
 
+[3.0.0]: https://github.com/AnayDhawan/tourneyradar/releases/tag/v3.0.0
 [2.0.0]: https://github.com/AnayDhawan/tourneyradar/releases/tag/v2.0.0
