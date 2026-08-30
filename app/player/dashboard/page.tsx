@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/AuthContext";
+import { getPersonalizedTournaments, type TournamentListItem } from "@/lib/tournaments";
 import Footer from "@/components/Footer";
 import { useThemePreference } from "@/lib/theme";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
@@ -36,6 +37,8 @@ export default function PlayerDashboardPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [tournaments, setTournaments] = useState<WishlistTournament[]>([]);
   const [loading, setLoading] = useState(true);
+  const [recommended, setRecommended] = useState<TournamentListItem[]>([]);
+  const [recommendedLoading, setRecommendedLoading] = useState(true);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -80,6 +83,32 @@ export default function PlayerDashboardPage() {
     }
   }, [user, userType]);
 
+  // "Recommended for you": v1 weighted-scoring ranking (issue #127), not a
+  // trained model, see lib/ranking.ts for the full explanation. Kept as its
+  // own effect/state pair, separate from the wishlist load above, so it can
+  // fail or load independently without blocking the wishlist section.
+  useEffect(() => {
+    async function loadRecommendations() {
+      if (!user || userType !== "player") return;
+
+      setRecommendedLoading(true);
+      try {
+        const results = await getPersonalizedTournaments((user as any).id);
+        setRecommended(results);
+      } catch {
+        setRecommended([]);
+      } finally {
+        setRecommendedLoading(false);
+      }
+    }
+
+    if (user && userType === "player") {
+      loadRecommendations();
+    } else {
+      setRecommendedLoading(false);
+    }
+  }, [user, userType]);
+
   if (authLoading || loading) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--background)" }}>
@@ -114,6 +143,55 @@ export default function PlayerDashboardPage() {
                 {(user as any).rating ? <p>⭐ Rating: {(user as any).rating}</p> : null}
                 {(user as any).fide_id ? <p>🏆 FIDE ID: {(user as any).fide_id}</p> : null}
               </div>
+            </div>
+          )}
+
+          {user && userType === "player" && (
+            <div style={{ marginBottom: "2rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "0.5rem" }}>
+                <h2 className="font-display" style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--text-primary)" }}>
+                  Recommended for you
+                </h2>
+              </div>
+
+              {recommendedLoading ? (
+                <div className="card" style={{ textAlign: "center", padding: "2rem" }}>
+                  <p style={{ color: "var(--text-secondary)" }}>Finding tournaments for you...</p>
+                </div>
+              ) : recommended.length === 0 ? (
+                <div className="card" style={{ textAlign: "center", padding: "2rem" }}>
+                  <p style={{ color: "var(--text-secondary)" }}>
+                    Set your home country and categories in{" "}
+                    <Link href="/player/onboarding" style={{ color: "var(--primary)", fontWeight: 600 }}>
+                      onboarding
+                    </Link>{" "}
+                    to get personalized picks.
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: "grid", gap: "1rem" }}>
+                  {recommended.map(t => (
+                    <div key={t.id} className="card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
+                      <div style={{ flex: 1, minWidth: "200px" }}>
+                        <Link href={`/tournaments/${t.id}`} style={{ textDecoration: "none" }}>
+                          <h3 style={{ fontWeight: 700, color: "var(--text-primary)", marginBottom: "0.5rem" }}>
+                            {t.name}
+                          </h3>
+                        </Link>
+                        <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", marginBottom: "0.25rem" }}>
+                          📅 {formatDate(t.date)} • 📍 {t.location || t.city}{t.state ? `, ${t.state}` : ""}
+                        </p>
+                        <p style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
+                          {t.category}
+                        </p>
+                      </div>
+                      <Link href={`/tournaments/${t.id}`} className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", textDecoration: "none" }}>
+                        View Details
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
