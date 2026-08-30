@@ -35,6 +35,13 @@ export default function UpdatesPopup({ latestRelease }: { latestRelease: Changel
       return;
     }
 
+    // localStorage doesn't exist during SSR and reading it deliberately
+    // waits for mount rather than running during render (would either
+    // crash on the server or cause a hydration mismatch), so this is a
+    // legitimate mount-time external-system read, not a prop-derived reset
+    // -- same justification Pepiros's HeroParticles.tsx uses for its
+    // matchMedia read.
+    /* eslint-disable-next-line react-hooks/set-state-in-effect */
     if (seen !== latestRelease.version) setVisible(true);
   }, [latestRelease]);
 

@@ -59,6 +59,16 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
   const pathname = usePathname();
   const active = items.some((item) => pathname === item.href || pathname?.startsWith(`${item.href}/`));
 
+  // Close on navigation. Adjusted during render (React-sanctioned pattern,
+  // same as MobileNavDrawer's open/closing state above) rather than in a
+  // useEffect, which would cause an extra cascading render for a plain
+  // prop-changed reset.
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    setOpen(false);
+  }
+
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (e: PointerEvent) => {
@@ -74,8 +84,6 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
-
-  useEffect(() => setOpen(false), [pathname]);
 
   return (
     <div ref={rootRef} className="nav-dropdown-root" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
