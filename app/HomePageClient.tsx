@@ -16,6 +16,7 @@ import { useThemePreference } from "@/lib/theme";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
 import SiteNav from "@/components/SiteNav";
 import Hero from "@/components/Hero";
+import ReferralCapture from "@/components/ReferralCapture";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -281,6 +282,9 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
 
   return (
     <>
+      {/* Reads ?ref=CODE for the invite-a-friend flow (issue #123). Renders nothing. */}
+      <ReferralCapture />
+
       {/* Mobile Menu Overlay */}
       <MobileNavDrawer
         open={mobileMenuOpen}
