@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import { useThemePreference } from "@/lib/theme";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
 import SiteNav from "@/components/SiteNav";
+import FideRatingChart, { type FideRatingPoint } from "./FideRatingChart";
 
 type WishlistTournament = {
   id: string;
@@ -37,11 +38,54 @@ export default function PlayerDashboardPage() {
   const [tournaments, setTournaments] = useState<WishlistTournament[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Issue #128: FIDE rating trajectory. Undefined = not loaded yet, null =
+  // loaded but the player has no fide_id on file, [] = has a fide_id but no
+  // usable history came back (see lib/fide.ts for why that can happen).
+  const [fideHistory, setFideHistory] = useState<FideRatingPoint[] | null | undefined>(undefined);
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push("/player/login");
     }
   }, [authLoading, user, router]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadFideRating() {
+      if (!user || userType !== "player") return;
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        if (!cancelled) setFideHistory(null);
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/player/fide-rating", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (!res.ok) throw new Error("failed to load FIDE rating history");
+        const body = (await res.json()) as { history?: FideRatingPoint[]; fide_id?: string | null };
+        if (cancelled) return;
+        setFideHistory(body.fide_id ? body.history ?? [] : null);
+      } catch {
+        // FIDE's endpoint (or our own route) is unreachable/changed; hide
+        // the section rather than showing a broken chart.
+        if (!cancelled) setFideHistory(null);
+      }
+    }
+
+    if (user && userType === "player") {
+      loadFideRating();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, userType]);
 
   useEffect(() => {
     async function loadWishlist() {
@@ -114,6 +158,22 @@ export default function PlayerDashboardPage() {
                 {(user as any).rating ? <p>⭐ Rating: {(user as any).rating}</p> : null}
                 {(user as any).fide_id ? <p>🏆 FIDE ID: {(user as any).fide_id}</p> : null}
               </div>
+            </div>
+          )}
+
+          {/* Issue #128: FIDE rating trajectory. Only shown for players who have
+              a fide_id on file; fideHistory stays `undefined` while loading and
+              `null` once we know there's nothing to show, so this renders
+              nothing rather than an empty chart in either of those cases. */}
+          {user && userType === "player" && fideHistory !== null && fideHistory !== undefined && (
+            <div className="card" style={{ marginBottom: "2rem", padding: "1.75rem" }}>
+              <h2 className="font-display" style={{ fontSize: "1.25rem", fontWeight: 700, marginBottom: "0.25rem", color: "var(--text-primary)" }}>
+                FIDE Rating Trajectory
+              </h2>
+              <p style={{ color: "var(--text-muted)", fontSize: "0.8125rem", marginBottom: "1.25rem" }}>
+                Standard, rapid, and blitz ratings over time, pulled from FIDE.
+              </p>
+              <FideRatingChart data={fideHistory} />
             </div>
           )}
 
