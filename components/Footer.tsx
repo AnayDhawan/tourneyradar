@@ -70,7 +70,7 @@ export default function Footer() {
       borderTop: "1px solid var(--border)",
       marginTop: "auto"
     }}>
-      <div className="footer-grid" style={{ maxWidth: "1200px", margin: "0 auto", padding: "3rem 1rem" }}>
+      <div className="footer-grid" style={{ maxWidth: "1200px", margin: "0 auto", padding: "4rem 1.5rem" }}>
         {/* Brand + CTA */}
         <div>
           <Link href="/" style={{ textDecoration: "none", display: "inline-flex", gap: "0.75rem", marginBottom: "0.5rem" }}>
@@ -116,7 +116,7 @@ export default function Footer() {
       <div style={{ borderTop: "1px solid var(--border)" }}>
         <div
           className="footer-bottom-bar"
-          style={{ maxWidth: "1200px", margin: "0 auto", padding: "1.5rem 1rem" }}
+          style={{ maxWidth: "1200px", margin: "0 auto", padding: "1.75rem 1.5rem" }}
         >
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem 1rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>
             <span>© {new Date().getFullYear()} TourneyRadar</span>

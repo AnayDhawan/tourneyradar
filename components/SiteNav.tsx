@@ -89,6 +89,10 @@ function AccountMenu() {
 
 // Single nav bar shared by the homepage and every other page (via
 // BaseLayout) so the site has one consistent nav, not two diverging ones.
+//
+// Three-zone layout (brand | links | utilities), shaped after Pepiros's
+// SiteHeader: a plain flex row with justify-between across exactly three
+// children, rather than lumping links and utilities into one group.
 export default function SiteNav({ onMenuClick }: SiteNavProps) {
   const { userType, loading: authLoading } = useAuth();
   const pathname = usePathname();
@@ -110,11 +114,26 @@ export default function SiteNav({ onMenuClick }: SiteNavProps) {
               </Link>
             );
           })}
-          <ThemeToggle variant="hero" />
-          {loggedIn && <AccountMenu />}
         </div>
 
-        <MobileMenuButton onClick={onMenuClick} />
+        <div className="nav-utilities">
+          <ThemeToggle />
+          {loggedIn ? (
+            <AccountMenu />
+          ) : (
+            !authLoading && (
+              <div className="nav-auth-links">
+                <Link href="/player/login" className="nav-btn-ghost">
+                  Log In
+                </Link>
+                <Link href="/player/register" className="nav-btn-primary">
+                  Sign Up
+                </Link>
+              </div>
+            )
+          )}
+          <MobileMenuButton onClick={onMenuClick} />
+        </div>
       </div>
     </nav>
   );
