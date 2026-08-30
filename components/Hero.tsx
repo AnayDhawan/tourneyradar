@@ -60,7 +60,9 @@ export default function Hero({ stats, tournaments }: HeroProps) {
       <div className="home-hero-inner">
         <div className="home-hero-content">
           <h1 className="home-hero-title font-display">
-            Discover Chess <span className="highlight">Tournaments Worldwide</span>
+            Discover Chess
+            <br />
+            <span className="highlight">Tournaments, Worldwide</span>
           </h1>
 
           <p className="home-hero-description">
@@ -80,15 +82,12 @@ export default function Hero({ stats, tournaments }: HeroProps) {
             >
               View on GitHub
             </a>
-          </div>
-
-          {!authLoading && userType !== "player" && (
-            <div className="home-hero-signup">
+            {!authLoading && userType !== "player" && (
               <Link href="/player/register" className="btn btn-signup">
                 Sign up, it&apos;s Free!
               </Link>
-            </div>
-          )}
+            )}
+          </div>
 
           <HeroStatsLine stats={stats} />
         </div>

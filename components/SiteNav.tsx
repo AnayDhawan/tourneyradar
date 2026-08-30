@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import MobileMenuButton from "@/components/MobileMenuButton";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/AuthContext";
@@ -15,7 +16,7 @@ const NAV_LINKS = [
   { href: "/docs", label: "Docs" },
   { href: "/updates", label: "Updates" },
   { href: "/about", label: "About" },
-  { href: "/support", label: "Support Us" },
+  { href: "/support", label: "Support" },
   { href: "/api-docs", label: "API Docs" },
 ];
 
@@ -25,6 +26,64 @@ function AccountIcon() {
       <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" />
       <path d="M4 20c0-4 3.5-6 8-6s8 2 8 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
+  );
+}
+
+// Hand-rolled account dropdown (Wishlist / Sign out), shaped after Pepiros's
+// header account menu. No Radix dependency — TR doesn't have one installed
+// and this is the only place that would need it.
+function AccountMenu() {
+  const { logout } = useAuth();
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={rootRef} style={{ position: "relative" }}>
+      <button
+        type="button"
+        className="nav-account-link"
+        aria-label="Account menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <AccountIcon />
+      </button>
+
+      {open && (
+        <div className="nav-account-menu">
+          <Link href="/player/wishlist" onClick={() => setOpen(false)}>
+            Wishlist
+          </Link>
+          <button
+            type="button"
+            onClick={async () => {
+              setOpen(false);
+              await logout();
+              router.push("/");
+            }}
+          >
+            Sign out
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -52,11 +111,7 @@ export default function SiteNav({ onMenuClick }: SiteNavProps) {
             );
           })}
           <ThemeToggle variant="hero" />
-          {loggedIn && (
-            <Link href="/player/wishlist" className="nav-account-link" aria-label="My account" title="My account">
-              <AccountIcon />
-            </Link>
-          )}
+          {loggedIn && <AccountMenu />}
         </div>
 
         <MobileMenuButton onClick={onMenuClick} />

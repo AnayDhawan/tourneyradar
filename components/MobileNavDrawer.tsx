@@ -78,7 +78,7 @@ export default function MobileNavDrawer({ open, onClose, userType, showThemeTogg
             About
           </Link>
           <Link href="/support" onClick={onClose}>
-            Support Us
+            Support
           </Link>
           <Link href="/api-docs" onClick={onClose}>
             API Docs
