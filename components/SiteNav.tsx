@@ -156,6 +156,9 @@ function AccountMenu() {
           <Link href="/player/wishlist" onClick={() => setOpen(false)}>
             Wishlist
           </Link>
+          <Link href="/player/settings" onClick={() => setOpen(false)}>
+            Settings
+          </Link>
           <button
             type="button"
             onClick={async () => {
