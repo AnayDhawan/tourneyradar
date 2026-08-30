@@ -163,6 +163,10 @@ export default async function StatusPage() {
               </table>
               <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", marginTop: "1rem" }}>
                 A region is flagged stale when it has not completed a successful run in over {STALE_DAYS} days.
+                {" "}
+                <a href="/status/detail" style={{ color: "var(--text-primary)", textDecoration: "underline" }}>
+                  Per-federation breakdown, failures, and geocoding tier usage &rarr;
+                </a>
               </p>
             </div>
           )}
