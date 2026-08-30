@@ -68,19 +68,30 @@ export default function MobileNavDrawer({ open, onClose, userType, showThemeTogg
           <Link href="/tournaments" onClick={onClose}>
             Tournaments
           </Link>
+          <Link href="/docs" onClick={onClose}>
+            Docs
+          </Link>
+          <Link href="/updates" onClick={onClose}>
+            Updates
+          </Link>
           <Link href="/about" onClick={onClose}>
             About
           </Link>
           <Link href="/support" onClick={onClose}>
-            Support Us
+            Support
           </Link>
           <Link href="/api-docs" onClick={onClose}>
             API Docs
           </Link>
           {!loggedIn && (
-            <Link href="/player/register" className="mobile-drawer-cta" onClick={onClose}>
-              Sign Up
-            </Link>
+            <>
+              <Link href="/player/login" onClick={onClose}>
+                Log In
+              </Link>
+              <Link href="/player/register" className="mobile-drawer-cta" onClick={onClose}>
+                Sign Up
+              </Link>
+            </>
           )}
           {showThemeToggle && (
             <div className="mobile-drawer-theme">

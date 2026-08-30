@@ -7,6 +7,8 @@ import { QueryProvider } from "./providers";
 import { Analytics } from '@vercel/analytics/react';
 import { inter, poppins } from "./fonts";
 import FeedbackPrompt from "@/components/FeedbackPrompt";
+import UpdatesPopup from "@/components/UpdatesPopup";
+import { getChangelog } from "@/lib/changelog";
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.tourneyradar.com'),
@@ -92,6 +94,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const latestRelease = getChangelog()[0] ?? null;
+
   return (
     <html
       lang="en"
@@ -138,6 +142,7 @@ export default function RootLayout({
               {/* Needs to live inside the providers: useAuth resolves player_id,
                   useToast reports submit results. */}
               <FeedbackPrompt />
+              <UpdatesPopup latestRelease={latestRelease} />
             </ToastProvider>
           </AuthProvider>
         </QueryProvider>

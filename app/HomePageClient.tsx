@@ -15,6 +15,7 @@ import { trackEvent } from "@/lib/track";
 import { useThemePreference } from "@/lib/theme";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
 import SiteNav from "@/components/SiteNav";
+import Hero from "@/components/Hero";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -137,56 +138,8 @@ function isWithinDateRange(dateStr: string, start: string, end: string): boolean
   return true;
 }
 
-// Isolated in its own component so the 60-tick count-up interval only
-// re-renders this small subtree, not the whole page (map + tournament
-// table included) on every tick.
-function HeroStats({ stats }: { stats: Props["stats"] }) {
-  const [animatedStats, setAnimatedStats] = useState({ total: 0, countries: 0, mapped: 0 });
-
-  useEffect(() => {
-    const duration = 2000;
-    const steps = 60;
-    const interval = duration / steps;
-    let step = 0;
-
-    const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
-
-    const timer = setInterval(() => {
-      step++;
-      const progress = easeOutQuart(step / steps);
-      setAnimatedStats({
-        total: Math.round(stats.total * progress),
-        countries: Math.round(stats.countries * progress),
-        mapped: Math.round(stats.mapped * progress),
-      });
-      if (step >= steps) clearInterval(timer);
-    }, interval);
-
-    return () => clearInterval(timer);
-  }, [stats]);
-
-  return (
-    <div className="stats-container" aria-label="Site statistics">
-      <div className="stat-item">
-        <div className="stat-number">{animatedStats.total}</div>
-        <div className="stat-label">Upcoming Events</div>
-      </div>
-      <div className="stat-divider" />
-      <div className="stat-item">
-        <div className="stat-number">{animatedStats.countries}</div>
-        <div className="stat-label">Countries</div>
-      </div>
-      <div className="stat-divider" />
-      <div className="stat-item">
-        <div className="stat-number">{animatedStats.mapped}</div>
-        <div className="stat-label">On Map</div>
-      </div>
-    </div>
-  );
-}
-
 export default function HomePageClient({ initialTournaments, stats }: Props) {
-  const { user, userType, loading: authLoading } = useAuth();
+  const { userType, loading: authLoading } = useAuth();
   const { showToast } = useToast();
   const [mapView, setMapView] = useState<MapView>("europe");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -336,49 +289,9 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
         showThemeToggle
       />
 
-      <section className="hero-bg">
-        <SiteNav onMenuClick={() => setMobileMenuOpen(true)} />
+      <SiteNav onMenuClick={() => setMobileMenuOpen(true)} />
 
-        <div className="hero-content-wrapper">
-          <div className="hero-container">
-            <div className="hero-content">
-              <h1 className="hero-title font-display">
-                Discover Chess <span className="highlight">Tournaments<br />Worldwide</span>
-              </h1>
-
-              <p className="hero-description">
-                A platform aggregating over-the-board chess tournaments
-                from around the world. Find your next event.
-              </p>
-
-              <div className="hero-cta-block">
-                <div className="btn-group">
-                  <Link href="/tournaments" className="btn btn-primary">
-                    Explore Tournaments
-                  </Link>
-                  <a
-                    href="https://github.com/AnayDhawan/tourneyradar"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-outline"
-                    onClick={() => trackEvent("star_link", { src: "hero" })}
-                  >
-                    View on GitHub
-                  </a>
-                </div>
-
-                {!authLoading && userType !== "player" && (
-                  <Link href="/player/register" className="btn btn-signup">
-                    Sign up, it&apos;s Free!
-                  </Link>
-                )}
-              </div>
-
-              <HeroStats stats={stats} />
-            </div>
-          </div>
-        </div>
-      </section>
+      <Hero stats={stats} tournaments={initialTournaments} />
 
       <section id="tournaments" className="tournament-section">
         <div className="section-container">
@@ -757,7 +670,114 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
         </div>
       </section>
 
+      <section className="marketing-band marketing-band-muted">
+        <div className="marketing-band-inner">
+          <div>
+            <p className="marketing-kicker">Why TourneyRadar</p>
+            <h2>Built by a chess player, for chess players.</h2>
+            <p>
+              Finding your next over-the-board tournament shouldn&apos;t mean digging through a dozen
+              federation sites. TourneyRadar pulls them all into one free, open-source map.
+            </p>
+          </div>
+          <div className="marketing-band-actions">
+            <Link href="/tournaments" className="btn btn-primary">
+              Browse Tournaments
+            </Link>
+            <Link href="/about" className="btn btn-outline-muted">
+              About
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="feature-grid-section">
+        <p className="marketing-kicker">What is inside</p>
+        <h2 style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--text-primary)" }}>
+          Everything a player needs.
+        </h2>
+
+        <div className="feature-grid">
+          <Link href="/docs" className="feature-card">
+            <p className="marketing-kicker">Docs &amp; guides</p>
+            <h3>Guides worth reading</h3>
+            <p>
+              How to register for FIDE-rated events, how TR helps you sign up, and how to find a
+              tournament near you.
+            </p>
+            <span className="feature-card-cta">
+              Read the docs
+              <ArrowIcon />
+            </span>
+          </Link>
+
+          <Link href="/updates" className="feature-card">
+            <p className="marketing-kicker">Updates</p>
+            <h3>What&apos;s new</h3>
+            <p>See what shipped recently, from new filters to this site redesign.</p>
+            <span className="feature-card-cta">
+              View updates
+              <ArrowIcon />
+            </span>
+          </Link>
+
+          <Link href="/player/wishlist" className="feature-card">
+            <p className="marketing-kicker">Wishlist</p>
+            <h3>Save tournaments, get notified</h3>
+            <p>
+              Save tournaments you care about and get a weekly digest matching your categories and
+              location.
+            </p>
+            <span className="feature-card-cta">
+              Open wishlist
+              <ArrowIcon />
+            </span>
+          </Link>
+
+          <Link href="/api-docs" className="feature-card">
+            <p className="marketing-kicker">API</p>
+            <h3>Build on TR&apos;s data</h3>
+            <p>Free public API for the same tournament data that powers this site.</p>
+            <span className="feature-card-cta">
+              Read API docs
+              <ArrowIcon />
+            </span>
+          </Link>
+        </div>
+      </section>
+
+      <section className="marketing-band">
+        <div className="marketing-band-inner">
+          <div>
+            <h2 style={{ fontSize: "1.25rem" }}>Free &amp; open source, built by chess players.</h2>
+            <p>Every line of code is public. Star it, fork it, or send a PR.</p>
+          </div>
+          <div className="marketing-band-actions">
+            <a
+              href="https://github.com/AnayDhawan/tourneyradar"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-outline-muted"
+              onClick={() => trackEvent("star_link", { src: "homepage_closing" })}
+            >
+              ⭐ Star on GitHub
+            </a>
+            <Link href="/feedback" className="btn btn-outline-muted">
+              Send Feedback
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <Footer />
     </>
+  );
+}
+
+function ArrowIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
