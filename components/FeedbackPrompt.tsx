@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { trackEvent } from "@/lib/track";
+import FeedbackForm from "@/components/FeedbackForm";
 
 const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000; // re-ask 7 days after "maybe later"
 const FIRST_VISIT_DELAY = 20000; // first-time visitor: give them time to get value
@@ -12,12 +13,11 @@ const SCROLL_THRESHOLD = 0.5; // fire once half the page has been scrolled
 // Pages where a feedback nudge would be noise (auth flows, legal text).
 const EXCLUDED_PREFIXES = ["/player", "/legal", "/feedback"];
 
-// Lightweight teaser that routes to the dedicated /feedback page rather than
-// collecting the rating inline, so the actual form gets the full-page,
-// more-appealing treatment instead of being squeezed into a corner card.
+// Full-screen feedback modal. Collects the rating/comment inline (via the
+// shared FeedbackForm, same one /feedback and About use) rather than routing
+// away, since a full-screen takeover is the moment to ask, not a detour.
 export default function FeedbackPrompt() {
   const pathname = usePathname();
-  const router = useRouter();
   const [show, setShow] = useState(false);
   const firedRef = useRef(false);
   const visitsRef = useRef(1);
@@ -97,28 +97,23 @@ export default function FeedbackPrompt() {
     return cleanup;
   }, [pathname]);
 
-  // Focus management + Esc to dismiss when open.
+  // Focus management, Esc to dismiss, and lock page scroll while the
+  // full-screen modal is open.
   useEffect(() => {
     if (!show) return;
     closeBtnRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") handleLater();
     };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [show]);
-
-  const handleGiveFeedback = useCallback(() => {
-    trackEvent("feedback_button_click", { src: "popup", page: pathname });
-    try {
-      localStorage.setItem("tr_feedback_snooze", String(Date.now()));
-    } catch {
-      /* ignore */
-    }
-    setShow(false);
-    router.push(`/feedback?from=${encodeURIComponent(pathname || "/")}`);
-  }, [pathname, router]);
 
   const handleLater = useCallback(() => {
     trackEvent("feedback_maybe_later");
@@ -145,19 +140,18 @@ export default function FeedbackPrompt() {
   return (
     <div
       role="dialog"
-      aria-label="Give feedback"
+      aria-modal="true"
+      aria-label="Rate your TourneyRadar experience"
       style={{
         position: "fixed",
-        bottom: "1.5rem",
-        right: "1.5rem",
-        zIndex: 900,
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
-        borderRadius: 16,
-        padding: "1.25rem 1.5rem",
-        width: "min(300px, calc(100vw - 2rem))",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
-        animation: "slideUp 0.3s ease",
+        inset: 0,
+        zIndex: 1000,
+        background: "var(--background)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem 1.5rem",
+        overflowY: "auto",
       }}
     >
       <button
@@ -165,59 +159,61 @@ export default function FeedbackPrompt() {
         onClick={handleLater}
         style={{
           position: "absolute",
-          top: "0.75rem",
-          right: "0.75rem",
+          top: "1.5rem",
+          right: "1.5rem",
           background: "none",
           border: "none",
           cursor: "pointer",
           color: "var(--text-secondary)",
-          fontSize: 18,
+          fontSize: 28,
           lineHeight: 1,
         }}
         aria-label="Close"
       >
         ×
       </button>
-      <div style={{ fontSize: 24, marginBottom: "0.5rem" }}>💬</div>
-      <div style={{ fontWeight: 700, marginBottom: "0.375rem", color: "var(--text-primary)" }}>
-        Got a sec for TourneyRadar?
-      </div>
-      <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginBottom: "1rem" }}>
-        30 seconds of feedback helps a ton.
-      </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <button
-          className="btn btn-primary"
-          style={{ textAlign: "center", fontSize: "0.875rem" }}
-          onClick={handleGiveFeedback}
-        >
-          Give Feedback
-        </button>
-        <button
-          className="btn"
-          style={{
-            background: "var(--surface-elevated)",
-            border: "1px solid var(--border)",
-            color: "var(--text-primary)",
-            fontSize: "0.875rem",
+
+      <div className="feedback-card" style={{ margin: "auto" }}>
+        <FeedbackForm
+          fromPage={pathname || "/"}
+          title="Rate TourneyRadar experience"
+          subtitle="How's it going so far? A quick rating helps a ton, a comment is optional."
+          onSubmitted={() => {
+            /* tr_feedback_ok is set inside FeedbackForm; leave the modal open
+               so the thank-you state (with the GitHub star nudge) shows. */
           }}
-          onClick={handleLater}
-        >
-          Maybe later
-        </button>
-        <button
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--text-secondary)",
-            fontSize: "0.8125rem",
-            cursor: "pointer",
-            textDecoration: "underline",
-          }}
-          onClick={handleNever}
-        >
-          Don&apos;t show again
-        </button>
+        />
+
+        <div style={{ display: "flex", justifyContent: "center", gap: "1.5rem", marginTop: "1.5rem" }}>
+          <button
+            type="button"
+            onClick={handleLater}
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--text-secondary)",
+              fontSize: "0.8125rem",
+              cursor: "pointer",
+              textDecoration: "underline",
+            }}
+          >
+            Maybe later
+          </button>
+          <button
+            type="button"
+            onClick={handleNever}
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--text-secondary)",
+              fontSize: "0.8125rem",
+              cursor: "pointer",
+              textDecoration: "underline",
+            }}
+          >
+            Don&apos;t show again
+          </button>
+        </div>
       </div>
     </div>
   );

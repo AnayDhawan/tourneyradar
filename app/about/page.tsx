@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import BaseLayout from "@/components/BaseLayout";
 import { trackEvent } from "@/lib/track";
 
@@ -102,6 +103,25 @@ export default function AboutPage() {
                 Contributing Guide
               </a>
             </div>
+          </div>
+
+          {/* Feedback */}
+          <div className="card" style={{ marginBottom: "2rem" }}>
+            <h2 className="font-display" style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1rem", color: "var(--text-primary)" }}>
+              Feedback
+            </h2>
+            <p style={{ color: "var(--text-secondary)", lineHeight: 1.8, marginBottom: "1.5rem" }}>
+              Got a rating or a comment? It takes about 30 seconds and directly shapes
+              what gets built next.
+            </p>
+            <Link
+              href="/feedback"
+              className="btn btn-primary"
+              style={{ textDecoration: "none", display: "inline-block" }}
+              onClick={() => trackEvent("feedback_button_click", { src: "about" })}
+            >
+              Rate TourneyRadar
+            </Link>
           </div>
 
           {/* Disclaimer */}

@@ -766,9 +766,6 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
             >
               ⭐ Star on GitHub
             </a>
-            <Link href="/feedback" className="btn btn-outline-muted">
-              Send Feedback
-            </Link>
           </div>
         </div>
       </section>
