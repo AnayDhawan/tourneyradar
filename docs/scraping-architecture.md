@@ -10,12 +10,13 @@ Chess-Results.com (fed.aspx?fed=IND … fed=GER …)
         ├── 10 GitHub Actions matrix jobs (one per region, 45 min timeout each)
         │       └── Puppeteer → fetch fed page → extract tnr links → scrape detail pages
         │                └── parse date, category, FIDE flag, rating restrictions
-        │                └── geocode city via cached Google Maps call
+        │                └── geocode city via 4-tier fallback (city table → country centroid → Google → Nominatim)
         │
         ├── 10 artifacts (tournaments-{region}.json) uploaded
         │
-        └── merge job → merged-tournaments.json → Supabase upsert (onConflict: id)
-                     └── scraper_logs (per-region success / per-failure rows for /status)
+        └── merge job → merged-tournaments.json → fuzzy dedup across federations
+                     → Supabase upsert (onConflict: id) → tournament_history trigger
+                     └── scraper_logs (region/federation/dedup/geocode-tier rows for /status, /status/detail)
 ```
 
 Weekly cron: `0 2 * * 0` (Sunday 02:00 UTC) + manual `workflow_dispatch`.
@@ -129,15 +130,15 @@ The issue description names four tiers; the code splits them across two files:
 | 3 | `scripts/scrape.ts:geocode()` + `lib/geocoding.ts:geocodeAddress()` | Google Maps Geocoding API (`/maps/api/geocode/json?address=`) | billable, fast |
 | 4 | `lib/geocoding.ts:geocodeWithNominatim()` | OpenStreetMap Nominatim (`/search?format=json`) with `User-Agent: TourneyRadar/1.0` and `NOMINATIM_DELAY = 1100 ms` between calls, `geocodeCity`/`geocodeTournaments` batch with dedup | free, rate-limited 1 req/s |
 
-In the **scraper path** (`scripts/scrape.ts`), Phase 3 uses tier 3 only — Google Maps with a per-`city,country` cache (`Map<string, coords|null>`) and 50 ms pacing, setting `lat`/`lng` on the tournament before `pushTournaments`. If `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is unset, Phase 3 is skipped and tournaments are stored without coordinates.
+**Update (issue #126):** the split described above was true through 2026-08-30 but no longer is. Phase 3 previously had its own separate, simpler `geocode()` (Google-only, no fallback) while `lib/geocoding.ts`'s 4-tier chain sat unused — dead code relative to the live pipeline. Phase 3 now calls `geocodeWithFallback(city, country, country_code)` directly, so all four tiers are live in production, and each result carries a `tier` field recording which one resolved it (`'city_table' | 'country_centroid' | 'google' | 'nominatim'`). A per-run tally is logged to `scraper_logs` via `logGeocodeTierSummary` (message shape `[geocode_tier] city_table:N country_centroid:N google:N nominatim:N unresolved:N`), surfaced on the observability dashboard (see section 7). `geocodeTournaments`/`geocodeSingleCity` remain the entry points for library consumers hydrating older rows outside the scraper's own run.
 
-In the **library path** (`lib/geocoding.ts`), `geocodeTournaments(tournaments)` implements the full chain for callers that need local fallback: try `geocodeCity(city, country_code)` (tiers 1+2) synchronously, collect `unknownCities`, then batch them through `geocodeWithNominatim` (tier 4) with deduplication and result caching back into `CITY_COORDINATES`. `geocodeSingleCity` is the single-city entry point for that chain.
+Nominatim's 1 req/s pacing (`NOMINATIM_DELAY = 1100 ms`) is now a real cost on the scraper's hot path for any city that misses both hardcoded tiers and isn't resolved by Google, not just a theoretical one — worth watching run duration if a batch of unusual-city tournaments comes through in one run.
 
-Both paths are intentionally split: the scraper must not block on 1 req/s Nominatim for thousands of tournaments (it batches only unknown cities and currently defers to Google), while library consumers that hydrate older rows can afford the slower fallback.
+## 5. Deduplication, persistence, and history
 
-## 5. Persistence and idempotency
+**Cross-source dedup (issue #124), new since 2026-08-30.** The same tournament can appear under two different `cr_` ids when a federation site and a regional sub-site both list it. Before either the merge job's `--push-from` path or a local full `npm run scrape` pushes, `dedupeTournaments()` (`lib/dedup.ts`) scores every pair on name similarity (hand-rolled Levenshtein, normalized 0–1), date proximity (exact `start_date` = 1.0, within ±1 day = 0.6, else 0), and location (same city + country_code = 1.0, same country_code with high name similarity but differing city formatting = 0.9, differing country_code = 0). The weighted combination (`0.5*name + 0.3*date + 0.2*location`) against a `DUPLICATE_SCORE_THRESHOLD` of 0.85 decides a match; matched tournaments are grouped (transitively, via union-find), and the most complete row in each group (geocoded, has organizer/external link, longer name, in that order) is kept. A summary is logged to `scraper_logs` via `logDedupSummary` (`[dedup] merged N duplicate tournament(s): ...`). Per-region CI output (`--output`) is left un-deduped on purpose — dedup only runs where a full merged list actually exists, since that's where cross-region/cross-federation duplicates surface.
 
-`pushTournaments(tournaments)` upserts one row at a time:
+`pushTournaments(tournaments)` then upserts one row at a time:
 
 ```ts
 await supabase.from('tournaments').upsert({
@@ -150,7 +151,9 @@ await supabase.from('tournaments').upsert({
 
 `id = cr_${tnr}` is stable, so reruns are idempotent. Single-row upserts sacrifice batch throughput for per-row error isolation — a constraint violation on one tournament does not roll back the batch; it is logged via `scraper_logs` and the loop continues. `saved` is the success count surfaced to the `merge` job and to `logScraperSuccess`.
 
-Schema lives in `supabase/migrations/`; core columns are `tournaments` (one row per event), `players`/`admins` (auth), `player_favorite_tournaments` (wishlist), and observability tables below.
+**Append-only history (issue #125), new since 2026-08-30.** Every upsert used to be destructive: a `tournaments` row's prior state was gone the moment a later run overwrote it. A `tournament_history` table (migration `20260830120200_tournament_history_table.sql`) now captures every version via an `after insert or update on tournaments` trigger (`record_tournament_history()`, `security definer`), storing a full `jsonb` snapshot of the row plus `recorded_at`. This is a database-level trigger, not scraper code, so it also captures writes from the (separate, closed-source) admin panel, not just `pushTournaments`. Public-read RLS, no direct write policy for any role, the trigger writes regardless of who wrote to `tournaments`.
+
+Schema lives in `supabase/migrations/`; core columns are `tournaments` (one row per event), `tournament_history` (append-only snapshots), `players`/`admins` (auth), `player_favorite_tournaments` (wishlist), and observability tables below.
 
 ## 6. Orchestration (GitHub Actions)
 
@@ -188,9 +191,10 @@ Failure handling: `logScraperFailure` is best-effort — `supabase.from('scraper
 
 ## 7. Observability
 
-- **`scraper_logs`** table (`supabase/migrations/*scraper_logs*`): rows with `started_at`, `completed_at`, `status` (`success`/`failed`), `message`. Success rows encode region and row count in `message` (`[region:europe-west] success: 42 tournaments`) because the table predates dedicated columns — see `supabase/README.md`.
+- **`scraper_logs`** table (`supabase/migrations/*scraper_logs*`): rows with `started_at`, `completed_at`, `status` (`success`/`failed`/`completed`), `message`. Region, per-federation, dedup, and geocode-tier data all ride in `message` (`[region:europe-west] success: 42 tournaments`, `[fed:eng] success: 12 tournaments found`, `[dedup] merged N duplicate tournament(s): ...`, `[geocode_tier] city_table:N country_centroid:N google:N nominatim:N unresolved:N`) because the table predates dedicated columns — see `supabase/README.md`.
 - **Phase banners**: `═` separators and `✓` counts are plain `console.log` — visible in Actions logs per region.
-- **Status page**: reads `scraper_logs` to show per-region freshness (see `app/api/scraper-last-success` and `app/status/page.tsx`).
+- **Status page** (`app/status/page.tsx`): reads `scraper_logs` to show per-region freshness (see `app/api/scraper-last-success`).
+- **Status detail page** (`app/status/detail/page.tsx`, issue #126, new since 2026-08-30): a richer internal-facing view built on the same table — per-federation success rate (not just per-region), a currently-failing-federations alert list with the last failure reason, and the geocoding tier-usage breakdown described in section 4. There is no admin-auth layer in this repo (the admin panel is a separate, closed-source deployment per `CONTRIBUTING.md`), so this page is public like `/status`, just more detailed.
 
 No external APM — the design trades granularity for durability: even if Supabase is briefly unavailable, the scraper finishes and artifacts are retained (90 days by default via `upload-artifact`).
 
@@ -204,9 +208,11 @@ No external APM — the design trades granularity for durability: even if Supaba
 ## 9. Known limitations and next steps
 
 - **City parsing is heuristic** — `location.split(',')[0]` fails on `St. Louis, Missouri, USA` style strings; `CITY_COORDINATES` contains hand-added aliases (`st. louis`/`saint louis`) to compensate.
-- **Nominatim not on the scraper hot path** — unknown cities without Google key end up without coordinates; wiring `lib/geocoding.ts:geocodeTournaments` into the scraper's unknown-city set would close that gap at the cost of 1 req/s pacing.
 - **Single-row upserts** — slower than batch but gives per-row observability; switching to `.upsert(rows, {onConflict:'id'})` is viable once error handling is batched.
-- **No append-only history** — reruns overwrite rows; historical trajectory (issue #125) would need a separate `tournaments_history` table.
+- **Dedup threshold is a fixed constant, not tuned against labeled data** — `DUPLICATE_SCORE_THRESHOLD = 0.85` (section 5) was chosen by inspection of a few known-duplicate/known-distinct pairs, not a labeled dataset; worth revisiting if false merges or missed duplicates show up in practice.
+- **History is per-row snapshots, not a queryable time series yet** — `tournament_history` (section 5) captures every version as `jsonb`, which is enough to reconstruct "what did this row look like on date X" but nothing yet aggregates it into trend views; that's a separate future feature, not part of #125's own scope.
+
+Resolved since the version of this doc that shipped with issue #129: geocoding's 4-tier fallback is now live on the scraper's hot path (was previously dead code, see section 4), and reruns no longer silently lose history (see section 5, issue #125).
 
 ---
 
@@ -214,12 +220,15 @@ No external APM — the design trades granularity for durability: even if Supaba
 
 | File | Role |
 |------|------|
-| `scripts/scrape.ts` | Puppeteer scraper, region map, category/FIDE/rating parsers, 3-tier geocode + Supabase push |
-| `lib/geocoding.ts` | City/country hardcode tables, state centroids, Nominatim rate-limited fallback, `geocodeTournaments` batch |
+| `scripts/scrape.ts` | Puppeteer scraper, region map, category/FIDE/rating parsers, dedup + 4-tier geocode + Supabase push |
+| `lib/dedup.ts` | Cross-federation fuzzy-match dedup (name/date/location scoring, union-find grouping) |
+| `lib/geocoding.ts` | City/country hardcode tables, state centroids, Google Maps + Nominatim fallback, `geocodeWithFallback`/`geocodeTournaments` |
 | `lib/countryMap.ts` | FIDE 3-letter → ISO-2 mapping used by `getCountryCode` |
 | `.github/workflows/scrape.yml` | 10-way matrix + merge job, weekly cron |
 | `app/api/cron/scrape-tournaments/route.ts` | Vercel cron shim (logs only) |
 | `vercel.json` | Cron schedule + headers |
 | `supabase/migrations/*scraper_logs*` | Observability table DDL |
+| `supabase/migrations/*tournament_history*` | Append-only history table + trigger DDL |
+| `app/status/detail/page.tsx` | Per-federation/geocode-tier observability dashboard |
 
 Contributions that touch scraping should run `npm run scrape -- --region india --output /tmp/out.json` locally (requires `.env.local` with Supabase + Google keys) and keep the `CITY_COORDINATES` / `COUNTRY_CODES` tables in sync with any new federation added to `REGION_MAP`.
