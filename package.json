@@ -14,6 +14,8 @@
     "scrape:region": "npx tsx scripts/scrape.ts",
     "digest": "npx tsx --env-file=.env.local scripts/send-digest.ts",
     "digest:ci": "npx tsx scripts/send-digest.ts",
+    "export:dataset": "npx tsx --env-file=.env.local scripts/export-dataset.ts",
+    "export:dataset:ci": "npx tsx scripts/export-dataset.ts",
     "test:e2e": "playwright test",
     "demo:gif": "node scripts/record-demo.mjs"
   },

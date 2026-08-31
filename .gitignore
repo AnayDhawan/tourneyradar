@@ -43,3 +43,6 @@ Claude
 /playwright-report/
 /blob-report/
 .env*
+
+# Local dataset export output (scripts/export-dataset.ts default target)
+/data/exports/
