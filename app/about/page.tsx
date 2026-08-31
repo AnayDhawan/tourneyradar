@@ -124,6 +124,25 @@ export default function AboutPage() {
             </Link>
           </div>
 
+          {/* Open Dataset */}
+          <div className="card" style={{ marginBottom: "2rem" }}>
+            <h2 className="font-display" style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1rem", color: "var(--text-primary)" }}>
+              Open Dataset
+            </h2>
+            <p style={{ color: "var(--text-secondary)", lineHeight: 1.8, marginBottom: "1.5rem" }}>
+              The cleaned tournament dataset behind this map is free to download for the
+              hobbyist and research community, CSV or NDJSON, with attribution notes included.
+            </p>
+            <Link
+              href="/dataset"
+              className="btn btn-primary"
+              style={{ textDecoration: "none", display: "inline-block" }}
+              onClick={() => trackEvent("dataset_link_click", { src: "about" })}
+            >
+              View Open Dataset
+            </Link>
+          </div>
+
           {/* Disclaimer */}
           <div className="card">
             <h2 className="font-display" style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1rem", color: "var(--text-primary)" }}>
