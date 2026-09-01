@@ -4,10 +4,23 @@ import BaseLayout from "@/components/BaseLayout";
 
 import { getAllUpcomingTournaments, getTournamentStats } from "@/lib/tournaments";
 import MonthlyChart from "./MonthlyChart";
+import TrafficChart from "./TrafficChart";
 
 const MONTH_LABELS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+// Manually logged once a month (no self-hosted analytics infra).
+const MONTHLY_TRAFFIC = [
+  { month: "Jan 2026", views: 2050, visitors: 1440 },
+  { month: "Feb 2026", views: 3020, visitors: 2230 },
+  { month: "Mar 2026", views: 3560, visitors: 2650 },
+  { month: "Apr 2026", views: 4250, visitors: 2210 },
+  { month: "May 2026", views: 2110, visitors: 1580 },
+  { month: "Jun 2026", views: 4618, visitors: 3097 },
+  { month: "Jul 2026", views: 8564, visitors: 5891 },
+  { month: "Aug 2026", views: 5460, visitors: 3610 },
 ];
 
 const getStats = unstable_cache(
@@ -71,6 +84,19 @@ export default async function StatsPage() {
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="card" style={{ marginBottom: "2rem", padding: "1.75rem" }}>
+            <h3 className="font-display" style={{
+              fontSize: "1.125rem",
+              fontWeight: 700,
+              marginBottom: "1.5rem",
+              color: "var(--text-primary)",
+            }}>
+              Monthly Traffic
+            </h3>
+
+            <TrafficChart data={MONTHLY_TRAFFIC} />
           </div>
 
           <div className="card" style={{ marginBottom: "2rem", padding: "1.75rem" }}>
