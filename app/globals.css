@@ -2412,6 +2412,30 @@ body > div[style*="position: fixed"][style*="bottom"][style*="left"] {
    bottom bar with legal links + socials)
    ============================================= */
 
+/* The footer is a fixed dark surface, not theme-reactive. Rather than
+   hardcoding colors on every node, it re-declares the palette tokens at
+   its own scope with the [data-theme="dark"] values. Custom properties
+   inherit, so every descendant (link columns, .footer-kicker, .btn-primary,
+   DataFreshness) resolves against dark values in both site themes without
+   knowing the toggle exists. */
+.site-footer {
+  --primary: #3B82F6;
+  --primary-dark: #2563EB;
+  --primary-light: #60A5FA;
+  --secondary: #FFFFFF;
+  --accent: #FBBF24;
+  --background: #0F172A;
+  --surface: #1E293B;
+  --surface-elevated: #334155;
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --border: #334155;
+  --border-hover: #475569;
+  --success: #34D399;
+  color: var(--text-primary);
+}
+
 .footer-kicker {
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   font-size: 0.6875rem;

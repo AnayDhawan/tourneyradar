@@ -64,7 +64,7 @@ function FooterColumn({
 
 export default function Footer() {
   return (
-    <footer style={{
+    <footer className="site-footer" style={{
       background: "var(--surface)",
       borderTop: "1px solid var(--border)",
       marginTop: "auto"
@@ -178,6 +178,9 @@ export default function Footer() {
                 height: "36px",
                 borderRadius: "50%",
                 background: "#333",
+                // #333 sits close to the fixed dark footer surface (#1E293B),
+                // so the circle needs an edge to stay visible.
+                border: "1px solid rgba(255, 255, 255, 0.22)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
