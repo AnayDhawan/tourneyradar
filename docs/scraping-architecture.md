@@ -108,7 +108,7 @@ Error handling: every scrape helper catches and calls `logScraperFailure(source,
 
 ### Derived fields
 
-**Category** — `detectCategory(name)` defaults to `Rapid` (the global majority). Multilingual keyword lists promote to `Blitz` or `Classical` only on explicit signals (`blitz`/`bullet`/`bijli`…, `classical`/`standard`/`klassisch`/`classique`…, `rapid`/`schnell`/`rapide`… and Hindi terms `tez`/`jaldi`).
+**Category** — `detectCategoryFromTimeControl(tc)` regexes chess-results' own `Time control (Standard|Rapid|Blitz)` marker off the detail page (already scraped into `time_control`). Standard maps to `Classical`, Blitz and Rapid pass through as-is. No marker means `category: null`, never a guess.
 
 **FIDE-rated** — `detectFideRated(name)` checks for `fide`/`rated`/`elo` and translations (`bewertet`/`gewertet`, `homologué`, `valorado`, `рейтинговый`, …) plus standalone `\belo\b`.
 

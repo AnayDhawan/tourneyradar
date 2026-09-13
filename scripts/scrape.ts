@@ -139,66 +139,15 @@ function parseDate(str: string): { start: string; end: string } | null {
 }
 
 // ========== CATEGORY DETECTION ==========
-// Detect tournament category from tournament NAME
-// DEFAULT: Rapid (most common worldwide)
-// Only Classical or Blitz if explicitly mentioned
-function detectCategory(name: string): 'Classical' | 'Rapid' | 'Blitz' {
-  const n = (name || '').toLowerCase();
-  
-  // Check for Blitz keywords
-  if (
-    n.includes('blitz') || 
-    n.includes('bijli') || 
-    n.includes('lightning') ||
-    n.includes('bullet') || 
-    n.includes('ultra fast') || 
-    n.includes('superfast') || 
-    n.includes('super fast') || 
-    n.includes('speed chess')
-  ) {
-    return 'Blitz';
-  }
-  
-  // Check for Classical keywords - ONLY if explicitly mentioned
-  if (
-    n.includes('classical') || 
-    n.includes('standard') || 
-    n.includes('std') || 
-    n.includes('shastriya') || 
-    n.includes('long') || 
-    n.includes('long format') || 
-    n.includes('classical format') || 
-    n.includes('long play') ||
-    n.includes('klassisch') ||    // German
-    n.includes('classique') ||    // French
-    n.includes('clásico') ||      // Spanish
-    n.includes('classico')        // Italian/Portuguese
-  ) {
-    return 'Classical';
-  }
-  
-  // Check for Rapid keywords
-  if (
-    n.includes('rapid') || 
-    n.includes('rapids') || 
-    n.includes('tez') || 
-    n.includes('tezz') || 
-    n.includes('jaldi') || 
-    n.includes('fast') || 
-    n.includes('quick') || 
-    n.includes('speed') || 
-    n.includes('rapido') || 
-    n.includes('schnell') ||      // German
-    n.includes('rapide') ||       // French
-    n.includes('rápido') ||       // Spanish
-    n.includes('active') ||
-    n.includes('semi-rapid') ||
-    n.includes('semirapid')
-  ) {
-    return 'Rapid';
-  }
-  
-  // DEFAULT: Rapid (most common format worldwide)
+// Derive category from chess-results' own time_control marker
+// ("Time control (Standard)" / "(Rapid)" / "(Blitz)"), scraped verbatim
+// off the tournament detail page. No guessing: no marker means null.
+function detectCategoryFromTimeControl(tc: string): 'Classical' | 'Rapid' | 'Blitz' | null {
+  const m = (tc || '').match(/Time control\s*\((Standard|Rapid|Blitz)\)/i);
+  if (!m) return null;
+  const label = m[1].toLowerCase();
+  if (label === 'standard') return 'Classical';
+  if (label === 'blitz') return 'Blitz';
   return 'Rapid';
 }
 
@@ -550,7 +499,7 @@ async function pushTournaments(tournaments: ScrapedTournament[]): Promise<number
       lat: t.lat,
       lng: t.lng,
       status: 'published',
-      category: detectCategory(t.name),
+      category: detectCategoryFromTimeControl(t.time_control),
       format: 'Swiss',
       fide_rated: detectFideRated(t.name),
       min_rating: t.min_rating,
