@@ -40,9 +40,18 @@ $$;
 -- Retries on collision. 8 hex chars is ~4 billion possible codes so a
 -- collision is rare, but the loop means a rare one fails the insert loudly
 -- instead of silently handing out a duplicate code.
+-- security definer: this fires on every insert, including the anonymous
+-- (unconfirmed-email) registration path, where the inserting role only has
+-- INSERT on players, not SELECT. Without definer, the collision check's own
+-- `select ... from public.players` fails with "permission denied for table
+-- players" before the insert it's protecting ever completes. search_path
+-- pinned empty, same hardening as is_claimable_auth_user and
+-- my_referral_count in this file.
 create or replace function public.set_player_referral_code()
 returns trigger
 language plpgsql
+security definer
+set search_path = ''
 as $$
 declare
   candidate text;

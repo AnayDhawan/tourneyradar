@@ -46,3 +46,6 @@ Claude
 
 # Local dataset export output (scripts/export-dataset.ts default target)
 /data/exports/
+
+# Supabase CLI local cache/link state
+supabase/.temp/
