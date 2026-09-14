@@ -22,8 +22,6 @@
 
 **TourneyRadar puts 1,300+ upcoming chess tournaments across 70+ countries on one interactive map, updated weekly.**
 
-<!-- DEMO GIF: an animated walkthrough (filter by country → click a pin → open details) belongs here as docs/media/demo.gif. Tracked in a "good first issue" — contributions welcome. -->
-
 Chess tournaments are scattered across Chess-Results.com, federation websites, and club newsletters. TourneyRadar puts them all in one place. Filter by country, time control, and FIDE rating status. No account needed.
 
 ---

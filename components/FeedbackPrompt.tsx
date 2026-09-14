@@ -45,6 +45,14 @@ export default function FeedbackPrompt() {
   useEffect(() => {
     if (firedRef.current) return;
     if (EXCLUDED_PREFIXES.some((p) => pathname?.startsWith(p))) return;
+    // Screen-recording/screenshot captures (?demoCursor=1, see
+    // DemoCursor.tsx) engage with the page on purpose to show off features,
+    // exactly what this prompt's own trigger conditions look for. Suppressed
+    // outright so a capture's interaction script never has to guess whether
+    // this modal is up and intercepting clicks. Checked here rather than as
+    // an early return before the hooks above, so hook call order stays
+    // identical between server and client render regardless of the flag.
+    if (new URLSearchParams(window.location.search).has("demoCursor")) return;
 
     let dismissed = false;
     let snoozed = false;

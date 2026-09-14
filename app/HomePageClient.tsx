@@ -18,6 +18,7 @@ import MobileNavDrawer from "@/components/MobileNavDrawer";
 import SiteNav from "@/components/SiteNav";
 import Hero from "@/components/Hero";
 import ReferralCapture from "@/components/ReferralCapture";
+import DemoCursor from "@/components/DemoCursor";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -155,8 +156,12 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
   // absent for any country not in COUNTRY_COORDINATES, both of which just
   // leave the existing Europe default in place, no broken state either way.
   useEffect(() => {
+    // ?demoCountry=XX overrides the cookie for screen-recording/screenshot
+    // captures, which drive a URL directly and can't set a cookie first.
+    const params = new URLSearchParams(window.location.search);
+    const override = params.get("demoCountry");
     const match = document.cookie.match(/(?:^|; )tr_geo_country=([^;]+)/);
-    const code = match ? decodeURIComponent(match[1]) : null;
+    const code = override || (match ? decodeURIComponent(match[1]) : null);
     const coords = code ? COUNTRY_COORDINATES[code] : undefined;
     if (coords) {
       setNearbyCenter([coords.lat, coords.lng]);
@@ -307,6 +312,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
     <>
       {/* Reads ?ref=CODE for the invite-a-friend flow (issue #123). Renders nothing. */}
       <ReferralCapture />
+      <DemoCursor />
 
       {/* Mobile Menu Overlay */}
       <MobileNavDrawer
