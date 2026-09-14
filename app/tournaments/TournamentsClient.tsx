@@ -207,12 +207,14 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
                       <span>{tournament.city || tournament.location || 'Unknown'}{tournament.country_code ? `, ${tournament.country_code}` : (tournament.state ? `, ${tournament.state}` : '')}</span>
                     </div>
 
-                    <div style={{ fontSize: "0.875rem" }}>
-                      <span style={{ color: "var(--text-secondary)" }}>By: </span>
-                      <span style={{ color: "var(--text-secondary)" }}>
-                        {tournament.organizer_name || "Unknown"}
-                      </span>
-                    </div>
+                    {tournament.organizer_name && (
+                      <div style={{ fontSize: "0.875rem" }}>
+                        <span style={{ color: "var(--text-secondary)" }}>By: </span>
+                        <span style={{ color: "var(--text-secondary)" }}>
+                          {tournament.organizer_name}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <Link href={`/tournaments/${tournament.id}`} className="btn btn-primary" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", textDecoration: "none" }} onClick={() => handleTournamentDetailOpen(tournament.id)}>
