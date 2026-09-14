@@ -34,7 +34,7 @@ test.describe("/api/wishlist", () => {
       // Skipped: this needs a real Supabase session. getAuthenticatedPlayer()
       // (lib/supabase-server.ts) verifies the bearer token against Supabase
       // auth and resolves the caller's player row server-side, so no request
-      // can pass the 401 gate without credentials — and no credentials exist
+      // can pass the 401 gate without credentials, and no credentials exist
       // in CI or local runs. The protection being verified (player_id derived
       // from the verified token, never from the request; RLS policies in
       // supabase/migrations/20260729000000_wishlist_rls.sql) is enforced
@@ -78,7 +78,7 @@ test.describe("/api/tournaments", () => {
 })
 
 test.describe("other routes", () => {
-  test("/api/stats is gone — 404, stats are server-rendered", async ({ request }) => {
+  test("/api/stats is gone: 404, stats are server-rendered", async ({ request }) => {
     // The issue lists /api/stats, but no such route exists on main: stats are
     // computed server-side in app/page.tsx via getTournamentStats()
     // (lib/tournaments.ts). Pin the current contract so a re-added route is

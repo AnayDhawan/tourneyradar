@@ -207,7 +207,7 @@ function parseRatingRestriction(
   const lower = t.match(/(?:^|[^a-z])(?:over\s*|(?:elo\s*)?[>]\s*)(\d{3,4})\b|(\d{3,4})\s*\+/i);
   if (lower) return { min_rating: parseInt(lower[1] || lower[2], 10), max_rating: null };
 
-  // Restriction-like text present but unrecognised — surface it instead of
+  // Restriction-like text present but unrecognised: surface it instead of
   // silently dropping it. Keyword must sit near a 3-4 digit number so plain
   // names like "FIDE Rated 2025" are not mistaken for restrictions.
   if (/\b(?:u\s*-?\s*\d|under\b|below\b|over\b|elo\b|rating\s*limit|[<>])[^0-9]{0,12}\d{3,4}/i.test(t)) {

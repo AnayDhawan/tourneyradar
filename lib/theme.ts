@@ -45,7 +45,7 @@ interface ThemeSnapshot {
   resolvedTheme: ResolvedTheme;
 }
 
-// Deterministic server-safe default — matches getStoredTheme()/getSystemTheme()'s
+// Deterministic server-safe default, matches getStoredTheme()/getSystemTheme()'s
 // own SSR fallback, so the hydration render can't mismatch the server render.
 const SERVER_SNAPSHOT: ThemeSnapshot = { theme: "system", resolvedTheme: "light" };
 

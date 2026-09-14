@@ -1,5 +1,5 @@
 // Pure ICS (RFC 5545) feed helpers for the per-country calendar route.
-// No imports — runnable standalone via node lib/ics-feed.selfcheck.mjs.
+// No imports, runnable standalone via node lib/ics-feed.selfcheck.mjs.
 
 // Backslash, semicolon, comma and newline must be escaped in text fields.
 // Backslash first so escaped chars aren't double-escaped.

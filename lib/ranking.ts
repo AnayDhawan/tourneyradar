@@ -21,9 +21,9 @@ import type { TournamentListItem } from './tournaments';
  *
  * WHAT WOULD JUSTIFY A REAL LEARNED MODEL LATER: enough labeled implicit- or
  * explicit-interest events at volume, tied to (player_id, tournament_id,
- * timestamp) — wishlist-add events, tournament detail page views /
+ * timestamp): wishlist-add events, tournament detail page views /
  * click-throughs, or (strongest signal) registration-link click-throughs or
- * conversions — collected over weeks to months across enough players to
+ * conversions, collected over weeks to months across enough players to
  * generalize. At that point the weighted signals below become a reasonable
  * starting feature set for a real ranking model (or a collaborative-
  * filtering / bandit approach over player-tournament interactions), and the

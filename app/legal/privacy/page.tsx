@@ -32,7 +32,7 @@ export default function PrivacyPage() {
 
             <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>4. Local Storage</h3>
             <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem", lineHeight: 1.7 }}>
-              We store a small number of anonymous flags in your browser&apos;s local storage to improve your experience — for example, remembering whether you have dismissed a prompt. These values contain no personal data, never leave your browser, and can be cleared at any time by clearing your browser&apos;s site data.
+              We store a small number of anonymous flags in your browser&apos;s local storage to improve your experience, for example remembering whether you have dismissed a prompt. These values contain no personal data, never leave your browser, and can be cleared at any time by clearing your browser&apos;s site data.
             </p>
 
             <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>5. Data Storage</h3>

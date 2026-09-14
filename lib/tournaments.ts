@@ -4,7 +4,7 @@ import { scoreTournamentForPlayer, type PlayerRankingPreferences } from './ranki
 // Listings hide tournaments starting within the next `days` days: players need
 // lead time to register and travel, so anything too imminent is noise. Returns
 // the lower-bound date (YYYY-MM-DD) a tournament's `date` must be >= to. Rolling
-// window — the daily scrape cron makes this self-refresh.
+// window, the daily scrape cron makes this self-refresh.
 function leadTimeCutoff(days = 7): string {
   return new Date(Date.now() + days * 86_400_000).toISOString().split('T')[0];
 }

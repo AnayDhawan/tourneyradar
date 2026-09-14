@@ -95,7 +95,7 @@ const getStatus = unstable_cache(
 );
 
 function formatDate(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "N/A";
   return new Date(iso).toLocaleString("en-GB", {
     day: "numeric",
     month: "short",
@@ -139,13 +139,13 @@ export default async function StatusPage() {
                       <tr key={r.region} style={{ color, verticalAlign: "top" }}>
                         <td style={{ padding: "0.6rem", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>
                           {r.region}
-                          {stale && <span style={{ color: "#ef4444", fontWeight: 700 }}> — stale</span>}
+                          {stale && <span style={{ color: "#ef4444", fontWeight: 700 }}> (stale)</span>}
                         </td>
                         <td style={{ padding: "0.6rem", borderBottom: "1px solid var(--border)" }}>
                           {formatDate(r.lastSuccess)}
                         </td>
                         <td style={{ padding: "0.6rem", borderBottom: "1px solid var(--border)" }}>
-                          {r.lastSuccessRows?.toLocaleString() ?? "—"}
+                          {r.lastSuccessRows?.toLocaleString() ?? "N/A"}
                         </td>
                         <td style={{ padding: "0.6rem", borderBottom: "1px solid var(--border)" }}>
                           {r.lastFailure ? (
@@ -153,7 +153,7 @@ export default async function StatusPage() {
                               {formatDate(r.lastFailure)}
                             </span>
                           ) : (
-                            "—"
+                            "N/A"
                           )}
                         </td>
                       </tr>

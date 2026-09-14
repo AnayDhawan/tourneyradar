@@ -20,7 +20,7 @@ No test suite is present in this project.
 ### Stack
 - **Framework:** Next.js (App Router) with TypeScript and React 19
 - **Database:** Supabase (PostgreSQL)
-- **Map:** Leaflet + react-leaflet with marker clustering (SSR-unsafe — always lazy-loaded via `next/dynamic`)
+- **Map:** Leaflet + react-leaflet with marker clustering (SSR-unsafe, always lazy-loaded via `next/dynamic`)
 - **Data fetching:** TanStack React Query v5 on client; `unstable_cache()` (5 min revalidation) on server
 - **Styling:** Tailwind CSS v4
 - **Analytics:** Firebase + Vercel Analytics
@@ -34,7 +34,7 @@ No test suite is present in this project.
 - Leaflet map components are always lazy-loaded (`next/dynamic`) because Leaflet is SSR-unsafe
 
 **Data Flow**
-1. Daily Vercel cron (`0 2 * * *`) hits `/api/cron/scrape-tournaments` — this only logs activity
+1. Daily Vercel cron (`0 2 * * *`) hits `/api/cron/scrape-tournaments`, this only logs activity
 2. Full scraping runs via `npm run scrape` (Puppeteer, runs locally or on a beefy server)
 3. Scraper geocodes locations via Google Maps API, stores results in Supabase
 4. API routes at `/api/tournaments` and `/api/tournaments/upcoming` serve the frontend with 30-min cache headers
@@ -47,12 +47,12 @@ No test suite is present in this project.
 
 | File | Purpose |
 |---|---|
-| `app/HomePageClient.tsx` | Main interactive map page (~24KB — the core UI) |
+| `app/HomePageClient.tsx` | Main interactive map page (~24KB, the core UI) |
 | `app/page.tsx` | Server Component shell for the homepage |
 | `lib/supabase.ts` | Supabase client + `Tournament` type definition |
 | `lib/tournaments.ts` | Server-side query helpers (getUpcomingTournaments, getTournamentStats, etc.) |
 | `lib/AuthContext.tsx` | Global auth state (Player/Admin) |
-| `scripts/scrape.ts` | Puppeteer scraper — fetches tournaments by country federation code |
+| `scripts/scrape.ts` | Puppeteer scraper, fetches tournaments by country federation code |
 | `app/api/cron/scrape-tournaments/route.ts` | Vercel cron endpoint (logs only, no heavy Puppeteer work) |
 | `vercel.json` | Cron schedule + security/cache headers |
 

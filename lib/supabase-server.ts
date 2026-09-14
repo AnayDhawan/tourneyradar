@@ -98,7 +98,7 @@ export type UnsubscribeResult =
  * One-click email unsubscribe by token, deliberately not routed through
  * getAuthenticatedPlayer above. The visitor clicking an emailed link has no
  * bearer token and no session, only the unsubscribe_token from the URL
- * (`/player/unsubscribe/{unsubscribe_token}`) — that token is the whole
+ * (`/player/unsubscribe/{unsubscribe_token}`), that token is the whole
  * credential. Since there is no auth.uid() for a players RLS policy to
  * check, this uses the service-role client and scopes the update to the one
  * row matching the token itself, never to a caller-supplied id.

@@ -115,7 +115,7 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
 }
 
 // Hand-rolled account dropdown (Wishlist / Sign out), shaped after Pepiros's
-// header account menu. No Radix dependency — TR doesn't have one installed
+// header account menu. No Radix dependency, TR doesn't have one installed
 // and this is the only place that would need it.
 function AccountMenu() {
   const { logout } = useAuth();

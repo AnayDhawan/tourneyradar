@@ -14,7 +14,7 @@
 // extra join or snapshot-diffing required. tournament_history is an
 // append-old-state-on-change audit log (old values in `snapshot`, keyed by
 // `recorded_at`), it answers "what changed" for a given row, not "which rows
-// are new this run" — using it here would mean reconstructing the same
+// are new this run": using it here would mean reconstructing the same
 // per-run boundary that scraped_at already gives for free. Simpler and
 // robust wins per repo convention.
 //

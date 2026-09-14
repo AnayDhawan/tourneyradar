@@ -15,10 +15,10 @@
 See `supabase/migrations/` for the full DDL history.
 
 Core tables:
-- `tournaments` — all scraped tournament data (current state only)
-- `tournament_history` — append-only jsonb snapshot of every insert/update to `tournaments`, written by a trigger; public read-only, see the migration file for why
-- `players` — player accounts (linked to Supabase Auth)
-- `admins` — admin accounts
-- `page_views` — analytics: every page visit with geo, UA, UTMs, duration
-- `tournament_analytics` — per-tournament event tracking (views, PDF clicks, etc.)
-- `player_favorite_tournaments` — player wishlist junction table
+- `tournaments`: all scraped tournament data (current state only)
+- `tournament_history`: append-only jsonb snapshot of every insert/update to `tournaments`, written by a trigger; public read-only, see the migration file for why
+- `players`: player accounts (linked to Supabase Auth)
+- `admins`: admin accounts
+- `page_views`: analytics: every page visit with geo, UA, UTMs, duration
+- `tournament_analytics`: per-tournament event tracking (views, PDF clicks, etc.)
+- `player_favorite_tournaments`: player wishlist junction table

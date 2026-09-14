@@ -25,7 +25,7 @@ const getMeta = unstable_cache(
 );
 
 function formatDate(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "N/A";
   return new Date(iso).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",

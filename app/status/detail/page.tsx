@@ -172,7 +172,7 @@ const getDashboardData = unstable_cache(
 );
 
 function formatDate(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "N/A";
   return new Date(iso).toLocaleString("en-GB", {
     day: "numeric",
     month: "short",
@@ -242,7 +242,7 @@ export default async function StatusDetailPage() {
                             <tr key={f.fed} style={{ color: "#ef4444" }}>
                               <td style={{ ...cellStyle, fontWeight: 600 }}>{f.fed}</td>
                               <td style={cellStyle}>{formatDate(f.lastFailure)}</td>
-                              <td style={cellStyle}>{f.lastFailureMessage ?? "—"}</td>
+                              <td style={cellStyle}>{f.lastFailureMessage ?? "N/A"}</td>
                             </tr>
                           ))}
                       </tbody>
@@ -325,7 +325,7 @@ export default async function StatusDetailPage() {
                         return (
                           <tr key={f.fed} style={{ color, verticalAlign: "top" }}>
                             <td style={{ ...cellStyle, fontWeight: 600 }}>{f.fed}</td>
-                            <td style={cellStyle}>{rate !== null ? `${rate.toFixed(0)}%` : "—"}</td>
+                            <td style={cellStyle}>{rate !== null ? `${rate.toFixed(0)}%` : "N/A"}</td>
                             <td style={cellStyle}>{f.successCount}</td>
                             <td style={cellStyle}>{f.failureCount}</td>
                             <td style={cellStyle}>{formatDate(f.lastSuccess)}</td>
@@ -333,7 +333,7 @@ export default async function StatusDetailPage() {
                               {f.lastFailure ? (
                                 <span title={f.lastFailureMessage ?? ""}>{formatDate(f.lastFailure)}</span>
                               ) : (
-                                "—"
+                                "N/A"
                               )}
                             </td>
                           </tr>

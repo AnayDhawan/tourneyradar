@@ -147,12 +147,12 @@ export default function ApiDocsPage() {
                   </tr>
                   <tr>
                     <td><code className="inline-code">GET /v1/tournaments/:id</code></td>
-                    <td>—</td>
+                    <td>None</td>
                     <td>Single tournament by ID</td>
                   </tr>
                   <tr>
                     <td><code className="inline-code">GET /v1/countries</code></td>
-                    <td>—</td>
+                    <td>None</td>
                     <td>All countries with tournament data</td>
                   </tr>
                   <tr>
