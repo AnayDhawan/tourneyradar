@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "@/lib/AuthContext";
+import { COUNTRY_COORDINATES } from "@/lib/geocoding";
 import Footer from "@/components/Footer";
 import SaveButton from "@/components/SaveButton";
 import { useToast } from "@/components/Toast";
@@ -30,7 +31,7 @@ const MarkerClusterGroup = dynamic(
   { ssr: false },
 );
 
-type MapView = "europe" | "world";
+type MapView = "nearby" | "europe" | "world";
 
 interface Tournament {
   id: string;
@@ -143,8 +144,25 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
   const { userType, loading: authLoading } = useAuth();
   const { showToast } = useToast();
   const [mapView, setMapView] = useState<MapView>("europe");
+  const [nearbyCenter, setNearbyCenter] = useState<[number, number] | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   useThemePreference();
+
+  // Reads the tr_geo_country cookie middleware.ts sets from Vercel's edge geo
+  // header. Client-side, not read server-side in a page.tsx server component,
+  // so the homepage itself stays statically cacheable rather than forced
+  // dynamic per request. Absent in local dev and on non-Vercel hosts, and
+  // absent for any country not in COUNTRY_COORDINATES, both of which just
+  // leave the existing Europe default in place, no broken state either way.
+  useEffect(() => {
+    const match = document.cookie.match(/(?:^|; )tr_geo_country=([^;]+)/);
+    const code = match ? decodeURIComponent(match[1]) : null;
+    const coords = code ? COUNTRY_COORDINATES[code] : undefined;
+    if (coords) {
+      setNearbyCenter([coords.lat, coords.lng]);
+      setMapView("nearby");
+    }
+  }, []);
 
   const [filters, setFilters] = useState<FilterState>({
     search: "",
@@ -266,11 +284,16 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
   );
 
   const mapConfig = useMemo(() => {
+    if (mapView === "nearby" && nearbyCenter) {
+      // Zoom 4 matches the Europe preset's proven level: a country plus its
+      // immediate neighbours, not just the one country in isolation.
+      return { center: nearbyCenter, zoom: 4 };
+    }
     if (mapView === "europe") {
       return { center: [48.8566, 2.3522] as [number, number], zoom: 4 };
     }
     return { center: [30, 0] as [number, number], zoom: 2 };
-  }, [mapView]);
+  }, [mapView, nearbyCenter]);
 
   // Tell FeedbackPrompt the user got value (used a filter / opened a tournament),
   // so it can fire the feedback nudge at a value moment instead of waiting on time.
@@ -320,6 +343,15 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
             </div>
 
             <div className="view-toggle" style={{ marginBottom: "1.25rem" }}>
+              {nearbyCenter && (
+                <button
+                  type="button"
+                  className={mapView === "nearby" ? "active" : ""}
+                  onClick={() => setMapView("nearby")}
+                >
+                  Nearby
+                </button>
+              )}
               <button
                 type="button"
                 className={mapView === "europe" ? "active" : ""}

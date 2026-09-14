@@ -177,8 +177,9 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
   'buenos aires': { lat: -34.6037, lng: -58.3816 },
 };
 
-// Country center coordinates (fallback)
-const COUNTRY_COORDINATES: Record<string, { lat: number; lng: number }> = {
+// Country center coordinates (fallback). Exported for use outside geocoding
+// too, e.g. app/HomePageClient.tsx's viewer-country map centering.
+export const COUNTRY_COORDINATES: Record<string, { lat: number; lng: number }> = {
   'IN': { lat: 20.5937, lng: 78.9629 },
   'US': { lat: 37.0902, lng: -95.7129 },
   'FR': { lat: 46.2276, lng: 2.2137 },
