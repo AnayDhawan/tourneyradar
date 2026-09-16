@@ -118,6 +118,7 @@ interface ScrapedTournament {
   country: string;
   country_code: string;
   time_control: string;
+  rating_calculation: string;
   rounds: number | null;
   organizer: string | null;
   source_url: string;
@@ -152,30 +153,12 @@ function detectCategoryFromTimeControl(tc: string): 'Classical' | 'Rapid' | 'Bli
 }
 
 // ========== FIDE RATING DETECTION ==========
-function detectFideRated(name: string): boolean {
-  const n = (name || '').toLowerCase();
-  if (n.includes('fide')) return true;
-  if (n.includes('rated')) return true;
-  if (n.includes('fide rated')) return true;
-  if (n.includes('fide rating')) return true;
-  if (n.includes('rating')) return true;
-  if (n.includes('rating tournament')) return true;
-  if (n.includes('rating event')) return true;
-  if (n.includes('international rating')) return true;
-  if (n.includes('elo')) return true;
-  if (n.includes('elo rated')) return true;
-  if (n.includes('ankit')) return true;
-  if (n.includes('rating open')) return true;
-  if (n.includes('rating championship')) return true;
-  if (n.includes('bewertet') || n.includes('gewertet')) return true; // German
-  if (n.includes('noté') || n.includes('notée') || n.includes('homologué')) return true; // French
-  if (n.includes('valorado')) return true; // Spanish
-  if (n.includes('omologato')) return true; // Italian
-  if (n.includes('classificado')) return true; // Portuguese
-  if (n.includes('рейтинговый') || n.includes('рейтинговий')) return true; // Russian/Ukrainian
-  // "ELO" as a standalone word (not inside another word)
-  if (/\belo\b/.test(n)) return true;
-  return false;
+// Derive from chess-results' own "Rating calculation" field, scraped verbatim
+// off the tournament detail page (e.g. "Rating national, Rating international",
+// "Rating national", or "-" for unrated). No guessing from the name: FIDE-rated
+// means the page itself says "international".
+function detectFideRatedFromRatingCalculation(rc: string): boolean {
+  return /international/i.test(rc || '');
 }
 
 // ========== RATING RESTRICTION DETECTION ==========
@@ -307,15 +290,28 @@ async function scrapeTournament(browser: Browser, url: string): Promise<ScrapedT
         }
       });
       
-      document.querySelectorAll('td').forEach((td, i, all) => {
-        const label = td.textContent?.trim().toLowerCase() || '';
-        const next = all[i + 1]?.textContent?.trim() || '';
-        if (label === 'federation' && !result.federation) result.federation = next;
-        if (label === 'date' && !result.date) result.date = next;
-        if (label === 'location' && !result.location) result.location = next;
-        if ((label === 'organizer(s)' || label === 'organizer') && !result.organizer) result.organizer = next;
-        if (label.includes('time control') && !result.timeControl) result.timeControl = next;
-        if (label === 'number of rounds' && !result.rounds) result.rounds = next;
+      // Row-scoped: chess-results' info table is `<tr><td>label</td><td>value</td></tr>`,
+      // so read the value from the SAME row rather than the next <td> in page order.
+      // The old page-wide index broke on pages where a nested table (e.g. the outer
+      // wrapper around this table) shifted the flat td sequence out of alignment,
+      // pulling in a blob of unrelated page text instead of the single value cell.
+      document.querySelectorAll('tr').forEach(tr => {
+        const cells = tr.querySelectorAll(':scope > td');
+        if (cells.length < 2) return;
+        const labelCell = cells[0];
+        const label = labelCell.textContent?.trim().toLowerCase() || '';
+        const value = cells[1].textContent?.trim() || '';
+        if (label === 'federation' && !result.federation) result.federation = value;
+        if (label === 'date' && !result.date) result.date = value;
+        if (label === 'location' && !result.location) result.location = value;
+        if ((label === 'organizer(s)' || label === 'organizer') && !result.organizer) result.organizer = value;
+        if (label.includes('time control') && !result.timeControl) {
+          // The "(Standard/Rapid/Blitz)" marker lives in the label cell itself
+          // ("Time control (Standard)"), not the value cell ("90+30"). Keep both.
+          result.timeControl = `${labelCell.textContent?.trim() || ''} ${value}`.trim();
+        }
+        if (label === 'rating calculation' && !result.ratingCalculation) result.ratingCalculation = value;
+        if (label === 'number of rounds' && !result.rounds) result.rounds = value;
       });
       
       document.querySelectorAll('a').forEach(a => {
@@ -364,6 +360,7 @@ async function scrapeTournament(browser: Browser, url: string): Promise<ScrapedT
       country,
       country_code: countryCode,
       time_control: data.timeControl || '',
+      rating_calculation: data.ratingCalculation || '',
       rounds: data.rounds ? parseInt(data.rounds) : null,
       organizer: data.organizer || null,
       source_url: url.split('&turdet')[0],
@@ -501,7 +498,7 @@ async function pushTournaments(tournaments: ScrapedTournament[]): Promise<number
       status: 'published',
       category: detectCategoryFromTimeControl(t.time_control),
       format: 'Swiss',
-      fide_rated: detectFideRated(t.name),
+      fide_rated: detectFideRatedFromRatingCalculation(t.rating_calculation),
       min_rating: t.min_rating,
       max_rating: t.max_rating,
       scraped_at: new Date().toISOString()
