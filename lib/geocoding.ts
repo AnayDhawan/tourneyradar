@@ -88,16 +88,15 @@ export async function geocodeAddress(address: string): Promise<{ lat: number; ln
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   
   if (!apiKey) {
-    console.error("❌ Google Maps API key not found in environment variables");
     return null;
   }
 
   try {
     const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
-    
+
     const response = await fetch(url);
     const data = await response.json();
-    
+
     if (data.status === "OK" && data.results.length > 0) {
       const location = data.results[0].geometry.location;
       return {
@@ -105,14 +104,9 @@ export async function geocodeAddress(address: string): Promise<{ lat: number; ln
         lng: location.lng
       };
     } else {
-      console.error("❌ Geocoding failed:", {
-        status: data.status,
-        error_message: data.error_message || "No results found"
-      });
       return null;
     }
-  } catch (error) {
-    console.error("❌ Geocoding request error:", error);
+  } catch {
     return null;
   }
 }

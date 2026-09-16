@@ -18,8 +18,8 @@ export async function trackEvent(tournamentId: string, eventType: AnalyticsEvent
         event_category: 'tournament',
       });
     }
-  } catch (error) {
-    console.error("Failed to track event:", error);
+  } catch {
+    // Silently ignore tracking errors
   }
 }
 
@@ -45,8 +45,8 @@ export async function getAnalytics(tournamentId: string): Promise<Record<Analyti
         result[eventType]++;
       }
     }
-  } catch (error) {
-    console.error("Failed to get analytics:", error);
+  } catch {
+    // Silently ignore analytics fetch errors
   }
 
   return result;
@@ -81,8 +81,8 @@ export async function getAnalyticsForTournaments(tournamentIds: string[]): Promi
         result[tournamentId][eventType]++;
       }
     }
-  } catch (error) {
-    console.error("Failed to get analytics:", error);
+  } catch {
+    // Silently ignore batch analytics fetch errors
   }
 
   return result;
