@@ -52,7 +52,20 @@ export default function FeedbackPrompt() {
     // this modal is up and intercepting clicks. Checked here rather than as
     // an early return before the hooks above, so hook call order stays
     // identical between server and client render regardless of the flag.
-    if (new URLSearchParams(window.location.search).has("demoCursor")) return;
+    //
+    // Latched into sessionStorage rather than a bare URL check: this effect
+    // re-runs on every route change (it depends on `pathname`), and a real
+    // in-app navigation (e.g. clicking into a tournament) lands on a URL
+    // that no longer carries ?demoCursor=1, which would silently drop the
+    // suppression mid-recording on whatever page the capture navigates to.
+    try {
+      if (new URLSearchParams(window.location.search).has("demoCursor")) {
+        sessionStorage.setItem("tr_demo_capture", "1");
+      }
+      if (sessionStorage.getItem("tr_demo_capture") === "1") return;
+    } catch {
+      if (new URLSearchParams(window.location.search).has("demoCursor")) return;
+    }
 
     let dismissed = false;
     let snoozed = false;

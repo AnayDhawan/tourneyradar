@@ -18,7 +18,6 @@ import MobileNavDrawer from "@/components/MobileNavDrawer";
 import SiteNav from "@/components/SiteNav";
 import Hero from "@/components/Hero";
 import ReferralCapture from "@/components/ReferralCapture";
-import DemoCursor from "@/components/DemoCursor";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -312,7 +311,6 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
     <>
       {/* Reads ?ref=CODE for the invite-a-friend flow (issue #123). Renders nothing. */}
       <ReferralCapture />
-      <DemoCursor />
 
       {/* Mobile Menu Overlay */}
       <MobileNavDrawer

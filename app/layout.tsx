@@ -8,6 +8,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { inter, poppins } from "./fonts";
 import FeedbackPrompt from "@/components/FeedbackPrompt";
 import UpdatesPopup from "@/components/UpdatesPopup";
+import DemoCursor from "@/components/DemoCursor";
 import { getChangelog } from "@/lib/changelog";
 
 export const metadata: Metadata = {
@@ -138,6 +139,9 @@ export default function RootLayout({
         <QueryProvider>
           <AuthProvider>
             <ToastProvider>
+              {/* Root layout, not per-page, so it survives client-side navigation
+                  during a ?demoCursor=1 recording (see DemoCursor.tsx). */}
+              <DemoCursor />
               {children}
               {/* Needs to live inside the providers: useAuth resolves player_id,
                   useToast reports submit results. */}
