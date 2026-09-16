@@ -12,7 +12,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     schema: 'public',
   },
   auth: {
-    persistSession: false,
+    // This is the one browser-facing client (see AuthContext.tsx), so it must persist the
+    // session to localStorage or every reload starts sessionless. `false` here was carried
+    // over from the request-scoped server clients in supabase-server.ts, where it's correct
+    // because those are ephemeral and per-request.
+    persistSession: true,
   },
   global: {
     headers: {
