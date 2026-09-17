@@ -144,7 +144,18 @@ function parseDate(str: string): { start: string; end: string } | null {
 // ("Time control (Standard)" / "(Rapid)" / "(Blitz)"), scraped verbatim
 // off the tournament detail page. No guessing: no marker means null.
 function detectCategoryFromTimeControl(tc: string): 'Classical' | 'Rapid' | 'Blitz' | null {
-  const m = (tc || '').match(/Time control\s*\((Standard|Rapid|Blitz)\)/i);
+  const text = tc || '';
+  // Two real chess-results formats, confirmed by hand against live pages
+  // during the item-6 spike (2026-09-18): most tournaments carry the marker
+  // in the label itself ("Time control (Standard)"), but a second template
+  // puts it as a value prefix instead ("Time control Standard: 90min...",
+  // no parens). Both are chess-results stating its own classification, so
+  // both count; a third, genuinely unclassified case (a raw time spec with
+  // neither format, e.g. "40/90min+30s Fischer Rest/30 min+30s") still
+  // correctly falls through to null.
+  const m =
+    text.match(/Time control\s*\((Standard|Rapid|Blitz)\)/i) ||
+    text.match(/\b(Standard|Rapid|Blitz)\s*:/i);
   if (!m) return null;
   const label = m[1].toLowerCase();
   if (label === 'standard') return 'Classical';
@@ -305,9 +316,21 @@ async function scrapeTournament(browser: Browser, url: string): Promise<ScrapedT
         if (label === 'date' && !result.date) result.date = value;
         if (label === 'location' && !result.location) result.location = value;
         if ((label === 'organizer(s)' || label === 'organizer') && !result.organizer) result.organizer = value;
-        if (label.includes('time control') && !result.timeControl) {
-          // The "(Standard/Rapid/Blitz)" marker lives in the label cell itself
-          // ("Time control (Standard)"), not the value cell ("90+30"). Keep both.
+        // Anchored to the whole label, not a substring match: some tournament
+        // pages wrap the real info table inside an outer two-column layout
+        // (a sidebar column), which gives that outer <tr> two direct <td>
+        // children too, so :scope > td alone doesn't exclude it. Its label
+        // cell's textContent recursively includes the entire nested page,
+        // which contains the words "time control" somewhere inside as a
+        // substring, so a substring match picks up that blob instead of the
+        // real row (found during the item-6 spike, 2026-09-18: e.g.
+        // tnr1444493, tnr1493012). A real "time control" label is always
+        // exactly that, optionally with a parenthetical marker, never a
+        // multi-field blob, so require the whole label to match.
+        if (/^time control(\s*\([^)]*\))?$/.test(label) && !result.timeControl) {
+          // The "(Standard/Rapid/Blitz)" marker usually lives in the label
+          // cell itself ("Time control (Standard)"), not the value cell
+          // ("90+30"). Keep both either way.
           result.timeControl = `${labelCell.textContent?.trim() || ''} ${value}`.trim();
         }
         if (label === 'rating calculation' && !result.ratingCalculation) result.ratingCalculation = value;

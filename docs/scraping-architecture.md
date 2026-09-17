@@ -108,9 +108,9 @@ Error handling: every scrape helper catches and calls `logScraperFailure(source,
 
 ### Derived fields
 
-**Category**: `detectCategoryFromTimeControl(tc)` regexes chess-results' own `Time control (Standard|Rapid|Blitz)` marker off the detail page (already scraped into `time_control`). Standard maps to `Classical`, Blitz and Rapid pass through as-is. No marker means `category: null`, never a guess.
+**Category**: `detectCategoryFromTimeControl(tc)` regexes chess-results' own classification off the detail page (already scraped into `time_control`), in either of the two real formats seen live: label-embedded (`Time control (Standard|Rapid|Blitz)`) or value-prefixed (`Time control Standard: 90min...`, no parens). Standard maps to `Classical`, Blitz and Rapid pass through as-is. Neither format present means `category: null`, never a guess; confirmed by hand (2026-09-18) that some tournaments genuinely carry no classification on the page at all, e.g. a raw "40/90min+30s Fischer Rest/30 min+30s" with neither marker.
 
-**FIDE-rated**: `detectFideRated(name)` checks for `fide`/`rated`/`elo` and translations (`bewertet`/`gewertet`, `homologué`, `valorado`, `рейтинговый`, …) plus standalone `\belo\b`.
+**FIDE-rated**: `detectFideRatedFromRatingCalculation(rc)` reads chess-results' own "Rating calculation" field off the detail page (`"Rating national, Rating international"` / `"Rating national"` / `"-"`), true only when it says international. Replaced the old name-substring guess (true on bare "rating"), which is why this line changed.
 
 **Rating restrictions**: `parseRatingRestriction(name)` extracts `min_rating`/`max_rating`:
 
