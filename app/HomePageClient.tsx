@@ -56,6 +56,7 @@ type FilterState = {
   search: string;
   category: string;
   state: string;
+  country: string;
   fideRated: "all" | "yes" | "no";
   startDate: string;
   endDate: string;
@@ -90,6 +91,7 @@ const FILTER_PARAMS = {
   search: "q",
   category: "category",
   state: "state",
+  country: "country",
   fideRated: "fide",
   startDate: "start",
   endDate: "end",
@@ -100,6 +102,7 @@ function buildFilterQueryString(filters: FilterState): string {
   if (filters.search.trim()) params.set(FILTER_PARAMS.search, filters.search.trim());
   if (filters.category !== "All") params.set(FILTER_PARAMS.category, filters.category);
   if (filters.state !== "All") params.set(FILTER_PARAMS.state, filters.state);
+  if (filters.country !== "All") params.set(FILTER_PARAMS.country, filters.country);
   if (filters.fideRated !== "all") params.set(FILTER_PARAMS.fideRated, filters.fideRated);
   if (filters.startDate) params.set(FILTER_PARAMS.startDate, filters.startDate);
   if (filters.endDate) params.set(FILTER_PARAMS.endDate, filters.endDate);
@@ -116,6 +119,8 @@ function parseFiltersFromQuery(search: string): Partial<FilterState> | null {
   if (category) next.category = category;
   const state = params.get(FILTER_PARAMS.state);
   if (state) next.state = state;
+  const country = params.get(FILTER_PARAMS.country);
+  if (country) next.country = country;
   const fide = params.get(FILTER_PARAMS.fideRated);
   if (fide === "yes" || fide === "no") next.fideRated = fide;
   const start = params.get(FILTER_PARAMS.startDate);
@@ -172,6 +177,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
     search: "",
     category: "All",
     state: "All",
+    country: "All",
     fideRated: "all",
     startDate: "",
     endDate: "",
@@ -242,6 +248,16 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
     return ["All", ...Array.from(unique)];
   }, [initialTournaments]);
 
+  const countries = useMemo(() => {
+    const unique = new Set(
+      initialTournaments
+        .map((t) => normalizeString(t.country))
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b)),
+    );
+    return ["All", ...Array.from(unique)];
+  }, [initialTournaments]);
+
   const TABLE_PAGE_SIZE = 24;
   const [tablePage, setTablePage] = useState(1);
 
@@ -252,6 +268,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
       const name = normalizeString(t.name);
       const category = normalizeString(t.category);
       const st = normalizeString(t.state);
+      const country = normalizeString(t.country);
       const location = normalizeString(t.location);
 
       if (search) {
@@ -264,6 +281,10 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
       }
 
       if (filters.state !== "All" && st.toLowerCase() !== filters.state.toLowerCase()) {
+        return false;
+      }
+
+      if (filters.country !== "All" && country.toLowerCase() !== filters.country.toLowerCase()) {
         return false;
       }
 
@@ -474,6 +495,21 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               </div>
 
               <div className="filter-group">
+                <label>Country</label>
+                <select
+                  className="form-select"
+                  value={filters.country}
+                  onChange={(e) => setFilters((p) => ({ ...p, country: e.target.value }))}
+                >
+                  {countries.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="filter-group">
                 <label>FIDE Rated</label>
                 <select
                   className="form-select"
@@ -524,6 +560,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                       search: "",
                       category: "All",
                       state: "All",
+                      country: "All",
                       fideRated: "all",
                       startDate: "",
                       endDate: "",
