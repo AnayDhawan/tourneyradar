@@ -89,31 +89,20 @@ export default function PlayerRegisterPage() {
         return;
       }
 
-      // The client still writes the profile row, because the auth.users
-      // trigger that will take this over (#177) is not applied yet. The
-      // referral code is captured on the homepage from a `?ref=CODE` link, see
-      // lib/referral.ts. No validation that the code belongs to a real player;
-      // an unmatched code just never counts toward anyone's referral total.
-      const { error: profileError } = await supabase.from("players").insert({
-        auth_user_id: authData.user.id,
-        email: formData.email,
-        name: formData.name,
-        phone: formData.phone || null,
-        fide_id: formData.fide_id || null,
-        rating: formData.rating ? parseInt(formData.rating) : null,
-        referred_by: referredBy,
-      });
-
-      // A unique violation here means the row already exists, which is success
-      // rather than failure: the trigger got there first. Tolerating it is what
-      // lets the trigger be switched on without a matching client deploy, and
-      // it is why this insert can be deleted afterwards rather than having to
-      // go at the same instant.
-      const alreadyCreated =
-        profileError?.code === "23505" ||
-        /duplicate key|already exists/i.test(profileError?.message ?? "");
-
-      if (profileError && !alreadyCreated) throw profileError;
+      // The profile row is created by the on_auth_user_created trigger on
+      // auth.users (#177), which reads the fields sent as signUp metadata
+      // above. The client does not write to players at all any more, and it
+      // cannot: 20260923130000_players_drop_anon_insert.sql revoked anon
+      // insert and scoped the policy to authenticated.
+      //
+      // That is the point of the change. There is no longer a window between
+      // the account existing and the profile existing, so an interrupted
+      // registration cannot strand an account the way it did before.
+      //
+      // The referral code still rides along, captured on the homepage from a
+      // `?ref=CODE` link (lib/referral.ts) and passed through the metadata. No
+      // validation that it belongs to a real player; an unmatched code just
+      // never counts toward anyone's referral total.
 
       posthog.capture("player_registered");
       setSuccess(true);
