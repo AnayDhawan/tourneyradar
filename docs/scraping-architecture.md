@@ -201,7 +201,7 @@ No external APM: the design trades granularity for durability. Even if Supabase 
 ## 8. Performance and rate-limiting notes
 
 - Puppeteer: `headless: true` + `--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage` for Ubuntu runners.
-- No cross-fed concurrency within a shard: links for a fed are collected one by one (`delayBetweenRequests: 150 ms`), then detail pages one by one (`setTimeout 100 ms`). Concurrency knob `SCRAPER_CONFIG.concurrentPages: 5` is reserved but not wired, an intentional simplicity choice to avoid Chess-Results throttling.
+- No cross-fed concurrency within a shard: links for a fed are collected one by one (`delayBetweenRequests: 150 ms`), then detail pages one by one (`setTimeout 100 ms`). Sequential is the deliberate choice, to avoid Chess-Results throttling.
 - Geocoding cache in Phase 3 avoids N× Google calls for same city; many Indian opens share `Mumbai, India`.
 - `maxTotal: 2000` caps a run so a site change that suddenly returns 10k links does not explode Supabase writes.
 

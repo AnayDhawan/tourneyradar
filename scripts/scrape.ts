@@ -452,8 +452,9 @@ const SCRAPER_CONFIG = {
   // Maximum total tournaments to scrape
   maxTotal: 2000,
   
-  // Concurrency settings
-  concurrentPages: 5,
+  // Pause between federation requests. The scraper is sequential on purpose:
+  // Chess-Results throttles, and one page at a time with a delay is what keeps
+  // a full run from being cut off partway.
   delayBetweenRequests: 150,
 };
 
