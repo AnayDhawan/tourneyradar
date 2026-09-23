@@ -47,9 +47,27 @@ export default function PlayerRegisterPage() {
     }
 
     try {
+      // Issue #177, phase 1: the profile fields ride along as user metadata.
+      //
+      // Harmless today, and required later. Once the auth.users trigger is in
+      // place it reads these from raw_user_meta_data and creates the players
+      // row itself, closing the window where an account can exist with no
+      // profile. Sending them now means the trigger can be turned on without
+      // a matching client deploy.
+      const referredBy = readReferralCode();
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
+        options: {
+          data: {
+            name: formData.name,
+            phone: formData.phone || null,
+            fide_id: formData.fide_id || null,
+            rating: formData.rating || null,
+            referred_by: referredBy,
+          },
+        },
       });
 
       if (authError) throw authError;
@@ -71,12 +89,11 @@ export default function PlayerRegisterPage() {
         return;
       }
 
-      // Issue #123: if a `?ref=CODE` link brought this visitor in (captured on
-      // the homepage, see lib/referral.ts), attach it as referred_by. No
-      // validation that the code belongs to a real player, an unmatched code
-      // just never counts toward anyone's referral total.
-      const referredBy = readReferralCode();
-
+      // The client still writes the profile row, because the auth.users
+      // trigger that will take this over (#177) is not applied yet. The
+      // referral code is captured on the homepage from a `?ref=CODE` link, see
+      // lib/referral.ts. No validation that the code belongs to a real player;
+      // an unmatched code just never counts toward anyone's referral total.
       const { error: profileError } = await supabase.from("players").insert({
         auth_user_id: authData.user.id,
         email: formData.email,
@@ -87,7 +104,16 @@ export default function PlayerRegisterPage() {
         referred_by: referredBy,
       });
 
-      if (profileError) throw profileError;
+      // A unique violation here means the row already exists, which is success
+      // rather than failure: the trigger got there first. Tolerating it is what
+      // lets the trigger be switched on without a matching client deploy, and
+      // it is why this insert can be deleted afterwards rather than having to
+      // go at the same instant.
+      const alreadyCreated =
+        profileError?.code === "23505" ||
+        /duplicate key|already exists/i.test(profileError?.message ?? "");
+
+      if (profileError && !alreadyCreated) throw profileError;
 
       posthog.capture("player_registered");
       setSuccess(true);

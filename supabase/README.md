@@ -171,3 +171,49 @@ After: `42501`, policy violation. That is the result you want.
 If registration breaks, the cause is almost certainly the `auth.uid()` being
 null case above. Fix it by moving to the trigger approach rather than by
 loosening the policy.
+
+## 20260923120000_players_from_auth_trigger.sql and 20260923130000_players_drop_anon_insert.sql
+
+Closes the window where an auth user can exist with no `players` row (issue
+#177). The client currently calls `signUp()` and then inserts the profile
+itself; anything that interrupts the page between those two calls strands the
+account. #170 made that state recoverable; these remove it.
+
+**Apply in order, and not before each phase's client state is live.** Getting
+this wrong breaks registration for everyone, so the order is not optional:
+
+| Phase | What | State needed first |
+|---|---|---|
+| 1 | Client sends the profile as `signUp` metadata and treats a unique violation on its own insert as success. **Already deployed.** | nothing |
+| 2 | `20260923120000_players_from_auth_trigger.sql`: unique index on `auth_user_id`, `handle_new_user()`, the `on_auth_user_created` trigger. | phase 1 deployed |
+| 3 | Delete the client's `players` insert and `/player/complete-profile`. | phase 2 applied and verified |
+| 4 | `20260923130000_players_drop_anon_insert.sql`: collapse `players_insert_own`, revoke anon insert, drop `is_claimable_auth_user()`. | phase 3 deployed |
+
+Phase 2 is safe to apply on its own because of phase 1: with the trigger live,
+the client's insert hits the unique index, which the client now reads as "the
+row already exists", which it does.
+
+Phase 2 refuses to apply if `players` already holds two rows with the same
+`auth_user_id`. Resolve those first; the migration will not pick a winner.
+
+### Verify after phase 2
+
+```sql
+-- The trigger exists and is enabled.
+select tgname, tgenabled from pg_trigger where tgname = 'on_auth_user_created';
+
+-- A real signup produces exactly one profile, with the metadata carried over.
+select p.name, p.phone, p.rating, p.created_at
+  from public.players p
+  join auth.users u on u.id = p.auth_user_id
+ order by p.created_at desc
+ limit 5;
+
+-- Nothing is orphaned any more.
+select count(*) from auth.users u
+ where not exists (select 1 from public.players p where p.auth_user_id = u.id);
+```
+
+That last count is the one that matters. It was at least 1 before this work
+(`dhawansanay@gmail.com`, orphaned since 2025-12-26) and should stay at 0 for
+accounts created after the trigger lands.
