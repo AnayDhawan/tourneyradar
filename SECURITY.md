@@ -4,8 +4,8 @@
 
 | Version | Supported |
 |---------|-----------|
-| `{{CURRENT_MAJOR}}.x` | ✅ Active |
-| `< {{CURRENT_MAJOR}}.0` | ❌ No longer supported |
+| `{{CURRENT_MAJOR}}.x` | Active |
+| `< {{CURRENT_MAJOR}}.0` | No longer supported |
 
 ## Reporting a Vulnerability
 

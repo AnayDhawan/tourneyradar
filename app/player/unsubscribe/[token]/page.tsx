@@ -25,7 +25,6 @@ export default async function UnsubscribePage({ params }: Props) {
           <div className="card" style={{ textAlign: "center", padding: "3rem" }}>
             {result.status === "unsubscribed" && (
               <>
-                <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>✅</div>
                 <h2 className="font-display" style={{ fontSize: "1.5rem", marginBottom: "0.75rem", color: "var(--text-primary)" }}>
                   You&apos;re unsubscribed
                 </h2>
@@ -41,7 +40,6 @@ export default async function UnsubscribePage({ params }: Props) {
 
             {result.status === "not_found" && (
               <>
-                <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🤔</div>
                 <h2 className="font-display" style={{ fontSize: "1.5rem", marginBottom: "0.75rem", color: "var(--text-primary)" }}>
                   Link not recognized
                 </h2>
@@ -58,7 +56,6 @@ export default async function UnsubscribePage({ params }: Props) {
 
             {result.status === "error" && (
               <>
-                <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>⚠️</div>
                 <h2 className="font-display" style={{ fontSize: "1.5rem", marginBottom: "0.75rem", color: "var(--text-primary)" }}>
                   Something went wrong
                 </h2>

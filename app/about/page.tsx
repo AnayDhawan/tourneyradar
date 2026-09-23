@@ -80,7 +80,7 @@ export default function AboutPage() {
                 style={{ background: "white", border: "2px solid white", color: "var(--primary)", textDecoration: "none", fontWeight: 700 }}
                 onClick={() => trackEvent("star_link", { src: "about" })}
               >
-                ⭐ Star on GitHub
+                Star on GitHub
               </a>
               <a
                 href={ISSUE_URL}

@@ -207,9 +207,9 @@ export default function PlayerDashboardPage() {
                 Welcome back, {user.name || user.email}
               </h2>
               <div style={{ display: "grid", gap: "0.5rem", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                <p>📧 {user.email}</p>
-                {(user as any).rating ? <p>⭐ Rating: {(user as any).rating}</p> : null}
-                {(user as any).fide_id ? <p>🏆 FIDE ID: {(user as any).fide_id}</p> : null}
+                <p>{user.email}</p>
+                {(user as any).rating ? <p>Rating: {(user as any).rating}</p> : null}
+                {(user as any).fide_id ? <p>FIDE ID: {(user as any).fide_id}</p> : null}
               </div>
             </div>
           )}
@@ -247,7 +247,7 @@ export default function PlayerDashboardPage() {
                           </h3>
                         </Link>
                         <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", marginBottom: "0.25rem" }}>
-                          📅 {formatDate(t.date)} • 📍 {t.location || t.city}{t.state ? `, ${t.state}` : ""}
+                          {formatDate(t.date)} • {t.location || t.city}{t.state ? `, ${t.state}` : ""}
                         </p>
                         <p style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
                           {t.category}
@@ -350,7 +350,6 @@ export default function PlayerDashboardPage() {
 
           {tournaments.length === 0 ? (
             <div className="card" style={{ textAlign: "center", padding: "3rem" }}>
-              <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>❤️</div>
               <h3 className="font-display" style={{ fontSize: "1.25rem", marginBottom: "0.75rem", color: "var(--text-primary)" }}>
                 No saved tournaments yet
               </h3>
@@ -372,7 +371,7 @@ export default function PlayerDashboardPage() {
                       </h3>
                     </Link>
                     <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", marginBottom: "0.25rem" }}>
-                      📅 {formatDate(t.date)} • 📍 {t.location}, {t.state}
+                      {formatDate(t.date)} • {t.location}, {t.state}
                     </p>
                     <p style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
                       {t.category}

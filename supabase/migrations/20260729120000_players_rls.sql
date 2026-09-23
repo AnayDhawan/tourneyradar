@@ -1,4 +1,4 @@
--- ⚠️ DO NOT APPLY THIS FILE AS-IS. Superseded in part; see supabase/README.md
+-- DO NOT APPLY THIS FILE AS-IS. Superseded in part; see supabase/README.md
 -- "Measured state, 2026-08-22".
 --
 -- This migration was written against an empty `players` table with no policies

@@ -9,8 +9,8 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-  console.error('❌ Missing Supabase environment variables.');
-  console.error('   Run with: npm run scrape');
+  console.error('Missing Supabase environment variables.');
+  console.error('Run with: npm run scrape');
   process.exit(1);
 }
 
@@ -549,18 +549,18 @@ async function main() {
     console.log('  Deduping across regions (name + date + location similarity)...');
     const { deduped, mergedCount, groups } = dedupeTournaments(data);
     if (mergedCount > 0) {
-      console.log(`  ✓ Merged ${mergedCount} duplicate(s) found across ${groups.length} group(s):`);
+      console.log(`  Merged ${mergedCount} duplicate(s) found across ${groups.length} group(s):`);
       for (const g of groups) {
         console.log(`      kept ${g.keep.id} ("${g.keep.name}") over ${g.drop.map(d => d.id).join(', ')} [score ${g.score.toFixed(2)}]`);
       }
       await logDedupSummary(mergedCount, groups);
     } else {
-      console.log('  ✓ No cross-region duplicates found');
+      console.log('  No cross-region duplicates found');
     }
 
     console.log(`\n  Pushing ${deduped.length} tournaments to Supabase...`);
     const saved = await pushTournaments(deduped);
-    console.log(`  ✓ Saved ${saved}/${deduped.length}\n`);
+    console.log(`  Saved ${saved}/${deduped.length}\n`);
     await logScraperSuccess('merged', saved);
     return;
   }
@@ -569,10 +569,10 @@ async function main() {
   console.log('  TourneyRadar Scraper v9 - GLOBAL COVERAGE');
   console.log('═'.repeat(60));
   console.log('\n  Configuration:');
-  console.log(`    ✓ Top 10 countries: ${SCRAPER_CONFIG.top10.length} (target: ${SCRAPER_CONFIG.targets.top10} each)`);
-  console.log(`    ✓ Tier 2 countries: ${SCRAPER_CONFIG.tier2.length} (target: ${SCRAPER_CONFIG.targets.tier2} each)`);
-  console.log(`    ✓ Maximum total: ${SCRAPER_CONFIG.maxTotal} tournaments`);
-  console.log('    ✓ Smart category detection (Rapid default)\n');
+  console.log(`    Top 10 countries: ${SCRAPER_CONFIG.top10.length} (target: ${SCRAPER_CONFIG.targets.top10} each)`);
+  console.log(`    Tier 2 countries: ${SCRAPER_CONFIG.tier2.length} (target: ${SCRAPER_CONFIG.targets.tier2} each)`);
+  console.log(`    Maximum total: ${SCRAPER_CONFIG.maxTotal} tournaments`);
+  console.log('    Smart category detection (Rapid default)\n');
 
   console.log('  Loading existing tournaments from DB...');
   const { data: existing } = await supabase
@@ -679,7 +679,7 @@ async function main() {
       await new Promise(r => setTimeout(r, 100));
     }
 
-    console.log(`\n\n  ✓ Found ${tournaments.length} new tournaments\n`);
+    console.log(`\n\n  Found ${tournaments.length} new tournaments\n`);
 
     if (tournaments.length > 0) {
       console.log('Phase 3: Geocoding...\n');
@@ -726,7 +726,7 @@ async function main() {
         process.stdout.write(`\r  ${i + 1}/${tournaments.length}`);
       }
 
-      console.log(`\n\n  ✓ Geocoded ${geocoded} unique locations\n`);
+      console.log(`\n\n  Geocoded ${geocoded} unique locations\n`);
       console.log(
         `  Tiers: city_table=${tierCounts.city_table} country_centroid=${tierCounts.country_centroid} ` +
         `google=${tierCounts.google} nominatim=${tierCounts.nominatim} unresolved=${tierCounts.unresolved}\n`
@@ -741,7 +741,7 @@ async function main() {
       console.log(`Phase 4: Writing to ${outputArg}...\n`);
       fs.writeFileSync(outputArg, JSON.stringify(tournaments, null, 2));
       saved = tournaments.length;
-      console.log(`  ✓ Wrote ${saved} tournaments\n`);
+      console.log(`  Wrote ${saved} tournaments\n`);
     } else {
       console.log('Phase 4: Saving to database...\n');
       const { deduped, mergedCount, groups } = dedupeTournaments(tournaments);
@@ -750,7 +750,7 @@ async function main() {
         await logDedupSummary(mergedCount, groups);
       }
       saved = await pushTournaments(deduped);
-      console.log(`  ✓ Saved ${saved}/${deduped.length}\n`);
+      console.log(`  Saved ${saved}/${deduped.length}\n`);
     }
 
     const withCoords = tournaments.filter(t => t.lat && t.lng).length;

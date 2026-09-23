@@ -127,7 +127,6 @@ export default function WishlistPage() {
         <div className="section-container" style={{ maxWidth: "900px" }}>
           {tournaments.length === 0 ? (
             <div className="card" style={{ textAlign: "center", padding: "3rem" }}>
-              <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>❤️</div>
               <h2 className="font-display" style={{ fontSize: "1.5rem", marginBottom: "1rem", color: "var(--text-primary)" }}>
                 Your wishlist is empty
               </h2>
@@ -149,7 +148,7 @@ export default function WishlistPage() {
                       </h3>
                     </Link>
                     <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", marginBottom: "0.25rem" }}>
-                      📅 {formatDate(t.date)} • 📍 {t.location}, {t.state}
+                      {formatDate(t.date)} • {t.location}, {t.state}
                     </p>
                     <p style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
                       {t.category} {t.source && `• Source: ${t.source}`}

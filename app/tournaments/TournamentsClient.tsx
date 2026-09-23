@@ -262,7 +262,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
                 style={{ color: "var(--primary)", fontWeight: 700, textDecoration: "none" }}
                 onClick={() => trackEvent("star_link", { src: "tournaments_nudge" })}
               >
-                ⭐ Star us on GitHub
+                Star us on GitHub
               </a>
             </p>
           )}

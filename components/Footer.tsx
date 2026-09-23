@@ -100,7 +100,7 @@ export default function Footer() {
               onClick={() => trackEvent("star_link", { src: "footer_text" })}
               style={{ color: "var(--primary)", fontSize: "0.8125rem", fontWeight: 700, textDecoration: "none" }}
             >
-              ⭐ Star on GitHub
+              Star on GitHub
             </a>
           </div>
         </div>

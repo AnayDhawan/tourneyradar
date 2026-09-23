@@ -48,7 +48,7 @@ async function main() {
     await page.waitForTimeout(300);
     await dismissStarPrompt();
     await page.screenshot({ path: path.join(frameDir, FRAMES[0][0]) });
-    console.log(`[✓] ${FRAMES[0][0]}`);
+    console.log(`[ok] ${FRAMES[0][0]}`);
 
     console.log("[*] Filtering by category...");
     const categorySelect = page.locator(".filters-grid select.form-select").first();
@@ -59,7 +59,7 @@ async function main() {
     await page.waitForTimeout(900);
     await dismissStarPrompt();
     await page.screenshot({ path: path.join(frameDir, FRAMES[1][0]) });
-    console.log(`[✓] ${FRAMES[1][0]}`);
+    console.log(`[ok] ${FRAMES[1][0]}`);
 
     console.log("[*] Opening tournament detail...");
     const viewDetails = page.locator(".table-row a.btn-primary").first();
@@ -68,14 +68,14 @@ async function main() {
     await page.waitForTimeout(1200);
     await dismissStarPrompt();
     await page.screenshot({ path: path.join(frameDir, FRAMES[2][0]) });
-    console.log(`[✓] ${FRAMES[2][0]}`);
+    console.log(`[ok] ${FRAMES[2][0]}`);
 
     console.log("[*] Loading stats page...");
     await page.goto(new URL("/stats", BASE_URL).toString(), { waitUntil: "networkidle", timeout: 30000 });
     await page.waitForTimeout(1500);
     await dismissStarPrompt();
     await page.screenshot({ path: path.join(frameDir, FRAMES[3][0]) });
-    console.log(`[✓] ${FRAMES[3][0]}`);
+    console.log(`[ok] ${FRAMES[3][0]}`);
   } finally {
     await browser.close();
   }
@@ -106,7 +106,7 @@ async function main() {
   ]);
 
   const { size } = await fs.stat(OUT_GIF);
-  console.log(`[✓] GIF created: ${OUT_GIF} (${(size / 1024 / 1024).toFixed(2)} MB)`);
+  console.log(`[ok] GIF created: ${OUT_GIF} (${(size / 1024 / 1024).toFixed(2)} MB)`);
 
   await fs.rm(frameDir, { recursive: true, force: true });
 }

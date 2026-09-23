@@ -192,7 +192,7 @@ Failure handling: `logScraperFailure` is best-effort: `supabase.from('scraper_lo
 ## 7. Observability
 
 - **`scraper_logs`** table (`supabase/migrations/*scraper_logs*`): rows with `started_at`, `completed_at`, `status` (`success`/`failed`/`completed`), `message`. Region, per-federation, dedup, and geocode-tier data all ride in `message` (`[region:europe-west] success: 42 tournaments`, `[fed:eng] success: 12 tournaments found`, `[dedup] merged N duplicate tournament(s): ...`, `[geocode_tier] city_table:N country_centroid:N google:N nominatim:N unresolved:N`) because the table predates dedicated columns, see `supabase/README.md`.
-- **Phase banners**: `═` separators and `✓` counts are plain `console.log`, visible in Actions logs per region.
+- **Phase banners**: `═` separators and per-phase counts are plain `console.log`, visible in Actions logs per region.
 - **Status page** (`app/status/page.tsx`): reads `scraper_logs` to show per-region freshness (see `app/api/scraper-last-success`).
 - **Status detail page** (`app/status/detail/page.tsx`, issue #126, new since 2026-08-30): a richer internal-facing view built on the same table: per-federation success rate (not just per-region), a currently-failing-federations alert list with the last failure reason, and the geocoding tier-usage breakdown described in section 4. There is no admin-auth layer in this repo (the admin panel is a separate, closed-source deployment per `CONTRIBUTING.md`), so this page is public like `/status`, just more detailed.
 

@@ -68,7 +68,7 @@ export default function ContactPage() {
                 style={{ textDecoration: "none" }}
                 onClick={() => trackEvent("star_link", { src: "contact" })}
               >
-                ⭐ Star on GitHub
+                Star on GitHub
               </a>
               <a
                 href={ISSUE_URL}

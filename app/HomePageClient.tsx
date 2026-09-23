@@ -411,10 +411,10 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                               {t.name}
                             </div>
                             <div style={{ color: "#666", fontSize: 13, marginBottom: 4 }}>
-                              📍 {t.city || t.location}{t.country_code ? `, ${t.country_code}` : ''}
+                              {t.city || t.location}{t.country_code ? `, ${t.country_code}` : ''}
                             </div>
                             <div style={{ color: "#666", fontSize: 13, marginBottom: 12 }}>
-                              📅 {formatDate(t.date)}
+                              {formatDate(t.date)}
                             </div>
                             <a
                               href={`/tournaments/${t.id}`}
@@ -619,7 +619,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                 style={{ color: 'var(--primary)', fontWeight: 700 }}
                 onClick={() => trackEvent('star_link', { src: 'home_nudge' })}
               >
-                ⭐ Star us on GitHub
+                Star us on GitHub
               </a>
             </div>
 
@@ -837,7 +837,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               className="btn btn-outline-muted"
               onClick={() => trackEvent("star_link", { src: "homepage_closing" })}
             >
-              ⭐ Star on GitHub
+              Star on GitHub
             </a>
           </div>
         </div>

@@ -804,11 +804,6 @@
       background: linear-gradient(90deg, #2563eb, #F59E0B);
     }
 
-    .feedback-icon {
-      font-size: 2.5rem;
-      margin-bottom: 0.75rem;
-    }
-
     .feedback-title {
       font-size: 1.5rem;
       font-weight: 800;

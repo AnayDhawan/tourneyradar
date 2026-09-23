@@ -65,7 +65,6 @@ export default function FeedbackForm({ fromPage, title, subtitle, onSubmitted }:
   if (done) {
     return (
       <div className="feedback-card-thanks">
-        <div className="feedback-icon">🎉</div>
         <h1 className="font-display feedback-title">Thank you!</h1>
         <p className="feedback-subtitle">Your feedback helps shape what gets built next.</p>
         <p className="feedback-subtitle" style={{ marginTop: "0.5rem" }}>
@@ -80,7 +79,7 @@ export default function FeedbackForm({ fromPage, title, subtitle, onSubmitted }:
           style={{ textDecoration: "none", marginTop: "1.5rem" }}
           onClick={() => trackEvent("star_link", { src: "feedback_thanks" })}
         >
-          ⭐ Star on GitHub
+          Star on GitHub
         </a>
         <Link
           href="/"
@@ -94,7 +93,6 @@ export default function FeedbackForm({ fromPage, title, subtitle, onSubmitted }:
 
   return (
     <div>
-      <div className="feedback-icon">💬</div>
       <h1 className="font-display feedback-title">{title ?? "How's TourneyRadar working for you?"}</h1>
       <p className="feedback-subtitle">
         {subtitle ?? "Rate your experience and tell us what to fix or build next. Takes 30 seconds."}

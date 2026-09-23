@@ -102,7 +102,6 @@ export default function PlayerRegisterPage() {
           <div className="card">
             {success ? (
               <div style={{ textAlign: "center", padding: "2rem" }}>
-                <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>✅</div>
                 <h2 className="font-display" style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--success)", marginBottom: "1rem" }}>
                   Registration Successful!
                 </h2>

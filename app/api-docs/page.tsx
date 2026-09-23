@@ -234,7 +234,7 @@ export default function ApiDocsPage() {
                 style={{ background: "white", border: "2px solid white", color: "var(--primary)", textDecoration: "none", fontWeight: 700 }}
                 onClick={() => trackEvent("star_link", { src: "api_docs", repo: "tourneyradar-api" })}
               >
-                ⭐ Star tourneyradar-api
+                Star tourneyradar-api
               </a>
               <a
                 href={API_ISSUE_URL}
