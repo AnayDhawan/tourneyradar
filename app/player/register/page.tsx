@@ -16,6 +16,7 @@ export default function PlayerRegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [existingEmail, setExistingEmail] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -30,6 +31,7 @@ export default function PlayerRegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setExistingEmail(false);
     setLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
@@ -52,6 +54,22 @@ export default function PlayerRegisterPage() {
 
       if (authError) throw authError;
       if (!authData.user) throw new Error("Registration failed");
+
+      // Issue #170: signUp on an email that already has an auth user returns
+      // that user with no error and an empty identities array, rather than
+      // saying the address is taken. Supabase does this on purpose so the form
+      // cannot be used to test which addresses are registered.
+      //
+      // Carrying on regardless is what produced the bug: the players insert
+      // then failed against is_claimable_auth_user()'s 5-minute window and the
+      // visitor was shown "new row violates row-level security policy for table
+      // players", which tells them nothing and offers no way forward. Stop here
+      // and point at the two routes that do work.
+      if (authData.user.identities?.length === 0) {
+        setExistingEmail(true);
+        setLoading(false);
+        return;
+      }
 
       // Issue #123: if a `?ref=CODE` link brought this visitor in (captured on
       // the homepage, see lib/referral.ts), attach it as referred_by. No
@@ -77,7 +95,15 @@ export default function PlayerRegisterPage() {
         router.push("/player/onboarding");
       }, 2000);
     } catch (err: any) {
-      setError(err.message || "Registration failed");
+      // The raw Postgres text for an RLS refusal means nothing to a visitor,
+      // and the only way to reach it now is a profile insert that lost a race
+      // with the 5-minute claim window. Logging in is still the way out.
+      const message: string = err?.message || "Registration failed";
+      if (message.includes("row-level security")) {
+        setExistingEmail(true);
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -118,6 +144,21 @@ export default function PlayerRegisterPage() {
                 {error && (
                   <div style={{ padding: "1rem", background: "var(--error)", color: "white", borderRadius: "12px", marginBottom: "1.5rem" }}>
                     {error}
+                  </div>
+                )}
+
+                {existingEmail && (
+                  <div style={{ padding: "1rem", background: "var(--surface-2, var(--background))", border: "1px solid var(--primary)", borderRadius: "12px", marginBottom: "1.5rem", color: "var(--text-primary)" }}>
+                    <p style={{ fontWeight: 600, marginBottom: "0.5rem" }}>
+                      This email is already signed up
+                    </p>
+                    <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", marginBottom: "0.75rem" }}>
+                      Log in instead. If you started signing up before and never finished,
+                      logging in will pick up where you left off.
+                    </p>
+                    <Link href="/player/login" className="btn btn-primary" style={{ display: "inline-block" }}>
+                      Go to login
+                    </Link>
                   </div>
                 )}
 

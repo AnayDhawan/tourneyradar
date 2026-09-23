@@ -69,9 +69,20 @@ export default function PlayerLoginPage() {
         .eq("auth_user_id", data.user.id)
         .maybeSingle();
 
-      if (playerError || !playerData) {
+      if (playerError) {
         await supabase.auth.signOut();
-        throw new Error("No player account found. Please register first.");
+        throw new Error("Couldn't load your account. Please try again.");
+      }
+
+      // Issue #170: the password was right, so this auth user is theirs. It
+      // just has no profile row, because registration was abandoned partway
+      // through. Signing them out and telling them to register sent them to a
+      // page that refuses the same email, which was a loop with no exit. Keep
+      // the session and let them finish instead: with auth.uid() set, the
+      // insert is allowed outright.
+      if (!playerData) {
+        router.push("/player/complete-profile");
+        return;
       }
 
       posthog.capture("player_logged_in");
