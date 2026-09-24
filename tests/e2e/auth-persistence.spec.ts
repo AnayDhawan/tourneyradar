@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
+import { existsSync } from "node:fs";
 
 // Regression test for: players were logged out on every reload. Root cause was
 // lib/supabase.ts's browser client setting `persistSession: false`, so Supabase
@@ -9,18 +10,35 @@ import { createClient } from "@supabase/supabase-js";
 // standalone scripts (run via `tsx --env-file=.env.local`), the Playwright
 // test process has no env loader of its own, and this is the first e2e spec
 // that talks to Supabase directly rather than only through the running app.
-process.loadEnvFile(".env.local");
+//
+// Guarded, because .env.local is a local-development file and does not exist
+// in CI, where the workflow supplies the same variables from repository
+// secrets. loadEnvFile throws ENOENT on a missing file, and a throw at module
+// scope fails collection for the entire run, so this one unguarded line was
+// taking every other e2e spec down with it.
+if (existsSync(".env.local")) {
+  process.loadEnvFile(".env.local");
+}
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 test.describe("session persists across reload", () => {
+  // The service role key bypasses RLS, so it is deliberately not available
+  // everywhere: fork pull requests and Dependabot runs get no secrets at all,
+  // and a fresh clone has no .env.local. Skip with a reason rather than
+  // failing, so a missing key reads as "not run here" instead of "broken".
+  test.skip(
+    !supabaseUrl || !serviceRoleKey,
+    "needs NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY"
+  );
+
   const email = `e2e-auth-persist-${Date.now()}@example.com`;
   const password = "Test-password-123";
   let authUserId: string;
 
   test.beforeAll(async () => {
-    const admin = createClient(supabaseUrl, serviceRoleKey, {
+    const admin = createClient(supabaseUrl!, serviceRoleKey!, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
@@ -39,7 +57,7 @@ test.describe("session persists across reload", () => {
   });
 
   test.afterAll(async () => {
-    const admin = createClient(supabaseUrl, serviceRoleKey, {
+    const admin = createClient(supabaseUrl!, serviceRoleKey!, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
     await admin.from("players").delete().eq("auth_user_id", authUserId);

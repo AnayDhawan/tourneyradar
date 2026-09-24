@@ -28,6 +28,12 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          # auth-persistence.spec.ts creates and deletes a throwaway auth user,
+          # which needs the admin API and therefore the service role key. The
+          # job's `if` above already keeps every secret away from fork pull
+          # requests and Dependabot. Without this the spec skips itself with a
+          # reason rather than failing, so e2e stays green either way.
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
