@@ -1,6 +1,9 @@
 {
   "name": "TourneyRadar",
   "version": "3.0.0",
+  "engines": {
+    "node": ">=22"
+  },
   "type": "module",
   "private": true,
   "scripts": {
