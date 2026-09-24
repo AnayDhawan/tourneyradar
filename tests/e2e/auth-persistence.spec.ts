@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { existsSync } from "node:fs";
+import { randomUUID } from "node:crypto";
 
 // Regression test for: players were logged out on every reload. Root cause was
 // lib/supabase.ts's browser client setting `persistSession: false`, so Supabase
@@ -33,14 +34,23 @@ test.describe("session persists across reload", () => {
     "needs NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY"
   );
 
-  const email = `e2e-auth-persist-${Date.now()}@example.com`;
+  // Generated per attempt, inside beforeAll, not once at module scope.
+  // A timestamp fixed at import time is the same string on a retry in the same
+  // worker, so the second attempt collided with the row the first one had
+  // already inserted and failed on players_email_key. A random suffix makes
+  // each attempt genuinely distinct.
   const password = "Test-password-123";
+  let email: string;
   let authUserId: string;
 
-  test.beforeAll(async () => {
-    const admin = createClient(supabaseUrl!, serviceRoleKey!, {
+  const adminClient = () =>
+    createClient(supabaseUrl!, serviceRoleKey!, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
+
+  test.beforeAll(async () => {
+    const admin = adminClient();
+    email = `e2e-auth-persist-${Date.now()}-${randomUUID().slice(0, 8)}@example.com`;
 
     const { data, error } = await admin.auth.admin.createUser({
       email,
@@ -52,16 +62,21 @@ test.describe("session persists across reload", () => {
 
     const { error: insertError } = await admin
       .from("players")
-      .insert({ auth_user_id: authUserId, email, name: "E2E Auth Test" });
+      .upsert({ auth_user_id: authUserId, email, name: "E2E Auth Test" }, { onConflict: "email" });
+    // upsert rather than insert, because a transport-level retry of a request
+    // that actually succeeded would otherwise fail the setup on a duplicate key
+    // for a row this same run had just written.
     if (insertError) throw new Error(`test player row setup failed: ${insertError.message}`);
   });
 
   test.afterAll(async () => {
-    const admin = createClient(supabaseUrl!, serviceRoleKey!, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-    await admin.from("players").delete().eq("auth_user_id", authUserId);
-    await admin.auth.admin.deleteUser(authUserId);
+    // Runs even when beforeAll failed part way, so both deletes are guarded and
+    // neither is allowed to throw: an unclean teardown must not mask the real
+    // failure, and leaving rows behind in a shared database is worse than a
+    // noisy log line.
+    const admin = adminClient();
+    if (email) await admin.from("players").delete().eq("email", email);
+    if (authUserId) await admin.auth.admin.deleteUser(authUserId);
   });
 
   test("player stays logged in after a page reload", async ({ page }) => {
