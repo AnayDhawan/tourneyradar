@@ -21,6 +21,7 @@ const MONTHLY_TRAFFIC = [
   { month: "Jun 2026", views: 4618, visitors: 3097 },
   { month: "Jul 2026", views: 8564, visitors: 5891 },
   { month: "Aug 2026", views: 5460, visitors: 3610 },
+  { month: "Sep 2026", views: 5740, visitors: 3590 },
 ];
 
 const getStats = unstable_cache(

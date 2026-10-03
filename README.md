@@ -35,6 +35,7 @@ Chess tournaments are scattered across Chess-Results.com, federation websites, a
 - **Responsive:** issues and PRs are read and triaged, typically within a few days.
 - **Not actively planned:** no new major features are queued. Good first issues (new scrapers, small UI/API additions) are still welcome and get reviewed.
 - **Known gaps:** if a specific region's scraper is failing, it'll be reflected in `scraper_logs` and the [Unreleased] section of the changelog before it's claimed as fixed here. This file does not promise every region is always fresh.
+- **Traffic:** 30k+ lifetime page views, 80+ countries. Monthly breakdown at [/stats](https://www.tourneyradar.com/stats).
 
 ---
 
