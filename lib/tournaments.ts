@@ -9,10 +9,6 @@ function leadTimeCutoff(days = 7): string {
   return new Date(Date.now() + days * 86_400_000).toISOString().split('T')[0];
 }
 
-// Chess-Results occasionally publishes placeholder entries years out. Cap at
-// end of 2027 so wrongly-scraped future rows don't surface to users.
-const MAX_TOURNAMENT_DATE = '2027-12-31';
-
 export interface TournamentListItem {
   id: string;
   name: string;
@@ -85,7 +81,6 @@ export async function getUpcomingTournaments(
     .from('tournaments')
     .select(TOURNAMENT_SELECT_FIELDS, { count: 'exact' })
     .gte('date', cutoff)
-    .lte('date', MAX_TOURNAMENT_DATE)
     .eq('status', 'published')
     .order('date', { ascending: true })
     .order('created_at', { ascending: false })
@@ -128,21 +123,18 @@ export async function getTournamentStats(): Promise<TournamentStats> {
       .from('tournaments')
       .select('*', { count: 'exact', head: true })
       .gte('date', cutoff)
-      .lte('date', MAX_TOURNAMENT_DATE)
       .eq('status', 'published'),
 
     supabase
       .from('tournaments')
       .select('country_code')
       .gte('date', cutoff)
-      .lte('date', MAX_TOURNAMENT_DATE)
       .eq('status', 'published'),
 
     supabase
       .from('tournaments')
       .select('*', { count: 'exact', head: true })
       .gte('date', cutoff)
-      .lte('date', MAX_TOURNAMENT_DATE)
       .eq('status', 'published')
       .not('lat', 'is', null)
       .not('lng', 'is', null)
@@ -168,7 +160,6 @@ export async function getAllUpcomingTournaments(
     .from('tournaments')
     .select(TOURNAMENT_SELECT_FIELDS)
     .gte('date', cutoff)
-    .lte('date', MAX_TOURNAMENT_DATE)
     .eq('status', 'published')
     .order('date', { ascending: true })
     .limit(limit);
@@ -200,7 +191,6 @@ export async function getMapTournaments(
       .from('tournaments')
       .select(fields)
       .gte('date', today)
-      .lte('date', MAX_TOURNAMENT_DATE)
       .eq('status', 'published')
       .order('date', { ascending: true })
       .order('id', { ascending: true })
@@ -266,7 +256,6 @@ export async function queryTournaments({
     .select(TOURNAMENT_SELECT_FIELDS, { count: 'exact' })
     .eq('status', 'published')
     .gte('date', today)
-    .lte('date', MAX_TOURNAMENT_DATE)
     .order('date', { ascending: true })
     .order('created_at', { ascending: false })
     .range(start, end);
