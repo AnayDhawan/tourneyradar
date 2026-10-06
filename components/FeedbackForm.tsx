@@ -38,7 +38,18 @@ export default function FeedbackForm({ fromPage, title, subtitle, onSubmitted }:
     if (rating < 1 || submitting) return;
     setSubmitting(true);
     try {
-      const playerId = userType === "player" ? (user?.id ?? null) : null;
+      // feedback.player_id references players.id, which is not the auth user id.
+      // The insert policy checks players.auth_user_id = auth.uid(), so sending
+      // user.id here fails RLS with a 401 for every signed-in player.
+      let playerId: string | null = null;
+      if (userType === "player" && user?.id) {
+        const { data: player } = await supabase
+          .from("players")
+          .select("id")
+          .eq("auth_user_id", user.id)
+          .maybeSingle();
+        playerId = player?.id ?? null;
+      }
       const { error } = await supabase.from("feedback").insert({
         player_id: playerId,
         rating,
