@@ -217,3 +217,22 @@ select count(*) from auth.users u
 That last count is the one that matters. It was at least 1 before this work
 (`dhawansanay@gmail.com`, orphaned since 2025-12-26) and should stay at 0 for
 accounts created after the trigger lands.
+
+## 20261012120000_rls_hardening.sql
+
+Found by the RLS tests below. Safe to apply to the live project; it narrows nothing the app uses.
+
+- **docs cap bypass.** The 2-per-week cap counts `created_at`, which the client could set, so a backdated insert was never counted. A before-insert trigger now sets `created_at` and `updated_at` for the `anon` and `authenticated` roles.
+- **Trigger functions** (`handle_new_user`, `set_player_referral_code`, `generate_referral_code`, `record_tournament_history`) had the default EXECUTE grant to PUBLIC. Revoked. Triggers do not check EXECUTE when they fire, so signup and history are unaffected.
+- **`record_tournament_history`** now pins an empty `search_path` like the other definer functions.
+- **Length limits** on `feedback` and `docs` text, added `NOT VALID` so existing rows are not rescanned.
+
+## Tests and audit
+
+```bash
+npm run test:rls
+```
+
+`supabase/tests/rls.test.mjs` replays every migration in an in-process Postgres (PGlite) and attacks each table as anon, two users and an admin. It also enforces schema-wide rules (RLS on for every table, no `true` write policies, definer functions pin `search_path`) so a future migration that breaks them fails CI. No Docker or credentials needed.
+
+It can only see what is in this directory. `admins`, `tournaments` and the four `players` policies came from the dashboard, so `supabase/tests/baseline.sql` assumes their shape. To check the assumption against the real project, paste `supabase/audit/rls_audit.sql` into the SQL editor. It is read-only and returns one row per finding; rows flagged `REVIEW` need a look.

@@ -20,7 +20,8 @@
     "export:dataset": "npx tsx --env-file=.env.local scripts/export-dataset.ts",
     "export:dataset:ci": "npx tsx scripts/export-dataset.ts",
     "test:e2e": "playwright test",
-    "demo:gif": "node scripts/record-demo.mjs"
+    "demo:gif": "node scripts/record-demo.mjs",
+    "test:rls": "node --test supabase/tests/rls.test.mjs"
   },
   "dependencies": {
     "@next/third-parties": "^16.4.0",
@@ -43,6 +44,7 @@
     "resend": "^6.32.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.3.0",
     "@playwright/test": "^1.64.0",
     "@tailwindcss/postcss": "^4",
     "@types/cheerio": "^1.0.0",

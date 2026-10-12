@@ -24,3 +24,6 @@ jobs:
       # env at all, so it gates dependency bumps too. The full build is still
       # exercised by the Vercel preview deployment on every PR.
       - run: npm run typecheck
+      # In-process Postgres (PGlite), no secrets or Docker needed. Replays
+      # supabase/migrations and attacks every table as each role.
+      - run: npm run test:rls
