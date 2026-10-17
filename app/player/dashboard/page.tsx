@@ -152,6 +152,7 @@ export default function PlayerDashboardPage() {
     if (user && userType === "player") {
       loadRecommendations();
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clears the loading flag once auth says there is nothing to load
       setRecommendedLoading(false);
     }
   }, [user, userType]);

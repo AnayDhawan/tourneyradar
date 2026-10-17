@@ -39,6 +39,7 @@ export default function PlayerSettingsPage() {
   // Pre-fill from current user
   useEffect(() => {
     if (user && userType === "player") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- copies the loaded profile into the editable form once it arrives
       setCategories((user as { notify_categories?: string[] }).notify_categories ?? []);
       setFideOnly((user as { min_fide_rated?: boolean }).min_fide_rated ?? false);
       setFrequency((user as { notify_frequency?: "off" | "weekly" }).notify_frequency ?? "off");

@@ -118,24 +118,8 @@ export default function FeedbackPrompt() {
     return cleanup;
   }, [pathname]);
 
-  // Focus management, Esc to dismiss, and lock page scroll while the
-  // full-screen modal is open.
-  useEffect(() => {
-    if (!show) return;
-    closeBtnRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleLater();
-    };
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      window.removeEventListener("keydown", onKey);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [show]);
-
+  // Declared before the effect below that calls handleLater: the callbacks are stable
+  // (empty deps), so the effect can list handleLater without re-subscribing.
   const handleLater = useCallback(() => {
     trackEvent("feedback_maybe_later");
     try {
@@ -155,6 +139,23 @@ export default function FeedbackPrompt() {
     }
     setShow(false);
   }, []);
+
+  // Focus management, Esc to dismiss, and lock page scroll while the
+  // full-screen modal is open.
+  useEffect(() => {
+    if (!show) return;
+    closeBtnRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleLater();
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [show, handleLater]);
 
   if (!show) return null;
 
