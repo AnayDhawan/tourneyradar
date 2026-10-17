@@ -168,6 +168,8 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
     const code = override || (match ? decodeURIComponent(match[1]) : null);
     const coords = code ? COUNTRY_COORDINATES[code] : undefined;
     if (coords) {
+      // Reads the cookie/URL, which the server can't see, so this has to run after mount.
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR-safe post-mount read
       setNearbyCenter([coords.lat, coords.lng]);
       setMapView("nearby");
     }
@@ -196,6 +198,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
     if (typeof window === "undefined") return;
     const parsed = parseFiltersFromQuery(window.location.search);
     if (!parsed) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR-safe post-mount read of the URL
     setFilters((prev) => ({ ...prev, ...parsed }));
     document.getElementById("tournaments")?.scrollIntoView({ behavior: "smooth" });
   }, []);
@@ -300,6 +303,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
   const totalPages = Math.max(1, Math.ceil(filtered.length / TABLE_PAGE_SIZE));
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- resets pagination when filters change
     setTablePage(1);
   }, [filters]);
 
