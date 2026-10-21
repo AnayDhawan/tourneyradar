@@ -107,6 +107,13 @@ function formatDate(iso: string | null): string {
 
 export default async function StatusPage() {
   const regions = await getStatus();
+  // The most recent successful run across every region, the same moment the JSON endpoint reports.
+  const lastSuccess =
+    regions
+      ?.map((r) => r.lastSuccess)
+      .filter((value): value is string => Boolean(value))
+      .sort()
+      .at(-1) ?? null;
 
   return (
     <BaseLayout
@@ -161,6 +168,16 @@ export default async function StatusPage() {
                   })}
                 </tbody>
               </table>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", marginTop: "1rem" }}>
+                Last successful scrape: <strong>{formatDate(lastSuccess)}</strong>.{" "}
+                <a
+                  href="/api/scraper-last-success"
+                  style={{ color: "var(--text-primary)", textDecoration: "underline" }}
+                >
+                  Raw JSON for your own uptime checks
+                </a>{" "}
+                (<code>/api/scraper-last-success</code>).
+              </p>
               <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", marginTop: "1rem" }}>
                 A region is flagged stale when it has not completed a successful run in over {STALE_DAYS} days.
                 {" "}

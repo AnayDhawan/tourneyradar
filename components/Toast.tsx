@@ -115,7 +115,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               }
             }
           `}</style>
+          {/* The container is a polite live region that is always mounted, so screen readers
+              announce toasts as they are added. Errors also carry role="alert" to be announced
+              immediately. */}
           <div
+            aria-live="polite"
+            aria-atomic="false"
             style={{
               position: "fixed",
               top: "1rem",
@@ -129,12 +134,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             {toasts.map((toast) => (
               <div
                 key={toast.id}
+                role={toast.type === "error" ? "alert" : "status"}
                 style={getToastStyles(toast.type)}
                 onClick={() => removeToast(toast.id)}
               >
                 <span style={{ fontSize: "1.25rem" }}>{getIcon(toast.type)}</span>
                 <span style={{ flex: 1, fontWeight: 500 }}>{toast.message}</span>
                 <button
+                  type="button"
+                  aria-label="Dismiss notification"
                   onClick={(e) => {
                     e.stopPropagation();
                     removeToast(toast.id);

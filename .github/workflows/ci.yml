@@ -27,3 +27,5 @@ jobs:
       # In-process Postgres (PGlite), no secrets or Docker needed. Replays
       # supabase/migrations and attacks every table as each role.
       - run: npm run test:rls
+      # Pure unit tests (dedup, countdown, ics, sitemap helpers). No secrets needed.
+      - run: npm test

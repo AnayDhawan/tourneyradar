@@ -2,7 +2,7 @@
 
 export default function TournamentCardSkeleton() {
   return (
-    <div className="card" style={{ 
+    <div className="card skeleton-card" aria-hidden="true" style={{ 
       display: "flex", 
       flexDirection: "column",
       animation: "pulse 2s infinite"

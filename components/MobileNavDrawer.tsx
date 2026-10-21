@@ -54,7 +54,7 @@ export default function MobileNavDrawer({ open, onClose, userType, showThemeTogg
 
   return (
     <div className={`mobile-overlay${closing ? " closing" : ""}`} onClick={onClose}>
-      <div className={`mobile-drawer${closing ? " closing" : ""}`} onClick={(e) => e.stopPropagation()}>
+      <div id="mobile-nav-drawer" className={`mobile-drawer${closing ? " closing" : ""}`} onClick={(e) => e.stopPropagation()}>
         <div className="mobile-drawer-header">
           <span className="mobile-drawer-brand font-display">TourneyRadar</span>
           <button className="mobile-drawer-close" onClick={onClose} aria-label="Close menu">

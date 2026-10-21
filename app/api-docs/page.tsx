@@ -171,6 +171,111 @@ export default function ApiDocsPage() {
             </p>
           </div>
 
+          {/* This site's own endpoints */}
+          <div className="card" style={{ marginBottom: "2rem" }}>
+            <h2 className="font-display" style={cardHeading}>Site Endpoints</h2>
+            <p style={{ ...bodyText, marginBottom: "1rem" }}>
+              The website itself serves two read-only JSON endpoints on{" "}
+              <code className="inline-code">https://www.tourneyradar.com</code>. They return upcoming,
+              published tournaments only, in date order, and are cached for 30 minutes.
+            </p>
+            <h3 className="font-display" style={{ ...cardHeading, fontSize: "1.1rem" }}>
+              GET /api/tournaments
+            </h3>
+            <div className="api-table-wrap">
+              <table className="api-table">
+                <thead>
+                  <tr>
+                    <th>Param</th>
+                    <th>Type</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code className="inline-code">limit</code></td>
+                    <td>integer, 1 or more</td>
+                    <td>100</td>
+                    <td>Results per page. Values above 200 are capped at 200. A non-numeric value returns HTTP 400.</td>
+                  </tr>
+                  <tr>
+                    <td><code className="inline-code">page</code></td>
+                    <td>integer, 1 or more</td>
+                    <td>1</td>
+                    <td>1-based page number. A non-numeric value returns HTTP 400.</td>
+                  </tr>
+                  <tr>
+                    <td><code className="inline-code">country</code></td>
+                    <td>string</td>
+                    <td>none</td>
+                    <td>Two-letter country code, for example <code className="inline-code">IN</code>. Not case sensitive.</td>
+                  </tr>
+                  <tr>
+                    <td><code className="inline-code">q</code></td>
+                    <td>string</td>
+                    <td>none</td>
+                    <td>Search text, matched against name, location, city, state, country and organizer.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <CodeBlock
+              label="curl · /api/tournaments"
+              snippet={`curl "https://www.tourneyradar.com/api/tournaments?country=IN&q=open&limit=20&page=1"`}
+            />
+            <h3 className="font-display" style={{ ...cardHeading, fontSize: "1.1rem", marginTop: "1.5rem" }}>
+              GET /api/tournaments/upcoming
+            </h3>
+            <div className="api-table-wrap">
+              <table className="api-table">
+                <thead>
+                  <tr>
+                    <th>Param</th>
+                    <th>Type</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code className="inline-code">limit</code></td>
+                    <td>integer</td>
+                    <td>50</td>
+                    <td>Results per page.</td>
+                  </tr>
+                  <tr>
+                    <td><code className="inline-code">page</code></td>
+                    <td>integer</td>
+                    <td>1</td>
+                    <td>1-based page number.</td>
+                  </tr>
+                  <tr>
+                    <td><code className="inline-code">country</code></td>
+                    <td>string</td>
+                    <td>none</td>
+                    <td>Two-letter country code. Not case sensitive.</td>
+                  </tr>
+                  <tr>
+                    <td><code className="inline-code">category</code></td>
+                    <td>string</td>
+                    <td>none</td>
+                    <td>Exact category, for example <code className="inline-code">Classical</code>.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p style={{ ...bodyText, margin: "1rem 0", fontSize: "0.875rem" }}>
+              <code className="inline-code">POST /api/tournaments/upcoming</code> takes the same fields in a
+              JSON body, with <code className="inline-code">countries</code> (an array of country codes)
+              instead of <code className="inline-code">country</code>.
+            </p>
+            <CodeBlock
+              label="curl · /api/tournaments/upcoming"
+              snippet={`curl "https://www.tourneyradar.com/api/tournaments/upcoming?country=DE&category=Classical&limit=10"`}
+            />
+          </div>
+
           {/* Quick start */}
           <div className="card" style={{ marginBottom: "2rem" }}>
             <h2 className="font-display" style={cardHeading}>Quick Start</h2>

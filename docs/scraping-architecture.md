@@ -1,5 +1,7 @@
 # Scraping Architecture
 
+> Last verified against `scripts/scrape.ts`, `.github/workflows/scrape.yml` and the cron route on 2026-10-21.
+
 > Deep-dive into how TourneyRadar aggregates over-the-board tournaments from [Chess-Results.com](https://chess-results.com) across 140+ federations. Intended for contributors and anyone curious how a small open-source project stays fresh worldwide without paid data feeds.
 
 ## TL;DR
@@ -183,7 +185,10 @@ jobs:
       - download all artifacts → artifacts/
       - node -e "concat 10 JSONs → merged-tournaments.json"
       - run: npm run scrape:ci -- --push-from merged-tournaments.json
+      - curl POST $SITE_URL/api/revalidate   # purges the `tournaments` cache tag; skipped without SITE_URL and CRON_SECRET
 ```
+
+After the push, the merge job calls `POST /api/revalidate` (bearer `CRON_SECRET`), which runs `revalidateTag('tournaments', 'max')`. The homepage, `/dataset` and `/status` caches carry that tag, so they refresh on the next visit instead of waiting out their TTL (30 minutes for the homepage, 1 hour for the others). The step is skipped when the `SITE_URL` or `CRON_SECRET` repository secrets are not set.
 
 Why not Vercel Cron? `docs/ARCHITECTURE.md` notes Puppeteer + Chromium exceeds Vercel's 10 s function timeout. The Vercel cron at `app/api/cron/scrape-tournaments/route.ts` exists only to log activity; heavy work stays on Actions. `vercel.json` cron (`0 2 * * *` daily) is the lightweight trigger counterpart.
 
@@ -226,6 +231,7 @@ Resolved since the version of this doc that shipped with issue #129: geocoding's
 | `lib/countryMap.ts` | FIDE 3-letter → ISO-2 mapping used by `getCountryCode` |
 | `.github/workflows/scrape.yml` | 10-way matrix + merge job, weekly cron |
 | `app/api/cron/scrape-tournaments/route.ts` | Vercel cron shim (logs only) |
+| `app/api/revalidate/route.ts` | Purges the `tournaments` cache tag after a scrape (bearer `CRON_SECRET`) |
 | `vercel.json` | Cron schedule + headers |
 | `supabase/migrations/*scraper_logs*` | Observability table DDL |
 | `supabase/migrations/*tournament_history*` | Append-only history table + trigger DDL |

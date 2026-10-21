@@ -9,6 +9,8 @@ import { useAuth } from "@/lib/AuthContext";
 
 interface SiteNavProps {
   onMenuClick: () => void;
+  /** Whether the mobile drawer is open, so the menu button can report it to assistive tech. */
+  menuOpen?: boolean;
 }
 
 interface DropdownItem {
@@ -181,7 +183,7 @@ function AccountMenu() {
 // Three-zone layout (brand | links | utilities), shaped after Pepiros's
 // SiteHeader: a plain flex row with justify-between across exactly three
 // children, rather than lumping links and utilities into one group.
-export default function SiteNav({ onMenuClick }: SiteNavProps) {
+export default function SiteNav({ onMenuClick, menuOpen = false }: SiteNavProps) {
   const { userType, loading: authLoading } = useAuth();
   const pathname = usePathname();
   const loggedIn = !authLoading && userType === "player";
@@ -220,7 +222,7 @@ export default function SiteNav({ onMenuClick }: SiteNavProps) {
               </div>
             )
           )}
-          <MobileMenuButton onClick={onMenuClick} />
+          <MobileMenuButton onClick={onMenuClick} expanded={menuOpen} />
         </div>
       </div>
     </nav>
