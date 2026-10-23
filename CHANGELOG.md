@@ -6,6 +6,23 @@ All notable changes to this project are documented here. Format based on
 
 ## [Unreleased]
 
+### Added
+- Skip-to-content link, `aria-expanded`/`aria-controls` on the mobile menu, and live-region roles on toasts.
+- Per-country social preview image, `POST /api/revalidate` (called after each scrape), and site endpoint docs on the API page.
+- Vitest suite (64 tests) run in CI, plus Playwright specs for country pages and calendar feeds.
+
+### Changed
+- Sitemap lists every static page, pages through all upcoming events, and uses real last-modified dates.
+- Unknown `/country/<code>` URLs now return a real 404; cached pages refresh every 30 minutes.
+- 404 page styling moved to CSS classes; animations respect `prefers-reduced-motion`.
+- Status page shows the last successful scrape; architecture docs corrected.
+
+### Fixed
+- Countdown no longer shows "In NaN months" for unreadable dates.
+
+### Removed
+- Unused default Next.js SVGs and the static `robots.txt` (served by `app/robots.ts`).
+
 ## [3.0.0] - 2026-08-30
 
 Site revamp: rebuilt layout, a new homepage hero, an updates/changelog page, a

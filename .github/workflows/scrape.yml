@@ -98,6 +98,19 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
 
+      # Purge the cached pages that carry the `tournaments` tag now that new data is written,
+      # instead of waiting for their TTL. Skipped when the secrets are not set.
+      - name: Revalidate cached pages
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$SITE_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "SITE_URL or CRON_SECRET is not set, skipping revalidation"
+            exit 0
+          fi
+          curl --fail --silent --show-error -X POST             -H "Authorization: Bearer $CRON_SECRET"             "$SITE_URL/api/revalidate"
+
   digest:
     runs-on: ubuntu-latest
     timeout-minutes: 10

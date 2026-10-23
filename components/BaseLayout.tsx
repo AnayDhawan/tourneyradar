@@ -29,6 +29,9 @@ export default function BaseLayout({
 
   return (
     <div style={{ background: "var(--background)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
 
       {/* ========== MOBILE MENU OVERLAY ========== */}
       <MobileNavDrawer
@@ -40,7 +43,7 @@ export default function BaseLayout({
 
       {showHero ? (
         <section className="hero-bg" style={{ minHeight: "40vh", display: "flex", flexDirection: "column" }}>
-          <SiteNav onMenuClick={() => setMobileMenuOpen(true)} />
+          <SiteNav onMenuClick={() => setMobileMenuOpen(true)} menuOpen={mobileMenuOpen} />
 
           {heroTitle && (
             <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
@@ -58,10 +61,10 @@ export default function BaseLayout({
           )}
         </section>
       ) : (
-        <SiteNav onMenuClick={() => setMobileMenuOpen(true)} />
+        <SiteNav onMenuClick={() => setMobileMenuOpen(true)} menuOpen={mobileMenuOpen} />
       )}
 
-      <main style={{ flex: 1 }}>{children}</main>
+      <main id="main-content" tabIndex={-1} style={{ flex: 1 }}>{children}</main>
 
       <Footer />
       <ScrollToTop />

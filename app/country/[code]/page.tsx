@@ -9,10 +9,16 @@ type Props = {
   params: Promise<{ code: string }>;
 };
 
+// Only the known country codes exist. Anything else is a real 404 status from the router,
+// not a 200 page that streams a not-found message (a soft 404 that hurts indexing).
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
-  return Object.keys(COUNTRY_NAMES).map((code) => ({
-    code: code.toLowerCase(),
-  }));
+  // Lower case is the canonical form. Upper case (/country/IN) has always worked, so it stays valid.
+  return Object.keys(COUNTRY_NAMES).flatMap((code) => [
+    { code: code.toLowerCase() },
+    { code: code.toUpperCase() },
+  ]);
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

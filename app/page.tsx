@@ -10,7 +10,9 @@ const MAP_FIELDS =
 const getCachedTournaments = unstable_cache(
   async () => getMapTournaments(MAP_FIELDS),
   ['home-tournaments'],
-  { revalidate: 86400, tags: ['tournaments'] }
+  // 30 minutes, the same freshness as /api/tournaments. The scrape workflow also purges
+  // the `tournaments` tag through /api/revalidate as soon as new data is written.
+  { revalidate: 1800, tags: ['tournaments'] }
 );
 
 const getCachedStats = unstable_cache(
@@ -46,7 +48,7 @@ const getCachedStats = unstable_cache(
     };
   },
   ['home-stats'],
-  { revalidate: 86400, tags: ['tournaments'] }
+  { revalidate: 1800, tags: ['tournaments'] }
 );
 
 export default async function HomePage() {
