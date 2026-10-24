@@ -238,6 +238,19 @@ export function generateBreadcrumbJsonLd(items: { name: string; url: string }[])
   };
 }
 
+// Serializes a JSON-LD node for a <script type="application/ld+json"> body.
+// JSON.stringify leaves "<" alone, and tournament names are scraped from
+// third-party sites, so a name containing "</script>" would end the script
+// element early and let the rest of the name run as page markup. Escaping "<"
+// keeps the payload data without changing what parsers read. U+2028 and U+2029
+// are escaped as well since they are legal in JSON but not in older JS parsers.
+export function serializeJsonLd(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, '\\u003c')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+}
+
 export function generateOrganizationJsonLd() {
   return {
     '@context': 'https://schema.org',

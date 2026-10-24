@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import TournamentDetailClient from './TournamentDetailClient';
-import { generateTournamentJsonLd, generateBreadcrumbJsonLd } from '../../lib/metadata';
+import { generateTournamentJsonLd, generateBreadcrumbJsonLd, serializeJsonLd } from '../../lib/metadata';
 import { supabase } from '@/lib/supabase';
 
 type Props = {
@@ -78,11 +78,11 @@ export default async function TournamentDetailPage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(eventJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
       />
       <TournamentDetailClient tournament={tournament} />
     </>

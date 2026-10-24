@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import BaseLayout from '../../../components/BaseLayout';
-import { generateCountryMetadata, generateBreadcrumbJsonLd, generateEventListJsonLd, getCountryName, COUNTRY_NAMES } from '../../lib/metadata';
+import { generateCountryMetadata, generateBreadcrumbJsonLd, generateEventListJsonLd, getCountryName, serializeJsonLd, COUNTRY_NAMES } from '../../lib/metadata';
 import { supabase } from '@/lib/supabase';
 
 type Props = {
@@ -85,12 +85,12 @@ export default async function CountryPage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
       />
       {tournaments.length > 0 && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(eventListJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(eventListJsonLd) }}
         />
       )}
       <BaseLayout

@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache';
 import HomePageClient from './HomePageClient';
-import { generateOrganizationJsonLd, generateWebsiteJsonLd } from '@/app/lib/metadata';
+import { generateOrganizationJsonLd, generateWebsiteJsonLd, serializeJsonLd } from '@/app/lib/metadata';
 import { supabase } from '@/lib/supabase';
 import { getMapTournaments } from '@/lib/tournaments';
 
@@ -64,11 +64,11 @@ export default async function HomePage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(websiteJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }}
       />
       <HomePageClient initialTournaments={tournaments} stats={stats} />
     </>
