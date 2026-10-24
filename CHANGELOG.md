@@ -19,6 +19,7 @@ All notable changes to this project are documented here. Format based on
 
 ### Fixed
 - Countdown no longer shows "In NaN months" for unreadable dates.
+- Weekly digest no longer prints subscriber email addresses to the CI log or can write them into `scraper_logs`; the recipient is left out of send errors and any address in error text is redacted before it is logged.
 
 ### Removed
 - Unused default Next.js SVGs and the static `robots.txt` (served by `app/robots.ts`).

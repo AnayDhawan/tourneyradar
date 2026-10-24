@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { redactEmails } from './redact';
 import type { Tournament } from './supabase';
 
 // Thin wrapper around Resend for the weekly digest email (#119). Kept small
@@ -107,6 +108,8 @@ export async function sendDigestEmail(
   });
 
   if (error) {
-    throw new Error(`Resend error sending digest to ${to}: ${error.message}`);
+    // The address stays out of the message: send-digest.ts logs it to the
+    // public scraper_logs table. Resend sometimes echoes it back, so redact too.
+    throw new Error(`Resend error sending digest: ${redactEmails(error.message)}`);
   }
 }

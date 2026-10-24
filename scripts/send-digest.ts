@@ -29,6 +29,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { sendDigestEmail } from '../lib/email';
+import { redactEmails } from '../lib/redact';
 import type { Tournament } from '../lib/supabase';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -101,15 +102,17 @@ async function logDigestFailure(reason: string): Promise<void> {
       started_at: new Date().toISOString(),
       completed_at: new Date().toISOString(),
       status: 'failed',
-      message: `[digest] ${reason}`,
+      message: `[digest] ${redactEmails(reason)}`,
     });
   } catch {
     // Logging must never crash the job itself.
   }
 }
 
+// Every message from here ends up in the public scraper_logs table or in the
+// public GitHub Actions log, so addresses are redacted at the source.
 function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
+  return redactEmails(err instanceof Error ? err.message : String(err));
 }
 
 async function matchingTournaments(
@@ -149,7 +152,7 @@ async function logScraperFailureForPlayer(playerId: string, reason: string): Pro
       started_at: new Date().toISOString(),
       completed_at: new Date().toISOString(),
       status: 'failed',
-      message: `[digest:player:${playerId}] ${reason}`,
+      message: `[digest:player:${playerId}] ${redactEmails(reason)}`,
     });
   } catch {
     // Logging must never crash the job itself.
@@ -193,9 +196,9 @@ async function main() {
 
       emailsSent++;
       tournamentsCovered += tournaments.length;
-      console.log(`  sent ${player.email}: ${tournaments.length} tournament(s)`);
+      console.log(`  sent to player ${player.id}: ${tournaments.length} tournament(s)`);
     } catch (err) {
-      console.error(`  failed for ${player.email}:`, errorMessage(err));
+      console.error(`  failed for player ${player.id}:`, errorMessage(err));
       await logScraperFailureForPlayer(player.id, errorMessage(err));
     }
   }
