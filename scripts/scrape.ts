@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { countryNameToCode } from '../lib/countryMap';
 import { dedupeTournaments, DuplicateGroup } from '../lib/dedup';
 import { geocodeWithFallback, GeocodeTier, TieredCoordinates } from '../lib/geocoding';
+import { isPlausibleStartDate } from '../lib/dates';
 import fs from 'fs';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -355,6 +356,13 @@ async function scrapeTournament(browser: Browser, url: string): Promise<ScrapedT
     
     const today = new Date().toISOString().split('T')[0];
     if (dates.start < today) return null;
+    if (!isPlausibleStartDate(dates.start, today)) {
+      await logScraperFailure(
+        `implausibleStartDate:${url}`,
+        `Start date ${dates.start} is more than 2 years after ${today}`
+      );
+      return null;
+    }
 
     const idMatch = url.match(/tnr(\d+)/);
     if (!idMatch) return null;
