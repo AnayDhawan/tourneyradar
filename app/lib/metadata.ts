@@ -3,6 +3,11 @@ import { Metadata } from 'next';
 const BASE_URL = 'https://www.tourneyradar.com';
 const SITE_NAME = 'TourneyRadar';
 
+// Open Graph and Twitter titles are not run through the layout's title template.
+function brandedTitle(title: string): string {
+  return `${title} | ${SITE_NAME}`;
+}
+
 export interface TournamentMetadata {
   id: string;
   name: string;
@@ -25,29 +30,36 @@ export interface TournamentMetadata {
 
 export function generateTournamentMetadata(tournament: TournamentMetadata): Metadata {
   const location = [tournament.city, tournament.country_code].filter(Boolean).join(', ');
+  // A date-only string is midnight UTC, so format in UTC or the day can shift.
   const date = new Date(tournament.date).toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
+    timeZone: 'UTC',
   });
 
-  const title = `${tournament.name} - ${location} | ${SITE_NAME}`;
-  const description = `${tournament.name} - ${tournament.category || 'Chess'} tournament on ${date} in ${location}. ${tournament.fide_rated ? 'FIDE Rated. ' : ''}Find details, registration, and more on ${SITE_NAME}.`;
+  // The root layout's `title.template` appends " | TourneyRadar" to `title`, so
+  // the page title must not carry the site name itself. Open Graph and Twitter
+  // titles do not go through the template, so they add it.
+  const title = location ? `${tournament.name} - ${location}` : tournament.name;
+  const shareTitle = brandedTitle(title);
+  const where = location ? ` in ${location}` : '';
+  const description = `${tournament.name} - ${tournament.category || 'Chess'} tournament on ${date}${where}. ${tournament.fide_rated ? 'FIDE Rated. ' : ''}Find details, registration, and more on ${SITE_NAME}.`;
 
   return {
     title,
     description,
     keywords: [
       tournament.name,
-      `chess tournament ${tournament.city}`,
-      `chess tournament ${tournament.country}`,
-      `${tournament.category} chess`,
+      tournament.city ? `chess tournament ${tournament.city}` : '',
+      tournament.country ? `chess tournament ${tournament.country}` : '',
+      tournament.category ? `${tournament.category} chess` : '',
       tournament.fide_rated ? 'FIDE rated tournament' : '',
       'chess competition',
       'OTB chess',
     ].filter(Boolean),
     openGraph: {
-      title,
+      title: shareTitle,
       description,
       type: 'article',
       url: `${BASE_URL}/tournaments/${tournament.id}`,
@@ -64,7 +76,7 @@ export function generateTournamentMetadata(tournament: TournamentMetadata): Meta
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: shareTitle,
       description,
       images: [`${BASE_URL}/og-image.png`],
     },
@@ -75,7 +87,9 @@ export function generateTournamentMetadata(tournament: TournamentMetadata): Meta
 }
 
 export function generateCountryMetadata(countryCode: string, countryName: string, tournamentCount: number): Metadata {
-  const title = `Chess Tournaments in ${countryName} | ${SITE_NAME}`;
+  // No site name here: the root layout's `title.template` adds it once.
+  const title = `Chess Tournaments in ${countryName}`;
+  const shareTitle = brandedTitle(title);
   const description = `Discover ${tournamentCount}+ upcoming chess tournaments in ${countryName}. Find FIDE-rated Classical, Rapid, and Blitz events. Tournament finder with interactive map.`;
 
   return {
@@ -90,7 +104,7 @@ export function generateCountryMetadata(countryCode: string, countryName: string
       'chess tournament calendar',
     ],
     openGraph: {
-      title,
+      title: shareTitle,
       description,
       type: 'website',
       url: `${BASE_URL}/country/${countryCode.toLowerCase()}`,
@@ -107,7 +121,7 @@ export function generateCountryMetadata(countryCode: string, countryName: string
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: shareTitle,
       description,
     },
     alternates: {
@@ -117,7 +131,8 @@ export function generateCountryMetadata(countryCode: string, countryName: string
 }
 
 export function generateCityMetadata(city: string, countryName: string, tournamentCount: number): Metadata {
-  const title = `Chess Tournaments in ${city}, ${countryName} | ${SITE_NAME}`;
+  const title = `Chess Tournaments in ${city}, ${countryName}`;
+  const shareTitle = brandedTitle(title);
   const description = `Find ${tournamentCount}+ chess tournaments in ${city}, ${countryName}. Browse upcoming FIDE-rated events, Rapid, Blitz, and Classical tournaments near you.`;
 
   return {
@@ -131,7 +146,7 @@ export function generateCityMetadata(city: string, countryName: string, tourname
       'local chess tournaments',
     ],
     openGraph: {
-      title,
+      title: shareTitle,
       description,
       type: 'website',
       url: `${BASE_URL}/city/${encodeURIComponent(city.toLowerCase())}`,
@@ -139,7 +154,7 @@ export function generateCityMetadata(city: string, countryName: string, tourname
     },
     twitter: {
       card: 'summary',
-      title,
+      title: shareTitle,
       description,
     },
   };
