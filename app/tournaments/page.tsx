@@ -5,7 +5,7 @@ import { queryTournaments } from '@/lib/tournaments';
 
 export const metadata: Metadata = {
   title: 'Browse Chess Tournaments',
-  description: 'Browse and filter 500+ upcoming chess tournaments worldwide. Filter by country, format, date, and FIDE rating status.',
+  description: 'Browse and filter 1,000+ upcoming chess tournaments worldwide. Filter by country, format, date, and FIDE rating status.',
 };
 
 export default async function TournamentsPage({

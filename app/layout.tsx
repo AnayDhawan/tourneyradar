@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     default: "TourneyRadar | Find Chess Tournaments Worldwide",
     template: "%s | TourneyRadar"
   },
-  description: "Discover over-the-board chess tournaments worldwide. Platform with 500+ FIDE-rated tournaments from 40+ countries. Interactive map, filters by format, country, and date.",
+  description: "Discover over-the-board chess tournaments worldwide. Platform with 1,000+ FIDE-rated tournaments from 90+ countries. Interactive map, filters by format, country, and date.",
   keywords: [
     "chess tournaments",
     "FIDE tournaments",
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     url: "https://www.tourneyradar.com",
     siteName: "TourneyRadar",
     title: "TourneyRadar | Find Chess Tournaments Worldwide",
-    description: "Discover 500+ chess tournaments from 40+ countries on an interactive map. No signup required.",
+    description: "Discover 1,000+ chess tournaments from 90+ countries on an interactive map. No signup required.",
     images: [
       {
         url: "/og-image.png",
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "TourneyRadar | Find Chess Tournaments Worldwide",
-    description: "Discover 500+ chess tournaments from 40+ countries.",
+    description: "Discover 1,000+ chess tournaments from 90+ countries.",
     images: ["/og-image.png"],
   },
   icons: {

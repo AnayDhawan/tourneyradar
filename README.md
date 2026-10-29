@@ -20,7 +20,7 @@
 
 ---
 
-**TourneyRadar puts 1,300+ upcoming chess tournaments across 70+ countries on one interactive map, updated weekly.**
+**TourneyRadar puts 1,000+ upcoming chess tournaments across 90+ countries on one interactive map, updated weekly.**
 
 Chess tournaments are scattered across Chess-Results.com, federation websites, and club newsletters. TourneyRadar puts them all in one place. Filter by country, time control, and FIDE rating status. No account needed.
 
@@ -30,7 +30,7 @@ Chess tournaments are scattered across Chess-Results.com, federation websites, a
 
 **Feature-complete, actively maintained, not actively developed.** TourneyRadar does what it set out to do: put tournaments on a map. It is not chasing a roadmap.
 
-- **Shipped:** currently at `v2.0.0` (tagged 2026-05-12; see [CHANGELOG.md](./CHANGELOG.md)). Core flows (map, list, tournament detail, public API, player wishlist) are done and stable.
+- **Shipped:** currently at `v3.0.0` (tagged 2026-08-30; see [CHANGELOG.md](./CHANGELOG.md)). Core flows (map, list, tournament detail, public API, player wishlist) are done and stable.
 - **Maintained:** the scraper cron and dependency/security fixes land in most weeks (see recent commit history): this is a maintenance cadence, not a feature-development one.
 - **Responsive:** issues and PRs are read and triaged, typically within a few days.
 - **Not actively planned:** no new major features are queued. Good first issues (new scrapers, small UI/API additions) are still welcome and get reviewed.
