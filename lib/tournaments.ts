@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { scoreTournamentForPlayer, type PlayerRankingPreferences } from './ranking';
+import { MAX_PAGE_LIMIT } from './api-params';
 
 // Listings hide tournaments starting within the next `days` days: players need
 // lead time to register and travel, so anything too imminent is noise. Returns
@@ -213,7 +214,7 @@ export async function getMapTournaments(
   return all;
 }
 
-const TOURNAMENT_MAX_LIMIT = 200;
+const TOURNAMENT_MAX_LIMIT = MAX_PAGE_LIMIT;
 const TOURNAMENT_DEFAULT_LIMIT = 100;
 
 export interface TournamentQuery {
