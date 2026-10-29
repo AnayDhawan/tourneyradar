@@ -9,6 +9,8 @@ export async function GET() {
     .from("scraper_logs")
     .select("completed_at")
     .eq("status", "success")
+    // Only the merge job's row means data reached the database (see DataFreshness).
+    .like("message", "[region:merged]%")
     .order("completed_at", { ascending: false })
     .limit(1);
 

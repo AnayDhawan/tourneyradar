@@ -569,6 +569,13 @@ async function main() {
     console.log(`\n  Pushing ${deduped.length} tournaments to Supabase...`);
     const saved = await pushTournaments(deduped);
     console.log(`  Saved ${saved}/${deduped.length}\n`);
+    if (saved < deduped.length) {
+      // Do not write the success row the freshness badge reads, and fail the CI job.
+      await logScraperFailure('region:merged', `only ${saved} of ${deduped.length} tournaments saved`);
+      console.error(`  ${deduped.length - saved} tournament(s) failed to save`);
+      process.exitCode = 1;
+      return;
+    }
     await logScraperSuccess('merged', saved);
     return;
   }
