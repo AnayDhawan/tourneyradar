@@ -13,15 +13,21 @@ if (!projectToken || !posthogHost) {
   const message = `${missingVariable} variable required by PostHog is missing or un-configured, this causes events to be silently missed. This error stops appearing once ${missingVariable} is configured`;
 
   if (process.env.NODE_ENV === "development") {
-    throw new Error(message);
+    // The token belongs to the project's own PostHog account, so a contributor
+    // running the app locally cannot have one, and does not need one. Throwing
+    // here broke the first `npm run dev` for everyone who followed the setup
+    // steps. Analytics just stays off.
+    console.warn(
+      `[analytics] PostHog is off: ${missingVariable} is not set. This is fine for local development.`
+    );
+  } else {
+    // Production used to fall through here in total silence, which is how
+    // NEXT_PUBLIC_POSTHOG_HOST went missing on the deployment without anyone
+    // noticing that posthog.init() had stopped running and every capture() had
+    // become a no-op. Warn instead: still cannot break the page, but it now
+    // leaves a trace in the console.
+    console.warn(`[analytics] ${message}`);
   }
-
-  // Production used to fall through here in total silence, which is how
-  // NEXT_PUBLIC_POSTHOG_HOST went missing on the deployment without anyone
-  // noticing that posthog.init() had stopped running and every capture() had
-  // become a no-op. Warn instead: still cannot break the page, but it now
-  // leaves a trace in the console.
-  console.warn(`[analytics] ${message}`);
 } else {
   posthog.init(projectToken, {
     api_host: "/ingest",

@@ -14,7 +14,11 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-You will need your own Supabase project and Google Maps API key.
+You will need your own Supabase project: set `NEXT_PUBLIC_SUPABASE_URL` and
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local`. Every other variable in
+`.env.local.example` is optional. Analytics (PostHog, Umami, Google Analytics)
+stays off without its keys, and the Google Maps key is only used by the scraper
+for geocoding.
 The admin panel is not open source. All other routes work locally.
 
 ---
