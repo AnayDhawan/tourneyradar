@@ -4,6 +4,7 @@ import { countryNameToCode } from '../lib/countryMap';
 import { dedupeTournaments, DuplicateGroup } from '../lib/dedup';
 import { geocodeWithFallback, GeocodeTier, TieredCoordinates } from '../lib/geocoding';
 import { isPlausibleStartDate } from '../lib/dates';
+import { fetchKnownTournaments, selectLinksToScrape, REFRESH_AFTER_DAYS } from '../lib/known-ids';
 import fs from 'fs';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -583,13 +584,8 @@ async function main() {
   console.log('    Smart category detection (Rapid default)\n');
 
   console.log('  Loading existing tournaments from DB...');
-  const { data: existing } = await supabase
-    .from('tournaments')
-    .select('id')
-    .like('id', 'cr_%');
-  
-  const existingIds = new Set((existing || []).map(t => t.id));
-  console.log(`  Found ${existingIds.size} existing tournaments\n`);
+  const knownTournaments = await fetchKnownTournaments(supabase);
+  console.log(`  Found ${knownTournaments.size} existing tournaments\n`);
 
   const browser = await puppeteer.launch({
     headless: true,
@@ -598,7 +594,6 @@ async function main() {
 
   const tournaments: ScrapedTournament[] = [];
   const MAX = SCRAPER_CONFIG.maxTotal;
-  const seen = new Set<string>();
 
   try {
     console.log('Phase 1: Collecting links from federations...\n');
@@ -665,18 +660,13 @@ async function main() {
       await new Promise(r => setTimeout(r, SCRAPER_CONFIG.delayBetweenRequests));
     }
 
-    const unique = allLinks.filter(l => {
-      const m = l.match(/tnr(\d+)/);
-      if (!m) return false;
-      const id = `cr_${m[1]}`;
-      if (seen.has(m[1]) || existingIds.has(id)) return false;
-      seen.add(m[1]);
-      return true;
-    });
+    const selection = selectLinksToScrape(allLinks, knownTournaments);
+    const unique = selection.toScrape;
 
-    console.log(`\n  Total unique: ${unique.length}`);
-    console.log(`  Already in DB: ${allLinks.length - unique.length - (allLinks.length - seen.size)}`);
-    console.log(`  New to check: ${unique.length}\n`);
+    console.log(`\n  Total unique: ${selection.total}`);
+    console.log(`  Already in DB (skipped): ${selection.skipped}`);
+    console.log(`  Known upcoming, last scraped over ${REFRESH_AFTER_DAYS} days ago (refresh): ${selection.refresh}`);
+    console.log(`  New to check: ${selection.fresh}\n`);
 
     console.log('Phase 2: Scraping new tournaments...\n');
     
