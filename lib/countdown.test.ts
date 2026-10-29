@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getCountdown, isNewTournament } from './countdown';
 
-// "Now" is fixed so every boundary is exact.
+// "Now" is fixed so every boundary is exact. It is noon UTC on 2026-10-21.
 const NOW = new Date('2026-10-21T12:00:00Z');
 
 beforeEach(() => {
@@ -12,38 +12,46 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers());
 
 describe('getCountdown', () => {
-  it('is empty once the event has started', () => {
-    expect(getCountdown('2026-10-21T11:59:59Z')).toBe('');
+  it('is empty for a day that has already passed', () => {
+    expect(getCountdown('2026-10-20')).toBe('');
     expect(getCountdown('2026-10-01')).toBe('');
   });
 
-  it('says "Starting today!" for the same instant and for the next hour', () => {
-    expect(getCountdown('2026-10-21T12:00:00Z')).toBe('Starting today!');
-    expect(getCountdown('2026-10-21T12:59:59Z')).toBe('Starting today!');
+  it('says "Starting today!" for the whole of the event day', () => {
+    expect(getCountdown('2026-10-21')).toBe('Starting today!');
+    // Same date at any time of day, via the optional clock.
+    expect(getCountdown('2026-10-24', new Date('2026-10-24T00:00:00Z'))).toBe('Starting today!');
+    expect(getCountdown('2026-10-24', new Date('2026-10-24T09:00:00Z'))).toBe('Starting today!');
+    expect(getCountdown('2026-10-24', new Date('2026-10-24T23:59:59Z'))).toBe('Starting today!');
   });
 
-  it('counts hours later the same day', () => {
-    expect(getCountdown('2026-10-21T13:00:00Z')).toBe('Starting in 1h');
-    expect(getCountdown('2026-10-21T23:59:00Z')).toBe('Starting in 11h');
+  it('says "Tomorrow" the day before, never hours to midnight', () => {
+    expect(getCountdown('2026-10-22')).toBe('Tomorrow');
+    expect(getCountdown('2026-10-24', new Date('2026-10-23T09:00:00Z'))).toBe('Tomorrow');
+    expect(getCountdown('2026-10-24', new Date('2026-10-23T00:00:00Z'))).toBe('Tomorrow');
   });
 
-  it('says "Tomorrow" from 24 to 47 hours away', () => {
-    expect(getCountdown('2026-10-22T12:00:00Z')).toBe('Tomorrow');
-    expect(getCountdown('2026-10-23T11:59:00Z')).toBe('Tomorrow');
+  it('counts days up to a week', () => {
+    expect(getCountdown('2026-10-23')).toBe('In 2 days');
+    expect(getCountdown('2026-10-28')).toBe('In 7 days');
   });
 
-  it('counts days up to a week, then weeks up to a month, then months', () => {
-    expect(getCountdown('2026-10-23T12:00:00Z')).toBe('In 2 days');
-    expect(getCountdown('2026-10-28T12:00:00Z')).toBe('In 7 days');
-    expect(getCountdown('2026-10-29T12:00:00Z')).toBe('In 2 weeks');
-    expect(getCountdown('2026-11-20T12:00:00Z')).toBe('In 5 weeks');
-    expect(getCountdown('2026-11-21T12:00:00Z')).toBe('In 2 months');
-    expect(getCountdown('2027-04-21T12:00:00Z')).toBe('In 7 months');
+  it('counts weeks up to 30 days', () => {
+    expect(getCountdown('2026-10-29')).toBe('In 2 weeks');
+    expect(getCountdown('2026-11-20')).toBe('In 5 weeks');
   });
 
-  it('reads a plain date as midnight UTC, not local time', () => {
-    // 2026-10-22 is 12 hours after NOW (midnight UTC), so it is still "Starting in 12h".
-    expect(getCountdown('2026-10-22')).toBe('Starting in 12h');
+  it('counts whole months beyond 30 days and does not round up', () => {
+    // 31 days away is 1 month, not 2.
+    expect(getCountdown('2026-11-21')).toBe('In 1 month');
+    expect(getCountdown('2026-11-23', new Date('2026-10-23T00:00:00Z'))).toBe('In 1 month');
+    // 60 days away is 2 months.
+    expect(getCountdown('2026-12-20')).toBe('In 2 months');
+    expect(getCountdown('2027-04-21')).toBe('In 6 months');
+  });
+
+  it('reads a plain date as a calendar day, not as a time', () => {
+    expect(getCountdown('2026-10-22')).not.toMatch(/\dh/);
   });
 
   it('depends on the instant, not the timezone it is written in', () => {
