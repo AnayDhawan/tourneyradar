@@ -12,7 +12,7 @@ Chess-Results.com (fed.aspx?fed=IND … fed=GER …)
         ├── 10 GitHub Actions matrix jobs (one per region, 45 min timeout each)
         │       └── Puppeteer → fetch fed page → extract tnr links → scrape detail pages
         │                └── parse date, category, FIDE flag, rating restrictions
-        │                └── geocode city via 4-tier fallback (city table → country centroid → Google → Nominatim)
+        │                └── geocode city via 4-tier fallback (city table → Google → Nominatim → country centroid)
         │
         ├── 10 artifacts (tournaments-{region}.json) uploaded
         │
@@ -128,9 +128,9 @@ The issue description names four tiers; the code splits them across two files:
 | Tier | Where | What | Cost/Rate limit |
 |------|-------|------|-----------------|
 | 1 | `lib/geocoding.ts` → `CITY_COORDINATES` | ~45 hardcoded chess cities (`mumbai`, `saint louis`, `paris`, …), normalized `city.toLowerCase()` lookup | free, O(1) |
-| 2 | `lib/geocoding.ts` → `COUNTRY_COORDINATES` + `lib/geocoding.ts:getCoordinatesFromState` | Country centroid (14 countries) + Indian state centroids (30+ states) as fallback when city unknown | free |
-| 3 | `scripts/scrape.ts:geocode()` + `lib/geocoding.ts:geocodeAddress()` | Google Maps Geocoding API (`/maps/api/geocode/json?address=`) | billable, fast |
-| 4 | `lib/geocoding.ts:geocodeWithNominatim()` | OpenStreetMap Nominatim (`/search?format=json`) with `User-Agent: TourneyRadar/1.0` and `NOMINATIM_DELAY = 1100 ms` between calls, `geocodeCity`/`geocodeTournaments` batch with dedup | free, rate-limited 1 req/s |
+| 2 | `scripts/scrape.ts:geocode()` + `lib/geocoding.ts:geocodeAddress()` | Google Maps Geocoding API (`/maps/api/geocode/json?address=`) | billable, fast |
+| 3 | `lib/geocoding.ts:geocodeWithNominatim()` | OpenStreetMap Nominatim (`/search?format=json`) with `User-Agent: TourneyRadar/1.0` and `NOMINATIM_DELAY = 1100 ms` between calls, `geocodeCity`/`geocodeTournaments` batch with dedup | free, rate-limited 1 req/s |
+| 4 | `lib/geocoding.ts` → `COUNTRY_COORDINATES` + `lib/geocoding.ts:getCoordinatesFromState` | Country centroid (14 countries) + Indian state centroids (30+ states) as the last resort, used only when Google and Nominatim both fail or are skipped (or when the city is just the country name) | free |
 
 **Update (issue #126):** the split described above was true through 2026-08-30 but no longer is. Phase 3 previously had its own separate, simpler `geocode()` (Google-only, no fallback) while `lib/geocoding.ts`'s 4-tier chain sat unused, dead code relative to the live pipeline. Phase 3 now calls `geocodeWithFallback(city, country, country_code)` directly, so all four tiers are live in production, and each result carries a `tier` field recording which one resolved it (`'city_table' | 'country_centroid' | 'google' | 'nominatim'`). A per-run tally is logged to `scraper_logs` via `logGeocodeTierSummary` (message shape `[geocode_tier] city_table:N country_centroid:N google:N nominatim:N unresolved:N`), surfaced on the observability dashboard (see section 7). `geocodeTournaments`/`geocodeSingleCity` remain the entry points for library consumers hydrating older rows outside the scraper's own run.
 

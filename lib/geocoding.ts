@@ -246,11 +246,12 @@ export function geocodeCity(city: string, countryCode?: string): { lat: number; 
 }
 
 // ========== TIERED FALLBACK CHAIN (instrumentable) ==========
-// The real 4-tier chain: hardcoded city table, then hardcoded country
-// centroids, then the Google Maps API, then rate-limited Nominatim. This is
-// the version of the chain the live scraper (scripts/scrape.ts) calls, and it
-// reports which tier resolved each address so the scrape-observability
-// dashboard can show how often geocoding degrades past Google to Nominatim.
+// The real 4-tier chain: hardcoded city table, then the Google Maps API, then
+// rate-limited Nominatim, and only then the hardcoded country centroid as a
+// last resort. This is the version of the chain the live scraper
+// (scripts/scrape.ts) calls, and it reports which tier resolved each address so
+// the scrape-observability dashboard can show how often geocoding degrades past
+// Google to Nominatim, or all the way to a country centroid.
 export type GeocodeTier = 'city_table' | 'country_centroid' | 'google' | 'nominatim';
 
 export interface TieredCoordinates {
@@ -270,8 +271,12 @@ export async function geocodeWithFallback(
     return { ...CITY_COORDINATES[normalizedCity], tier: 'city_table' };
   }
 
-  if (countryCode && COUNTRY_COORDINATES[countryCode]) {
-    return { ...COUNTRY_COORDINATES[countryCode], tier: 'country_centroid' };
+  const centroid = countryCode ? COUNTRY_COORDINATES[countryCode] : undefined;
+
+  // When the "city" is empty or just the country name, the centroid is already the best
+  // answer a geocoder could give, so skip the network calls.
+  if (centroid && (!normalizedCity || normalizedCity === (country || '').toLowerCase().trim())) {
+    return { ...centroid, tier: 'country_centroid' };
   }
 
   // Only attempt the Google tier when a key is configured, otherwise skip
@@ -288,6 +293,12 @@ export async function geocodeWithFallback(
   const nominatim = await geocodeWithNominatim(city, country);
   if (nominatim) {
     return { ...nominatim, tier: 'nominatim' };
+  }
+
+  // Both network tiers failed or were skipped. A country centroid still beats no
+  // coordinates, but it is only reported as such when it was used this way.
+  if (centroid) {
+    return { ...centroid, tier: 'country_centroid' };
   }
 
   return null;
