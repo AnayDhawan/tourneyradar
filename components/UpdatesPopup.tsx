@@ -107,7 +107,7 @@ export default function UpdatesPopup({ latestRelease }: { latestRelease: Changel
       </div>
 
       <p style={{ fontSize: "0.875rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: "0.625rem" }}>
-        The site just got a redesign.
+        {latestRelease.description || `TourneyRadar v${latestRelease.version} is here.`}
       </p>
 
       {topItems.length > 0 && (
