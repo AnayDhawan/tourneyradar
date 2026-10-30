@@ -2,6 +2,14 @@ import puppeteer, { Browser } from 'puppeteer';
 import { createClient } from '@supabase/supabase-js';
 import { countryNameToCode } from '../lib/countryMap';
 import { dedupeTournaments, DuplicateGroup } from '../lib/dedup';
+import {
+  DUPLICATE_STATUS,
+  MAX_UNPUBLISH_PER_RUN,
+  classifyGroups,
+  droppedIds,
+  fetchPublishedUpcoming,
+  findStoredDuplicates,
+} from '../lib/dedup-stored';
 import { geocodeWithFallback, GeocodeTier, TieredCoordinates } from '../lib/geocoding';
 import { isPlausibleStartDate } from '../lib/dates';
 import { fetchKnownTournaments, selectLinksToScrape, REFRESH_AFTER_DAYS } from '../lib/known-ids';
@@ -67,6 +75,83 @@ async function logDedupSummary(mergedCount: number, groups: DuplicateGroup[]): P
     });
   } catch {
     // Logging must never crash the scraper itself.
+  }
+}
+
+// Compares the published upcoming rows already in the table, which the in-batch dedup never
+// sees (a copy from an earlier run is compared with nothing), and unpublishes the dropped
+// copies instead of deleting them. With dryRun it only prints the groups and their scores.
+async function dedupStoredRows(dryRun: boolean): Promise<void> {
+  const rows = await fetchPublishedUpcoming(supabase);
+  const { exact: groups, review } = classifyGroups(findStoredDuplicates(rows), rows);
+  const ids = droppedIds(groups);
+
+  console.log(
+    `  Stored rows: ${rows.length} published upcoming, ${groups.length} exact-copy group(s) (${ids.length} surplus row(s)), ${review.length} similar group(s) left for review`,
+  );
+  for (const g of groups) {
+    console.log(
+      `      exact copy: keep ${g.keep.id} ("${g.keep.name}", ${g.keep.start_date}) over ${g.drop.map(d => d.id).join(', ')} [score ${g.score.toFixed(2)}]`,
+    );
+  }
+  if (dryRun) {
+    for (const g of review) {
+      console.log(
+        `      review only: ${g.keep.id} ("${g.keep.name}", ${g.keep.start_date}) similar to ${g.drop.map(d => d.id).join(', ')} [score ${g.score.toFixed(2)}]`,
+      );
+    }
+  }
+  if (ids.length === 0) return;
+  if (dryRun) {
+    console.log('  Dry run: nothing was changed');
+    return;
+  }
+  if (ids.length > MAX_UNPUBLISH_PER_RUN) {
+    // A match this large is more likely a scoring problem than a clean-up. Look at it first.
+    const reason = `refusing to unpublish ${ids.length} stored rows in one run (limit ${MAX_UNPUBLISH_PER_RUN}); run with --dedup-stored --dry-run and check the groups`;
+    console.error(`  ${reason}`);
+    await logScraperFailure('dedup', reason);
+    return;
+  }
+
+  for (let i = 0; i < ids.length; i += 100) {
+    const chunk = ids.slice(i, i + 100);
+    const { error } = await supabase
+      .from('tournaments')
+      .update({ status: DUPLICATE_STATUS })
+      .in('id', chunk)
+      .eq('status', 'published');
+    if (error) {
+      await logScraperFailure('dedup', `could not set status "${DUPLICATE_STATUS}": ${error.message}`);
+      console.error(`  Failed to unpublish duplicates: ${error.message}`);
+      process.exitCode = 1;
+      return;
+    }
+  }
+
+  const detail = groups
+    .map(g => `${g.keep.id} kept over ${g.drop.map(d => d.id).join('+')} (score ${g.score.toFixed(2)})`)
+    .join('; ');
+  try {
+    await supabase.from('scraper_logs').insert({
+      started_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(),
+      status: 'success',
+      message: `[dedup] unpublished ${ids.length} stored duplicate tournament(s): ${detail}`,
+    });
+  } catch {
+    // Logging must never crash the scraper itself.
+  }
+  console.log(`  Unpublished ${ids.length} stored duplicate(s)`);
+}
+
+// Never lets a clean-up problem fail a scrape that already saved its data.
+async function dedupStoredRowsSafely(): Promise<void> {
+  try {
+    await dedupStoredRows(false);
+  } catch (err) {
+    console.error(`  Stored-row dedup failed: ${errorMessage(err)}`);
+    await logScraperFailure('dedup', errorMessage(err));
   }
 }
 
@@ -551,6 +636,11 @@ async function main() {
   const regionArg = getArg('--region');
   const outputArg = getArg('--output');
 
+  if (process.argv.includes('--dedup-stored')) {
+    await dedupStoredRows(process.argv.includes('--dry-run'));
+    return;
+  }
+
   if (pushFrom) {
     const data: ScrapedTournament[] = JSON.parse(fs.readFileSync(pushFrom, 'utf8'));
     console.log(`\n  Loaded ${data.length} merged tournaments from ${pushFrom}`);
@@ -578,6 +668,7 @@ async function main() {
       return;
     }
     await logScraperSuccess('merged', saved);
+    await dedupStoredRowsSafely();
     return;
   }
 
@@ -756,6 +847,7 @@ async function main() {
       }
       saved = await pushTournaments(deduped);
       console.log(`  Saved ${saved}/${deduped.length}\n`);
+      await dedupStoredRowsSafely();
     }
 
     const withCoords = tournaments.filter(t => t.lat && t.lng).length;
