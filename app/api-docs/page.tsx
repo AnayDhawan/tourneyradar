@@ -302,22 +302,13 @@ export default function ApiDocsPage() {
           <div className="card" style={{ marginBottom: "2rem" }}>
             <h2 className="font-display" style={cardHeading}>Rate Limiting</h2>
             <p style={{ ...bodyText, marginBottom: "1rem" }}>
-              API requests are subject to rate limiting:
-            </p>
-            <ul style={{ ...bodyText, paddingLeft: "1.25rem", marginBottom: "1rem" }}>
-              <li><strong>Anonymous:</strong> 100 requests per minute</li>
-              <li><strong>Registered:</strong> 600 requests per minute</li>
-              <li><strong>Internal / Partner:</strong> 6,000 requests per minute</li>
-            </ul>
-            <p style={{ ...bodyText, marginBottom: "1rem" }}>
-              The API sends <code className="inline-code">X-RateLimit-Limit</code> and <code className="inline-code">X-RateLimit-Tier</code> headers. Exceeding your tier limit returns HTTP 429 with a <code className="inline-code">Retry-After</code> header.
+              There is currently no rate limiting. Responses are cached at the edge, so
+              hammering the same query gains you nothing. Be reasonable.
             </p>
             <p style={bodyText}>
-              Need bulk access? See the{" "}
-              <a href="https://github.com/AnayDhawan/tourneyradar#rate-limiting" target="_blank" rel="noopener noreferrer">
-                rate-limit documentation
-              </a>{" "}
-              or open an issue on the repository to discuss higher limits.
+              Need bulk access? Open an issue on the repository and say what you&apos;re
+              building. Any future limits will be announced in the changelog before
+              they&apos;re enforced.
             </p>
           </div>
 
