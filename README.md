@@ -110,7 +110,7 @@ Chess tournaments are scattered across Chess-Results.com, federation websites, a
    ```bash
    cp .env.local.example .env.local
    ```
-   Fill in your Supabase project URL and keys. See `.env.local.example` for all required variables.
+   Fill in your Supabase credentials (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`). These are the only variables required to run the development server; all others (analytics, Google Maps, Resend, cron) are optional and commented out in `.env.local.example`.
 
 3. **Run dev server:**
    ```bash

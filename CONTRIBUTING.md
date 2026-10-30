@@ -14,7 +14,7 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-You will need your own Supabase project and Google Maps API key.
+You will need your own Supabase project (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`). Other integrations (analytics, Google Maps, Resend, cron) are optional and commented out in `.env.local.example`.
 The admin panel is not open source. All other routes work locally.
 
 ---
