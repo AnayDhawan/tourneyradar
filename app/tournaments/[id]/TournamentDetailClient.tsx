@@ -28,7 +28,7 @@ interface Tournament {
 }
 
 interface Props {
-  tournament: Tournament | null;
+  tournament: Tournament;
 }
 
 function formatDate(dateStr: string | undefined): string {
@@ -66,18 +66,6 @@ function ratingDisplay(min: number | null | undefined, max: number | null | unde
 }
 
 export default function TournamentDetailClient({ tournament }: Props) {
-  if (!tournament) {
-    return (
-      <BaseLayout>
-        <div style={{ minHeight: "60vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1rem" }}>
-          <h1 style={{ fontSize: "1.5rem" }}>Tournament Not Found</h1>
-          <p style={{ color: "var(--text-secondary)" }}>The requested tournament could not be found.</p>
-          <Link href="/tournaments" className="btn btn-primary">Back to Tournaments</Link>
-        </div>
-      </BaseLayout>
-    );
-  }
-
   const dateDisplay = tournament.end_date && tournament.end_date !== tournament.date
     ? `${formatDate(tournament.date)} - ${formatDate(tournament.end_date)}`
     : formatDate(tournament.date);

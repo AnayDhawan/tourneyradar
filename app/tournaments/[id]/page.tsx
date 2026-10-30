@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import TournamentDetailClient from './TournamentDetailClient';
 import { generateTournamentJsonLd, generateBreadcrumbJsonLd, serializeJsonLd } from '../../lib/metadata';
 import { supabase } from '@/lib/supabase';
@@ -14,7 +15,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .from('tournaments')
     .select('name, date, city, country, country_code, category, fide_rated')
     .eq('id', id)
-    .single();
+    .eq('status', 'published')
+    .maybeSingle();
 
   if (!tournament) {
     return {
@@ -53,9 +55,10 @@ async function getTournament(id: string) {
     .from('tournaments')
     .select('*')
     .eq('id', id)
-    .single();
+    .eq('status', 'published')
+    .maybeSingle();
   
-  if (error) return null;
+  if (error || !data) return null;
   return data;
 }
 
@@ -64,7 +67,7 @@ export default async function TournamentDetailPage({ params }: Props) {
   const tournament = await getTournament(id);
   
   if (!tournament) {
-    return <TournamentDetailClient tournament={null} />;
+    notFound();
   }
 
   const eventJsonLd = generateTournamentJsonLd(tournament);
