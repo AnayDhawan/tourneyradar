@@ -77,6 +77,51 @@ test.describe("/api/tournaments", () => {
   })
 })
 
+test.describe("/api/tournaments/upcoming input validation", () => {
+  for (const query of ["limit=abc", "limit=0", "page=-5", "page=abc"]) {
+    test(`?${query} returns 400`, async ({ request }) => {
+      const res = await request.get(`/api/tournaments/upcoming?${query}`)
+      expect(res.status()).toBe(400)
+      const body = await res.json()
+      expect(body.error).toMatch(/must be a positive integer/)
+    })
+  }
+
+  test("?limit=100000 is clamped to 200 and the response reports it", async ({ request }) => {
+    const res = await request.get("/api/tournaments/upcoming?limit=100000")
+    if (res.status() === 200) {
+      const body = await res.json()
+      expect(body.limit).toBe(200)
+      expect(body.tournaments.length).toBeLessThanOrEqual(200)
+    } else {
+      // Supabase unreachable (dummy env in local runs): a generic 500, never
+      // the database's own wording.
+      expect(res.status()).toBe(500)
+      expect(await res.json()).toEqual({ error: "Failed to load tournaments" })
+    }
+  })
+
+  test("POST with invalid JSON returns 400", async ({ request }) => {
+    const res = await request.post("/api/tournaments/upcoming", {
+      headers: { "Content-Type": "application/json" },
+      // Raw bytes: a plain string would be wrapped as valid JSON.
+      data: Buffer.from("{bad"),
+    })
+    expect(res.status()).toBe(400)
+    expect(await res.json()).toEqual({ error: "Invalid JSON body" })
+  })
+
+  test("POST with countries that is not an array returns 400", async ({ request }) => {
+    const res = await request.post("/api/tournaments/upcoming", {
+      data: { countries: "IN" },
+    })
+    expect(res.status()).toBe(400)
+    expect(await res.json()).toEqual({
+      error: "countries must be an array of non-empty strings",
+    })
+  })
+})
+
 test.describe("other routes", () => {
   test("/api/stats is gone: 404, stats are server-rendered", async ({ request }) => {
     // The issue lists /api/stats, but no such route exists on main: stats are
