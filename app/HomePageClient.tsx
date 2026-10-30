@@ -187,11 +187,6 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
 
   const [markerIcon, setMarkerIcon] = useState<import("leaflet").DivIcon | null>(null);
 
-  useEffect(() => {
-    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [mobileMenuOpen]);
-
   // Pre-fill filters from a shared link's query params on first load, then
   // scroll to the filtered results so the recipient doesn't land on the hero.
   useEffect(() => {
