@@ -13,6 +13,10 @@ type Props = {
 // not a 200 page that streams a not-found message (a soft 404 that hurts indexing).
 export const dynamicParams = false;
 
+// Refresh hourly. Without this the page is frozen at build time, so events that have already
+// happened stay listed as upcoming until the next deploy.
+export const revalidate = 3600;
+
 export async function generateStaticParams() {
   // Lower case is the canonical form. Upper case (/country/IN) has always worked, so it stays valid.
   return Object.keys(COUNTRY_NAMES).flatMap((code) => [
