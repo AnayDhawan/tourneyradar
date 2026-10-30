@@ -256,8 +256,8 @@ export default async function StatusDetailPage() {
                 <h2 style={{ marginTop: 0, marginBottom: "0.25rem" }}>Geocoding fallback-tier usage</h2>
                 <p style={{ color: "var(--text-muted)", fontSize: "0.8rem", marginTop: 0, marginBottom: "1rem" }}>
                   lib/geocoding.ts resolves an address through 4 tiers in order: a hardcoded city
-                  table, hardcoded country centroids, the Google Maps API, then rate-limited
-                  Nominatim. This is how often each tier fired, summed across recent scrape runs
+                  table, the Google Maps API, rate-limited Nominatim, then a hardcoded country
+                  centroid as the last resort. This is how often each tier fired, summed across recent scrape runs
                   {data.tierLastUpdated && <> (last updated {formatDate(data.tierLastUpdated)})</>}.
                 </p>
                 {tierTotal === 0 ? (
