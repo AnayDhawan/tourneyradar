@@ -72,11 +72,13 @@ jobs:
           path: artifacts/
 
       - name: Merge artifact JSONs
+        id: merge
         run: |
           node -e "
             const fs = require('fs');
             const regions = ['europe-west', 'europe-east', 'americas', 'india', 'east-asia', 'southeast-asia', 'south-asia', 'middle-east-central-asia', 'oceania', 'africa-me'];
             let all = [];
+            const missing = [];
             regions.forEach(r => {
               const file = 'artifacts/tournaments-' + r + '/tournaments-' + r + '.json';
               if (fs.existsSync(file)) {
@@ -85,10 +87,14 @@ jobs:
                 console.log(r + ': ' + data.length + ' tournaments');
               } else {
                 console.warn('Missing artifact: ' + file);
+                missing.push(r);
               }
             });
             fs.writeFileSync('merged-tournaments.json', JSON.stringify(all));
             console.log('Total merged: ' + all.length);
+            if (missing.length > 0) {
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'missing=' + missing.join(',') + '\n');
+            }
           "
 
       - name: Push merged data to Supabase
@@ -111,11 +117,21 @@ jobs:
           fi
           curl --fail --silent --show-error -X POST             -H "Authorization: Bearer $CRON_SECRET"             "$SITE_URL/api/revalidate"
 
+      # The regions that did arrive are pushed above, so one failed region does not hold back
+      # the rest. The job still fails so the gap is visible and the digest below does not run.
+      - name: Fail if a region artifact is missing
+        if: ${{ steps.merge.outputs.missing != '' }}
+        env:
+          MISSING: ${{ steps.merge.outputs.missing }}
+        run: |
+          echo "::error::Missing region artifact(s): $MISSING"
+          exit 1
+
   digest:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [merge]
-    if: ${{ !cancelled() }}
+    if: ${{ needs.merge.result == 'success' }}
 
     steps:
       - uses: actions/checkout@v4

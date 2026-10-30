@@ -14,6 +14,9 @@ export default function DataFreshness() {
       .from("scraper_logs")
       .select("completed_at")
       .eq("status", "success")
+      // Only the merge job's row means data reached the database. Region, federation and
+      // dedup rows share the same status but are written earlier or for other reasons.
+      .like("message", "[region:merged]%")
       .order("completed_at", { ascending: false })
       .limit(1)
       .then(({ data }) => {
