@@ -32,8 +32,77 @@ const posthogAssetsHost =
 const umamiScriptHost = process.env.UMAMI_SCRIPT_HOST ?? "https://cloud.umami.is";
 const umamiGatewayHost = process.env.UMAMI_GATEWAY_HOST ?? "https://gateway.umami.is";
 
+// Content-Security-Policy, report-only for now: violations show up in the browser
+// console without blocking anything. Once they are clean on the main pages it can be
+// switched to an enforcing Content-Security-Policy header.
+//
+// Origins in use: Supabase (REST and realtime), OpenStreetMap tiles for the map, and
+// Google Analytics when NEXT_PUBLIC_GA_ID is set. PostHog, Umami and Vercel Analytics all
+// go through same-origin paths (/ingest, /relay, /_vercel), so they need no entry.
+// 'unsafe-inline' is needed for the inline theme script and the JSON-LD blocks in the
+// layout; a nonce would remove it but forces every page to render dynamically.
+function supabaseOrigins(): string[] {
+  try {
+    const url = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
+    return [url.origin, `${url.protocol === "https:" ? "wss:" : "ws:"}//${url.host}`];
+  } catch {
+    return [];
+  }
+}
+
+function contentSecurityPolicy(): string {
+  const analytics = process.env.NEXT_PUBLIC_GA_ID !== undefined && process.env.NEXT_PUBLIC_GA_ID !== "";
+  const dev = process.env.NODE_ENV !== "production";
+
+  const directives: Record<string, string[]> = {
+    "default-src": ["'self'"],
+    "script-src": [
+      "'self'",
+      "'unsafe-inline'",
+      ...(dev ? ["'unsafe-eval'"] : []),
+      ...(analytics ? ["https://www.googletagmanager.com"] : []),
+    ],
+    "style-src": ["'self'", "'unsafe-inline'"],
+    "img-src": [
+      "'self'",
+      "data:",
+      "blob:",
+      "https://*.tile.openstreetmap.org",
+      ...(analytics ? ["https://www.google-analytics.com", "https://www.googletagmanager.com"] : []),
+    ],
+    "font-src": ["'self'", "data:"],
+    "connect-src": [
+      "'self'",
+      ...supabaseOrigins(),
+      ...(analytics
+        ? ["https://*.google-analytics.com", "https://*.analytics.google.com", "https://www.googletagmanager.com"]
+        : []),
+    ],
+    "worker-src": ["'self'", "blob:"],
+    "object-src": ["'none'"],
+    "base-uri": ["'self'"],
+    "form-action": ["'self'"],
+  };
+
+  return Object.entries(directives)
+    .map(([name, values]) => `${name} ${values.join(" ")}`)
+    .join("; ");
+}
+
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=()" },
+          { key: "Content-Security-Policy-Report-Only", value: contentSecurityPolicy() },
+        ],
+      },
+    ];
+  },
   async rewrites() {
     const rules = [
       { source: "/relay/script.js", destination: `${umamiScriptHost}/script.js` },
