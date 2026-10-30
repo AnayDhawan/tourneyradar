@@ -81,7 +81,7 @@ export default async function CountryPage({ params }: Props) {
   const breadcrumbJsonLd = generateBreadcrumbJsonLd([
     { name: 'Home', url: 'https://www.tourneyradar.com' },
     { name: 'Countries', url: 'https://www.tourneyradar.com/tournaments' },
-    { name: countryName, url: `https://www.tourneyradar.com/country/${code}` },
+    { name: countryName, url: `https://www.tourneyradar.com/country/${code.toLowerCase()}` },
   ]);
   const eventListJsonLd = generateEventListJsonLd(tournaments);
 
