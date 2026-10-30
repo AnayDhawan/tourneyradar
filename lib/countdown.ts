@@ -1,28 +1,32 @@
-export function getCountdown(dateStr: string): string {
+export function getCountdown(dateStr: string, now: Date | string = new Date()): string {
+  if (!dateStr) return "";
   const targetDate = new Date(dateStr);
-  const now = new Date();
-  const diff = targetDate.getTime() - now.getTime();
+  const nowDate = now instanceof Date ? now : new Date(now);
 
-  // Only show countdown for future tournaments, and nothing for a date that can't be read
-  if (Number.isNaN(diff) || diff < 0) return "";
+  if (Number.isNaN(targetDate.getTime()) || Number.isNaN(nowDate.getTime())) return "";
 
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const targetUtcDays =
+    Date.UTC(targetDate.getUTCFullYear(), targetDate.getUTCMonth(), targetDate.getUTCDate()) / 86400000;
+  const nowUtcDays =
+    Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth(), nowDate.getUTCDate()) / 86400000;
 
-  if (days === 0) {
-    if (hours === 0) return "Starting today!";
-    return `Starting in ${hours}h`;
-  }
+  const days = Math.round(targetUtcDays - nowUtcDays);
+
+  if (days < 0) return "";
+  if (days === 0) return "Starting today!";
   if (days === 1) return "Tomorrow";
   if (days <= 7) return `In ${days} days`;
   if (days <= 30) return `In ${Math.ceil(days / 7)} weeks`;
-  return `In ${Math.ceil(days / 30)} months`;
+
+  const months = Math.floor(days / 30);
+  return months === 1 ? "In 1 month" : `In ${months} months`;
 }
 
-export function isNewTournament(createdAt: string): boolean {
+export function isNewTournament(createdAt: string, now: Date | string = new Date()): boolean {
   if (!createdAt) return false;
   const created = new Date(createdAt);
-  const now = new Date();
-  const diffDays = (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
-  return diffDays <= 7;
+  const nowDate = now instanceof Date ? now : new Date(now);
+  if (Number.isNaN(created.getTime()) || Number.isNaN(nowDate.getTime())) return false;
+  const diffDays = (nowDate.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
+  return diffDays >= 0 && diffDays <= 7;
 }
