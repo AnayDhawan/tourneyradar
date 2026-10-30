@@ -43,13 +43,18 @@ vi.mock('@/lib/supabase', () => {
   return { supabase: { from: () => builder } };
 });
 
-type Node = ReactNode | ReactElement<{ children?: ReactNode; type?: string; dangerouslySetInnerHTML?: { __html: string } }>;
+type ElementProps = {
+  children?: ReactNode;
+  type?: string;
+  dangerouslySetInnerHTML?: { __html: string };
+};
+type Node = ReactNode | ReactElement<ElementProps>;
 
 function jsonLdScripts(node: Node, found: unknown[] = []): unknown[] {
   if (Array.isArray(node)) {
     node.forEach((child) => jsonLdScripts(child, found));
   } else if (node && typeof node === 'object' && 'props' in node) {
-    const { type, children, dangerouslySetInnerHTML } = node.props;
+    const { type, children, dangerouslySetInnerHTML } = (node as ReactElement<ElementProps>).props;
     if (node.type === 'script' && type === 'application/ld+json' && dangerouslySetInnerHTML) {
       found.push(JSON.parse(dangerouslySetInnerHTML.__html));
     }
