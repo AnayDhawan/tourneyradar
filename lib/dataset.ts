@@ -77,6 +77,9 @@ export async function fetchDatasetRows(
     const { data, error } = await client
       .from('tournaments')
       .select(DATASET_SELECT_FIELDS)
+      // Same filter as every other read of this table: the export must not
+      // publish more than the site shows (issue #239).
+      .eq('status', 'published')
       .order('id', { ascending: true })
       .range(from, from + PAGE_SIZE - 1);
 

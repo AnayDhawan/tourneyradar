@@ -72,6 +72,7 @@ export default function WishlistPage() {
         .from("tournaments")
         .select("id, name, date, location, state, category, source, source_url")
         .in("id", tournamentIds)
+        .eq("status", "published")
         .gte("date", today)
         .order("date", { ascending: true });
 

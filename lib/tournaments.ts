@@ -361,6 +361,7 @@ export async function getPersonalizedTournaments(
     const { data: wishlistData, error: wishlistError } = await supabase
       .from('tournaments')
       .select(WISHLIST_SIGNAL_FIELDS)
+      .eq('status', 'published')
       .in('id', wishlistTournamentIds);
 
     if (wishlistError) {
