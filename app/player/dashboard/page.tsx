@@ -117,6 +117,7 @@ export default function PlayerDashboardPage() {
         .from("tournaments")
         .select("id, name, date, location, state, category")
         .in("id", tournamentIds)
+        .eq("status", "published")
         .gte("date", today)
         .order("date", { ascending: true })
         .limit(5);

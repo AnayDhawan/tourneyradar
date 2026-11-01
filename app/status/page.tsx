@@ -3,6 +3,7 @@ import { unstable_cache } from "next/cache";
 import BaseLayout from "@/components/BaseLayout";
 
 import { supabase } from "@/lib/supabase";
+import { generateStaticPageMetadata } from "@/app/lib/metadata";
 
 interface ScraperLog {
   status: string;
@@ -104,6 +105,12 @@ function formatDate(iso: string | null): string {
     minute: "2-digit",
   });
 }
+
+export const metadata = generateStaticPageMetadata(
+  "/status",
+  "Scraper Status",
+  "Per-federation scraper health for TourneyRadar: last successful run, last failure and tournaments collected.",
+);
 
 export default async function StatusPage() {
   const regions = await getStatus();

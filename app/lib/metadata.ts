@@ -160,6 +160,40 @@ export function generateCityMetadata(city: string, countryName: string, tourname
   };
 }
 
+/**
+ * Metadata for the site's own static pages (/status, /api-docs, /dataset and so
+ * on). Without it they inherit the root layout's canonical URL and Open Graph
+ * text, so every one of them tells search engines the homepage is its canonical
+ * page and shows the homepage's title when shared (issue #237).
+ */
+export function generateStaticPageMetadata(path: string, title: string, description: string): Metadata {
+  const url = `${BASE_URL}${path}`;
+  const shareTitle = brandedTitle(title);
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: shareTitle,
+      description,
+      type: 'website',
+      url,
+      siteName: SITE_NAME,
+      locale: 'en_US',
+      images: [{ url: `${BASE_URL}/og-image.png`, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: shareTitle,
+      description,
+      images: [`${BASE_URL}/og-image.png`],
+    },
+    alternates: {
+      canonical: url,
+    },
+  };
+}
+
 export function generateTournamentJsonLd(tournament: TournamentMetadata) {
   const location = [tournament.city, tournament.state, tournament.country].filter(Boolean).join(', ');
   const hasCoords = Number.isFinite(tournament.lat) && Number.isFinite(tournament.lng);

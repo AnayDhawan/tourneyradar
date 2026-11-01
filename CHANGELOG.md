@@ -12,6 +12,8 @@ All notable changes to this project are documented here. Format based on
 - Vitest suite (64 tests) run in CI, plus Playwright specs for country pages and calendar feeds.
 
 ### Changed
+- The dataset export and the player wishlist and dashboard queries only read published tournaments, matching every other read of the table (#239).
+- `/status`, `/status/detail`, `/api-docs`, `/dataset`, `/stats` and `/player/login` have their own canonical URL and Open Graph text instead of inheriting the homepage's (#237).
 - Sitemap lists every static page, pages through all upcoming events, and uses real last-modified dates.
 - Unknown `/country/<code>` URLs now return a real 404; cached pages refresh every 30 minutes.
 - 404 page styling moved to CSS classes; animations respect `prefers-reduced-motion`.
