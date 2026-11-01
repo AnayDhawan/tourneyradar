@@ -5,6 +5,7 @@ import BaseLayout from "@/components/BaseLayout";
 
 import { supabase } from "@/lib/supabase";
 import type { GeocodeTier } from "@/lib/geocoding";
+import { generateStaticPageMetadata } from "@/app/lib/metadata";
 
 // Internal-facing scrape observability dashboard (issue #126). This repo has
 // no admin auth (see CONTRIBUTING.md: the admin panel is a separate, closed
@@ -189,6 +190,12 @@ function successRate(entry: FedStats): number | null {
 
 const cellStyle: CSSProperties = { padding: "0.6rem", borderBottom: "1px solid var(--border)" };
 const headerCellStyle: CSSProperties = { ...cellStyle, fontWeight: 600 };
+
+export const metadata = generateStaticPageMetadata(
+  "/status/detail",
+  "Scrape Observability",
+  "Scrape success rates by federation and geocoding fallback-tier usage for TourneyRadar.",
+);
 
 export default async function StatusDetailPage() {
   const data = await getDashboardData();

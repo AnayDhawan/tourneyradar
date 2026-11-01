@@ -3,6 +3,7 @@ import {
   generateBreadcrumbJsonLd,
   generateCityMetadata,
   generateCountryMetadata,
+  generateStaticPageMetadata,
   generateTournamentMetadata,
   serializeJsonLd,
 } from './metadata';
@@ -140,5 +141,26 @@ describe('country and city metadata', () => {
     const title = rendered(generateCityMetadata('Pune', 'India', 5).title);
     expect(title).toBe('Chess Tournaments in Pune, India | TourneyRadar');
     expect(occurrences(title, 'TourneyRadar')).toBe(1);
+  });
+});
+
+describe('generateStaticPageMetadata', () => {
+  const meta = generateStaticPageMetadata('/api-docs', 'API Docs', 'Endpoints and response shape.');
+
+  it('has its own canonical URL, not the homepage', () => {
+    expect(meta.alternates?.canonical).toBe('https://www.tourneyradar.com/api-docs');
+  });
+
+  it('carries its own Open Graph and Twitter text', () => {
+    expect(meta.openGraph).toMatchObject({
+      title: 'API Docs | TourneyRadar',
+      description: 'Endpoints and response shape.',
+      url: 'https://www.tourneyradar.com/api-docs',
+    });
+    expect(meta.twitter).toMatchObject({ title: 'API Docs | TourneyRadar' });
+  });
+
+  it('leaves the site name in the plain title to the root layout template', () => {
+    expect(rendered(meta.title)).toBe('API Docs | TourneyRadar');
   });
 });

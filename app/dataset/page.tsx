@@ -8,6 +8,7 @@ import { unstable_cache } from "next/cache";
 import BaseLayout from "@/components/BaseLayout";
 import { supabase } from "@/lib/supabase";
 import { fetchDatasetRows, buildDatasetMeta, DATASET_COLUMNS } from "@/lib/dataset";
+import { generateStaticPageMetadata } from "@/app/lib/metadata";
 
 const REPO_URL = "https://github.com/AnayDhawan/tourneyradar";
 const DATASET_LICENSE_URL = `${REPO_URL}/blob/main/DATASET.md`;
@@ -44,6 +45,12 @@ const bodyText: React.CSSProperties = {
   color: "var(--text-secondary)",
   lineHeight: 1.8,
 };
+
+export const metadata = generateStaticPageMetadata(
+  "/dataset",
+  "Open Dataset",
+  "Download the TourneyRadar chess tournament dataset as CSV or NDJSON, with the column list, license and attribution terms.",
+);
 
 export default async function DatasetPage() {
   const meta = await getMeta();

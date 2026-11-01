@@ -5,6 +5,7 @@ import BaseLayout from "@/components/BaseLayout";
 import { getAllUpcomingTournaments, getTournamentStats } from "@/lib/tournaments";
 import MonthlyChart from "./MonthlyChart";
 import TrafficChart from "./TrafficChart";
+import { generateStaticPageMetadata } from "@/app/lib/metadata";
 
 const MONTH_LABELS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -59,6 +60,12 @@ const STAT_CARDS = [
   { key: "countries", label: "Countries", color: "#10b981" },
   { key: "mapped", label: "With Map Location", color: "#f59e0b" },
 ] as const;
+
+export const metadata = generateStaticPageMetadata(
+  "/stats",
+  "Analytics",
+  "Tournament counts by month and traffic statistics for TourneyRadar.",
+);
 
 export default async function StatsPage() {
   const { stats, monthly } = await getStats();
