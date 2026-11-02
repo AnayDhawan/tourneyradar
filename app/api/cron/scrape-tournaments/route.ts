@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { checkCronAuth } from '@/lib/cron-auth';
 
-const CRON_SECRET = process.env.CRON_SECRET;
 
 function getSupabase() {
   const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -31,9 +31,12 @@ const SCRAPER_CONFIG = {
 };
 
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  const auth = checkCronAuth(request.headers.get('authorization'), process.env.CRON_SECRET);
+  if (auth === 'not-configured') {
+    // Fail closed: without a secret this endpoint used to accept every caller.
+    return NextResponse.json({ error: 'CRON_SECRET is not configured' }, { status: 503 });
+  }
+  if (auth !== 'ok') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
