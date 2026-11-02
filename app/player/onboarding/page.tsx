@@ -153,8 +153,8 @@ export default function PlayerOnboardingPage() {
                   We&apos;ll use this to surface tournaments near you first.
                 </p>
                 <div style={{ marginBottom: "2rem" }}>
-                  <label style={labelStyle}>Home country</label>
-                  <select
+                  <label htmlFor="onb-1" style={labelStyle}>Home country</label>
+                  <select id="onb-1"
                     className="form-select"
                     value={homeCountry}
                     onChange={(e) => setHomeCountry(e.target.value)}
@@ -186,6 +186,7 @@ export default function PlayerOnboardingPage() {
                 </p>
                 <div style={{ marginBottom: "2rem" }}>
                   <select
+                    aria-label="How did you hear about TourneyRadar?"
                     className="form-select"
                     value={referralSource}
                     onChange={(e) => setReferralSource(e.target.value)}
@@ -199,6 +200,7 @@ export default function PlayerOnboardingPage() {
                     <input
                       className="form-input"
                       style={{ marginTop: "0.75rem" }}
+                      aria-label="Where did you hear about TourneyRadar?"
                       placeholder="Tell us where"
                       value={referralOther}
                       onChange={(e) => setReferralOther(e.target.value)}

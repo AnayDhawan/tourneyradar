@@ -42,8 +42,10 @@ export async function GET(
   const events = (data || []).map((t) => {
     const endDay = dayAfter(t.end_date || t.date);
     const locationParts = [t.city, t.state, t.country].filter(Boolean);
+    // DESCRIPTION is a TEXT value like SUMMARY and LOCATION, so commas and
+    // semicolons in a place name must be escaped (RFC 5545 section 3.3.11).
     const description = [
-      `Location: ${locationParts.join(', ') || 'TBA'}`,
+      `Location: ${icsEscape(locationParts.join(', ')) || 'TBA'}`,
       `Link: ${SITE_URL}/tournaments/${t.id}`,
     ].join('\\n');
 
