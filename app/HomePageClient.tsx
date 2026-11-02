@@ -463,8 +463,8 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               </div>
 
               <div className="filter-group">
-                <label>Category</label>
-                <select
+                <label htmlFor="filter-1">Category</label>
+                <select id="filter-1"
                   className="form-select"
                   value={filters.category}
                   onChange={(e) => setFilters((p) => ({ ...p, category: e.target.value }))}
@@ -479,8 +479,8 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               </div>
 
               <div className="filter-group">
-                <label>State</label>
-                <select
+                <label htmlFor="filter-2">State</label>
+                <select id="filter-2"
                   className="form-select"
                   value={filters.state}
                   onChange={(e) => setFilters((p) => ({ ...p, state: e.target.value }))}
@@ -494,8 +494,8 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               </div>
 
               <div className="filter-group">
-                <label>Country</label>
-                <select
+                <label htmlFor="filter-3">Country</label>
+                <select id="filter-3"
                   className="form-select"
                   value={filters.country}
                   onChange={(e) => setFilters((p) => ({ ...p, country: e.target.value }))}
@@ -509,8 +509,8 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               </div>
 
               <div className="filter-group">
-                <label>FIDE Rated</label>
-                <select
+                <label htmlFor="filter-4">FIDE Rated</label>
+                <select id="filter-4"
                   className="form-select"
                   value={filters.fideRated}
                   onChange={(e) =>
@@ -524,8 +524,8 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               </div>
 
               <div className="filter-group">
-                <label>Start Date</label>
-                <input
+                <label htmlFor="filter-5">Start Date</label>
+                <input id="filter-5"
                   type="date"
                   className="form-input"
                   value={filters.startDate}
@@ -534,8 +534,8 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
               </div>
 
               <div className="filter-group">
-                <label>End Date</label>
-                <input
+                <label htmlFor="filter-6">End Date</label>
+                <input id="filter-6"
                   type="date"
                   className="form-input"
                   value={filters.endDate}

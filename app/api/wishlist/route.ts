@@ -6,6 +6,13 @@ import { getAuthenticatedPlayer } from '@/lib/supabase-server';
 // player can never read or mutate another player's wishlist.
 const UNAUTHORIZED = { error: 'Authentication required' };
 
+// Database errors are logged, never returned: their text names tables, columns
+// and constraints.
+const SERVER_ERROR = { error: 'Internal server error' };
+const MAX_TOURNAMENT_ID_LENGTH = 100;
+// Postgres unique_violation: the player already saved this tournament.
+const UNIQUE_VIOLATION = '23505';
+
 export async function GET(request: NextRequest) {
   const player = await getAuthenticatedPlayer(request);
   if (!player) {
@@ -18,7 +25,8 @@ export async function GET(request: NextRequest) {
     .eq('player_id', player.playerId);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Error reading wishlist:', error);
+    return NextResponse.json(SERVER_ERROR, { status: 500 });
   }
 
   return NextResponse.json(
@@ -44,6 +52,9 @@ export async function POST(request: NextRequest) {
   if (typeof tournamentId !== 'string' || !tournamentId.trim()) {
     return NextResponse.json({ error: 'tournament_id required' }, { status: 400 });
   }
+  if (tournamentId.length > MAX_TOURNAMENT_ID_LENGTH) {
+    return NextResponse.json({ error: 'tournament_id is too long' }, { status: 400 });
+  }
 
   const { data, error } = await player.supabase
     .from('player_favorite_tournaments')
@@ -51,8 +62,14 @@ export async function POST(request: NextRequest) {
     .select()
     .single();
 
+  // Saving something already saved (a second tab, a stale client) is not a
+  // failure: the wishlist ends up in the state the caller asked for.
+  if (error?.code === UNIQUE_VIOLATION) {
+    return NextResponse.json({ success: true, already_saved: true }, { status: 200 });
+  }
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Error saving to wishlist:', error);
+    return NextResponse.json(SERVER_ERROR, { status: 500 });
   }
 
   return NextResponse.json({ success: true, data }, { status: 201 });
@@ -76,7 +93,8 @@ export async function DELETE(request: NextRequest) {
     .eq('tournament_id', tournamentId);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Error removing from wishlist:', error);
+    return NextResponse.json(SERVER_ERROR, { status: 500 });
   }
 
   return NextResponse.json({ success: true });

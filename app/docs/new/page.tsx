@@ -151,10 +151,10 @@ export default function NewDocPage() {
             )}
 
             <div style={{ marginBottom: "1.25rem" }}>
-              <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+              <label htmlFor="doc-1" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                 Title
               </label>
-              <input
+              <input id="doc-1"
                 className="form-input"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -164,10 +164,10 @@ export default function NewDocPage() {
             </div>
 
             <div style={{ marginBottom: "1.25rem" }}>
-              <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+              <label htmlFor="doc-2" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                 Summary (optional)
               </label>
-              <input
+              <input id="doc-2"
                 className="form-input"
                 value={summary}
                 onChange={(e) => setSummary(e.target.value)}
@@ -178,7 +178,7 @@ export default function NewDocPage() {
 
             <div style={{ marginBottom: "1.5rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-                <label style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--text-secondary)" }}>
+                <label htmlFor="doc-3" style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--text-secondary)" }}>
                   Content (Markdown)
                 </label>
                 <button
@@ -198,6 +198,7 @@ export default function NewDocPage() {
                 </div>
               ) : (
                 <textarea
+                  id="doc-3"
                   className="form-input"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}

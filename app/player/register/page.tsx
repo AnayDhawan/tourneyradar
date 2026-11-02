@@ -178,10 +178,10 @@ export default function PlayerRegisterPage() {
                 )}
 
                 <div style={{ marginBottom: "1.5rem" }}>
-                  <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                  <label htmlFor="reg-1" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                     Full Name *
                   </label>
-                  <input
+                  <input id="reg-1"
                     type="text"
                     required
                     className="form-input"
@@ -192,10 +192,10 @@ export default function PlayerRegisterPage() {
                 </div>
 
                 <div style={{ marginBottom: "1.5rem" }}>
-                  <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                  <label htmlFor="reg-2" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                     Email *
                   </label>
-                  <input
+                  <input id="reg-2"
                     type="email"
                     required
                     className="form-input"
@@ -207,10 +207,10 @@ export default function PlayerRegisterPage() {
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
                   <div>
-                    <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                    <label htmlFor="reg-3" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                       Password *
                     </label>
-                    <input
+                    <input id="reg-3"
                       type="password"
                       required
                       className="form-input"
@@ -220,10 +220,10 @@ export default function PlayerRegisterPage() {
                     />
                   </div>
                   <div>
-                    <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                    <label htmlFor="reg-4" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                       Confirm Password *
                     </label>
-                    <input
+                    <input id="reg-4"
                       type="password"
                       required
                       className="form-input"
@@ -235,10 +235,10 @@ export default function PlayerRegisterPage() {
                 </div>
 
                 <div style={{ marginBottom: "1.5rem" }}>
-                  <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                  <label htmlFor="reg-5" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                     Phone (Optional)
                   </label>
-                  <input
+                  <input id="reg-5"
                     type="tel"
                     className="form-input"
                     value={formData.phone}
@@ -249,10 +249,10 @@ export default function PlayerRegisterPage() {
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "2rem" }}>
                   <div>
-                    <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                    <label htmlFor="reg-6" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                       FIDE ID (Optional)
                     </label>
-                    <input
+                    <input id="reg-6"
                       type="text"
                       className="form-input"
                       value={formData.fide_id}
@@ -261,10 +261,10 @@ export default function PlayerRegisterPage() {
                     />
                   </div>
                   <div>
-                    <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                    <label htmlFor="reg-7" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                       Rating (Optional)
                     </label>
-                    <input
+                    <input id="reg-7"
                       type="number"
                       className="form-input"
                       value={formData.rating}

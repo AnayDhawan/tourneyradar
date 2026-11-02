@@ -148,10 +148,10 @@ export default function CompleteProfilePage() {
                 )}
 
                 <div style={{ marginBottom: "1.5rem" }}>
-                  <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                  <label htmlFor="cp-1" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                     Full Name *
                   </label>
-                  <input
+                  <input id="cp-1"
                     type="text"
                     required
                     className="form-input"
@@ -162,10 +162,10 @@ export default function CompleteProfilePage() {
                 </div>
 
                 <div style={{ marginBottom: "1.5rem" }}>
-                  <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                  <label htmlFor="cp-2" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                     Phone (Optional)
                   </label>
-                  <input
+                  <input id="cp-2"
                     type="tel"
                     className="form-input"
                     value={formData.phone}
@@ -176,10 +176,10 @@ export default function CompleteProfilePage() {
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "2rem" }}>
                   <div>
-                    <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                    <label htmlFor="cp-3" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                       FIDE ID (Optional)
                     </label>
-                    <input
+                    <input id="cp-3"
                       type="text"
                       className="form-input"
                       value={formData.fide_id}
@@ -188,10 +188,10 @@ export default function CompleteProfilePage() {
                     />
                   </div>
                   <div>
-                    <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                    <label htmlFor="cp-4" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                       Rating (Optional)
                     </label>
-                    <input
+                    <input id="cp-4"
                       type="number"
                       className="form-input"
                       value={formData.rating}
