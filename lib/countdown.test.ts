@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getCountdown, isNewTournament } from './countdown';
 
 // "Now" is fixed so every boundary is exact. It is noon UTC on 2026-10-21.
+// The cases below read "today" in UTC; the zone tests pass a zone explicitly.
+process.env.TZ = 'UTC';
 const NOW = new Date('2026-10-21T12:00:00Z');
 
 beforeEach(() => {
@@ -36,9 +38,11 @@ describe('getCountdown', () => {
     expect(getCountdown('2026-10-28')).toBe('In 7 days');
   });
 
-  it('counts weeks up to 30 days', () => {
-    expect(getCountdown('2026-10-29')).toBe('In 2 weeks');
-    expect(getCountdown('2026-11-20')).toBe('In 5 weeks');
+  it('counts whole weeks up to 30 days, rounding down', () => {
+    expect(getCountdown('2026-10-29')).toBe('In 1 week');
+    expect(getCountdown('2026-11-03')).toBe('In 1 week');
+    expect(getCountdown('2026-11-04')).toBe('In 2 weeks');
+    expect(getCountdown('2026-11-20')).toBe('In 4 weeks');
   });
 
   it('counts whole months beyond 30 days and does not round up', () => {
@@ -58,6 +62,16 @@ describe('getCountdown', () => {
     // Both are the same instant: 2026-10-23T12:00:00Z.
     expect(getCountdown('2026-10-23T14:00:00+02:00')).toBe(getCountdown('2026-10-23T12:00:00Z'));
     expect(getCountdown('2026-10-23T05:00:00-07:00')).toBe('In 2 days');
+  });
+
+  it("uses the viewer's calendar date, not UTC's", () => {
+    // 01:00 in India on 2026-10-24 is still 2026-10-23 in UTC.
+    const lateNight = new Date('2026-10-23T19:30:00Z');
+    expect(getCountdown('2026-10-24', lateNight, 'Asia/Kolkata')).toBe('Starting today!');
+    expect(getCountdown('2026-10-24', lateNight, 'UTC')).toBe('Tomorrow');
+    // 20:00 in New York on 2026-10-23 is already 2026-10-24 in UTC.
+    const evening = new Date('2026-10-24T00:00:00Z');
+    expect(getCountdown('2026-10-24', evening, 'America/New_York')).toBe('Tomorrow');
   });
 
   it('returns an empty string for a date it cannot read', () => {

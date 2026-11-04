@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import BaseLayout from "@/components/BaseLayout";
 import SaveButton from "@/components/SaveButton";
@@ -43,7 +44,16 @@ function formatDate(dateStr: string): string {
   }).format(d);
 }
 
+// True only in the browser. The countdown depends on the viewer's calendar date,
+// which the server cannot know, so the server render leaves it out instead of
+// rendering a UTC label that hydration would then contradict.
+const noopSubscribe = () => () => {};
+function useIsClient(): boolean {
+  return useSyncExternalStore(noopSubscribe, () => true, () => false);
+}
+
 export default function TournamentsClient({ initialTournaments, page, totalPages, total, q }: Props) {
+  const isClient = useIsClient();
   // Signal FeedbackPrompt that the user got value (searched / opened a tournament).
   const markEngaged = () => {
     if (typeof window !== "undefined") {
@@ -176,7 +186,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
                       )}
                       {tournament.fide_rated && <span className="badge badge-fide">FIDE</span>}
                       <span className="badge">{tournament.category}</span>
-                      {getCountdown(tournament.date) && (
+                      {isClient && getCountdown(tournament.date) && (
                         <span style={{
                           marginLeft: "auto",
                           fontSize: "0.75rem",
