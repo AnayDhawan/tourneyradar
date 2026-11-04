@@ -42,3 +42,9 @@ create policy tournaments_published_read on public.tournaments
   using (status = 'published');
 
 commit;
+
+-- Shows the remaining policies in the editor's result pane (it hides NOTICEs),
+-- so an ALL policy using (true) is visible.
+select policyname, cmd, roles, qual from pg_policies
+ where schemaname = 'public' and tablename = 'tournaments'
+ order by cmd, policyname;
