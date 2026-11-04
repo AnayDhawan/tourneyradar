@@ -6,6 +6,7 @@ import { queryTournaments } from '@/lib/tournaments';
 export const metadata: Metadata = {
   title: 'Browse Chess Tournaments',
   description: 'Browse and filter 1,000+ upcoming chess tournaments worldwide. Filter by country, format, date, and FIDE rating status.',
+  alternates: { canonical: 'https://www.tourneyradar.com/tournaments' },
 };
 
 export default async function TournamentsPage({

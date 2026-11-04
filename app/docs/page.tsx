@@ -6,6 +6,7 @@ import DocsPageClient from "./DocsPageClient";
 export const metadata: Metadata = {
   title: "Docs",
   description: "Guides for using TourneyRadar, written by maintainers and players.",
+  alternates: { canonical: "https://www.tourneyradar.com/docs" },
 };
 
 export default async function DocsPage() {

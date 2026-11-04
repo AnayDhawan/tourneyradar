@@ -25,6 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: doc.title,
     description: doc.summary ?? undefined,
+    alternates: { canonical: `https://www.tourneyradar.com/docs/${encodeURIComponent(slug)}` },
   };
 }
 
