@@ -32,9 +32,14 @@ const posthogAssetsHost =
 const umamiScriptHost = process.env.UMAMI_SCRIPT_HOST ?? "https://cloud.umami.is";
 const umamiGatewayHost = process.env.UMAMI_GATEWAY_HOST ?? "https://gateway.umami.is";
 
-// Content-Security-Policy, report-only for now: violations show up in the browser
-// console without blocking anything. Once they are clean on the main pages it can be
-// switched to an enforcing Content-Security-Policy header.
+// Content-Security-Policy, enforced. It ran report-only first; on 2026-11-04 a
+// Playwright pass over /, a tournament page, a country page, /stats, /about,
+// /tournaments, /dataset, /api-docs, /docs, /support and /player/login recorded no
+// violations (map tiles loaded), so the header was switched to enforcing.
+//
+// frame-ancestors 'none' and X-Frame-Options: DENY stop other sites from framing
+// the app (clickjacking). Nothing here is meant to be embedded; an embeddable widget
+// would need its own route with a narrower rule.
 //
 // Origins in use: Supabase (REST and realtime), OpenStreetMap tiles for the map, and
 // Google Analytics when NEXT_PUBLIC_GA_ID is set. PostHog, Umami and Vercel Analytics all
@@ -82,6 +87,7 @@ function contentSecurityPolicy(): string {
     "object-src": ["'none'"],
     "base-uri": ["'self'"],
     "form-action": ["'self'"],
+    "frame-ancestors": ["'none'"],
   };
 
   return Object.entries(directives)
@@ -98,7 +104,8 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=()" },
-          { key: "Content-Security-Policy-Report-Only", value: contentSecurityPolicy() },
+          { key: "Content-Security-Policy", value: contentSecurityPolicy() },
+          { key: "X-Frame-Options", value: "DENY" },
         ],
       },
     ];
