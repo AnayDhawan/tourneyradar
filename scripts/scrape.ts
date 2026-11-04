@@ -14,6 +14,13 @@ import {
 import { geocodeWithFallback, GeocodeTier, TieredCoordinates } from '../lib/geocoding';
 import { isPlausibleStartDate } from '../lib/dates';
 import { fetchKnownTournaments, selectLinksToScrape, REFRESH_AFTER_DAYS } from '../lib/known-ids';
+import {
+  INVALID_DATE_STATUS,
+  fetchCentroidRows,
+  fetchImplausibleRows,
+  groupByLocation,
+  isCountryLevelAnswer,
+} from '../lib/stored-cleanup';
 import fs from 'fs';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -139,6 +146,102 @@ async function dedupStoredRows(dryRun: boolean): Promise<void> {
     // Logging must never crash the scraper itself.
   }
   console.log(`  Unpublished ${ids.length} stored duplicate(s)`);
+}
+
+async function logCleanup(message: string): Promise<void> {
+  try {
+    await supabase.from('scraper_logs').insert({
+      started_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(),
+      status: 'success',
+      message,
+    });
+  } catch {
+    // Logging must never crash the scraper itself.
+  }
+}
+
+// Unpublishes stored rows whose start date is past the plausibility limit (#211). The scrape
+// guard rejects these dates now, but rows saved before it stay listed as upcoming events. They
+// are hidden with INVALID_DATE_STATUS, never deleted. With dryRun it only prints them.
+async function unpublishImplausibleRows(dryRun: boolean): Promise<void> {
+  const today = new Date().toISOString().slice(0, 10);
+  const rows = await fetchImplausibleRows(supabase, today);
+  console.log(`  Stored rows with an implausible start date: ${rows.length}`);
+  for (const r of rows) console.log(`      ${r.id} ${r.date} ${r.country_code ?? '??'} "${r.name}"`);
+  if (rows.length === 0) return;
+  if (dryRun) {
+    console.log('  Dry run: nothing was changed');
+    return;
+  }
+  if (rows.length > MAX_UNPUBLISH_PER_RUN) {
+    const reason = `refusing to unpublish ${rows.length} rows in one run (limit ${MAX_UNPUBLISH_PER_RUN}); run with --unpublish-implausible --dry-run and check them`;
+    console.error(`  ${reason}`);
+    await logScraperFailure('implausible-dates', reason);
+    return;
+  }
+
+  const ids = rows.map(r => r.id);
+  const { error } = await supabase
+    .from('tournaments')
+    .update({ status: INVALID_DATE_STATUS })
+    .in('id', ids)
+    .eq('status', 'published');
+  if (error) throw new Error(`could not set status "${INVALID_DATE_STATUS}": ${error.message}`);
+
+  await logCleanup(`[implausible-dates] unpublished ${ids.length} row(s): ${rows.map(r => `${r.id} (${r.date})`).join(', ')}`);
+  console.log(`  Unpublished ${ids.length} row(s)`);
+}
+
+// Re-geocodes stored upcoming rows that sit exactly on their country centroid (#212). Those were
+// saved when the chain fell straight to the centroid; it now tries Google and Nominatim first.
+// One lookup per distinct place, rate-limited by the Nominatim tier. A row is only updated when
+// the new answer is better than the centroid. With dryRun it looks places up but writes nothing.
+async function regeocodeCentroidRows(dryRun: boolean): Promise<void> {
+  const today = new Date().toISOString().slice(0, 10);
+  const rows = await fetchCentroidRows(supabase, today);
+  const groups = groupByLocation(rows);
+  console.log(`  Upcoming rows on a country centroid: ${rows.length}, at ${groups.size} distinct place(s)`);
+
+  let fixedRows = 0;
+  let fixedPlaces = 0;
+  const tiers: Record<string, number> = {};
+  for (const group of groups.values()) {
+    const sample = group[0];
+    let coords: TieredCoordinates | null = null;
+    try {
+      coords = await geocodeWithFallback(sample.city ?? '', sample.country ?? '', sample.country_code ?? undefined);
+    } catch (err) {
+      console.error(`      ${sample.city}, ${sample.country_code}: lookup failed (${errorMessage(err)})`);
+      continue;
+    }
+    const countryLevel =
+      !coords || coords.tier === 'country_centroid' || isCountryLevelAnswer(sample.country_code, coords.lat, coords.lng);
+    const tier = countryLevel ? 'unresolved' : coords!.tier;
+    tiers[tier] = (tiers[tier] ?? 0) + 1;
+    if (countryLevel || !coords) {
+      console.log(`      ${sample.city}, ${sample.country_code}: still unresolved (${group.length} row(s))`);
+      continue;
+    }
+    console.log(`      ${sample.city}, ${sample.country_code}: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)} via ${coords.tier} (${group.length} row(s))`);
+    fixedPlaces++;
+    fixedRows += group.length;
+    if (dryRun) continue;
+
+    const { error } = await supabase
+      .from('tournaments')
+      .update({ lat: coords.lat, lng: coords.lng })
+      .in('id', group.map(r => r.id));
+    if (error) throw new Error(`could not update coordinates: ${error.message}`);
+  }
+
+  const summary = `${fixedRows} row(s) at ${fixedPlaces} of ${groups.size} place(s) resolved; tiers ${JSON.stringify(tiers)}`;
+  if (dryRun) {
+    console.log(`  Dry run: ${summary}. Nothing was changed`);
+    return;
+  }
+  await logCleanup(`[regeocode] ${summary}`);
+  console.log(`  Updated ${summary}`);
 }
 
 // Never lets a clean-up problem fail a scrape that already saved its data.
@@ -645,6 +748,28 @@ async function main() {
   const pushFrom = getArg('--push-from');
   const regionArg = getArg('--region');
   const outputArg = getArg('--output');
+
+  if (process.argv.includes('--unpublish-implausible')) {
+    try {
+      await unpublishImplausibleRows(process.argv.includes('--dry-run'));
+    } catch (err) {
+      console.error(`  Implausible-date clean-up failed: ${errorMessage(err)}`);
+      await logScraperFailure('implausible-dates', errorMessage(err));
+      process.exitCode = 1;
+    }
+    return;
+  }
+
+  if (process.argv.includes('--regeocode-centroids')) {
+    try {
+      await regeocodeCentroidRows(process.argv.includes('--dry-run'));
+    } catch (err) {
+      console.error(`  Centroid re-geocode failed: ${errorMessage(err)}`);
+      await logScraperFailure('regeocode', errorMessage(err));
+      process.exitCode = 1;
+    }
+    return;
+  }
 
   if (process.argv.includes('--dedup-stored')) {
     try {

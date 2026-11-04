@@ -55,7 +55,7 @@ select '2 policies',
               and (p.qual = 'true' or p.with_check = 'true')
            then 'REVIEW: write policy with a true predicate'
          when p.cmd = 'SELECT' and p.qual = 'true'
-              and p.tablename not in ('tournaments', 'scraper_logs', 'tournament_history',
+              and p.tablename not in ('scraper_logs', 'tournament_history',
                                       'fide_rating_history', 'docs')
            then 'REVIEW: public read on a table not expected to be public'
          when p.cmd in ('UPDATE', 'ALL') and p.with_check is null
