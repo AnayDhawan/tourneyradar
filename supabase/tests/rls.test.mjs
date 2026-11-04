@@ -368,6 +368,15 @@ describe("tournaments, history and read-only tables", () => {
     await denied("anon", null, "insert into public.tournaments (id, name) values ('t1', 'x')");
   });
 
+  it("anon and users read published tournaments only, the service role reads all", async () => {
+    await as("service_role", null, "insert into public.tournaments (id, name, status) values ('pub1', 'Shown', 'published'), ('dup1', 'Hidden', 'duplicate')");
+    const mine = "select id from public.tournaments where id in ('pub1', 'dup1') order by id";
+    for (const [role, sub] of [["anon", null], ["authenticated", A]]) {
+      assert.deepEqual((await visible(role, sub, mine)).map((r) => r.id), ["pub1"]);
+    }
+    assert.deepEqual((await as("service_role", null, mine)).rows.map((r) => r.id), ["dup1", "pub1"]);
+  });
+
   it("a service-role write is recorded in history, and history is public read-only", async () => {
     await as("service_role", null, "insert into public.tournaments (id, name) values ('t1', 'Open')");
     await as("service_role", null, "update public.tournaments set name = 'Open 2' where id = 't1'");

@@ -53,7 +53,8 @@ create table public.players (
 create table public.tournaments (
   id text primary key,
   name text,
-  start_date date
+  start_date date,
+  status text -- matches the live column; migrations filter on it
 );
 alter table public.tournaments enable row level security;
 create policy tournaments_public_read on public.tournaments
