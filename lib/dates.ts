@@ -6,12 +6,17 @@
 // Dates are ISO "YYYY-MM-DD" strings, so string comparison is date order.
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+/** The last start date that still counts as plausible, `maxYearsAhead` years after `today`. */
+export function latestPlausibleStartDate(today: string, maxYearsAhead = 2): string {
+  const limitYear = String(Number(today.slice(0, 4)) + maxYearsAhead).padStart(4, '0');
+  return `${limitYear}${today.slice(4)}`;
+}
+
 export function isPlausibleStartDate(
   start: string,
   today: string,
   maxYearsAhead = 2
 ): boolean {
   if (!ISO_DATE.test(start) || !ISO_DATE.test(today)) return false;
-  const limitYear = String(Number(today.slice(0, 4)) + maxYearsAhead).padStart(4, '0');
-  return start <= `${limitYear}${today.slice(4)}`;
+  return start <= latestPlausibleStartDate(today, maxYearsAhead);
 }
