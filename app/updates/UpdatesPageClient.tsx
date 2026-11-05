@@ -8,7 +8,7 @@ function formatDate(dateStr: string | null): string | null {
   if (!dateStr) return null;
   const d = new Date(dateStr);
   if (Number.isNaN(d.getTime())) return dateStr;
-  return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(d);
+  return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(d);
 }
 
 // The changelog bullets are plain Markdown snippets (`code` and [text](url)
