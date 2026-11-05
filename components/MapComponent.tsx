@@ -79,7 +79,7 @@ export default function MapComponent({ tournaments }: Props) {
           </span>
           <br/>
           <span style="color: #666; font-size: 12px;">
-            ${new Date(tournament.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+            ${new Date(tournament.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" })}
           </span>
           <br/>
           <a href="/tournaments/${tournament.id}" style="color: #3b82f6; font-size: 12px; text-decoration: none;">
