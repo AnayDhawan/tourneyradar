@@ -28,6 +28,7 @@ export default function PrivacyPage() {
             <ul style={list}>
               <li><strong>Account:</strong> your name, email and password. The password is stored as a hash by our login provider and we cannot read it.</li>
               <li><strong>Optional profile details:</strong> phone number, FIDE ID, rating, city, country, home country and state, your role, why you use the site, how you heard about us, who referred you, and your email preferences.</li>
+              <li><strong>Age confirmation:</strong> whether you confirmed at signup that you are 16 or older, or that a parent or guardian has agreed.</li>
               <li><strong>Saved tournaments:</strong> the tournaments you add to your wishlist.</li>
               <li><strong>FIDE rating history:</strong> if you add a FIDE ID, we fetch your public rating history from FIDE and store it. It is public data and can be read through this site.</li>
               <li><strong>Feedback:</strong> your star rating, comment and the page you sent it from, linked to your account only if you are logged in.</li>
@@ -84,7 +85,12 @@ export default function PrivacyPage() {
               You can ask us for a copy of your data, to correct it, to delete it, to restrict or object to how we use it, or to send it to you in a portable format. You can withdraw consent at any time. Email dhawansanay@gmail.com and we will respond within one month. Deleting your account removes your account details, saved tournaments and linked analytics. If you are in the EEA or UK, you can also complain to your local data protection authority.
             </p>
 
-            <h3 style={heading}>10. Tournament listings</h3>
+            <h3 style={heading}>10. Children</h3>
+            <p style={body}>
+              If you are under 16, a parent or guardian must agree before you create an account, and we record that you confirmed this at signup. A parent or guardian can ask to see or delete a child&apos;s data by emailing dhawansanay@gmail.com. If we learn that an account was created without that agreement, we delete it.
+            </p>
+
+            <h3 style={heading}>11. Tournament listings</h3>
             <p style={{ ...body, marginBottom: 0 }}>
               Listings come from public sources such as Chess-Results and can include an organizer&apos;s name. To correct or remove one, email dhawansanay@gmail.com.
             </p>

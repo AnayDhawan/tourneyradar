@@ -26,6 +26,7 @@ export default function PlayerRegisterPage() {
     phone: "",
     fide_id: "",
     rating: "",
+    age_basis: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,6 +67,8 @@ export default function PlayerRegisterPage() {
             fide_id: formData.fide_id || null,
             rating: formData.rating || null,
             referred_by: referredBy,
+            // GDPR Art. 8: kept on the auth user as the record of what was confirmed.
+            age_basis: formData.age_basis,
           },
         },
       });
@@ -273,6 +276,32 @@ export default function PlayerRegisterPage() {
                     />
                   </div>
                 </div>
+
+                <fieldset style={{ border: "none", padding: 0, margin: "0 0 2rem" }}>
+                  <legend style={{ fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                    Your age *
+                  </legend>
+                  <label style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                    <input
+                      type="radio"
+                      name="age_basis"
+                      required
+                      checked={formData.age_basis === "16_or_older"}
+                      onChange={() => setFormData({ ...formData, age_basis: "16_or_older" })}
+                    />
+                    I am 16 or older
+                  </label>
+                  <label style={{ display: "flex", gap: "0.5rem", color: "var(--text-secondary)" }}>
+                    <input
+                      type="radio"
+                      name="age_basis"
+                      required
+                      checked={formData.age_basis === "parental_consent"}
+                      onChange={() => setFormData({ ...formData, age_basis: "parental_consent" })}
+                    />
+                    I am under 16 and a parent or guardian has agreed to this account
+                  </label>
+                </fieldset>
 
                 <button
                   type="submit"
