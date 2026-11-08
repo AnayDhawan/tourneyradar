@@ -4,10 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { trackEvent } from "@/lib/track";
 import FeedbackForm from "@/components/FeedbackForm";
+import { FEEDBACK_MIN_VISITS, nextVisitCount } from "@/lib/visit-count";
 
 const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000; // re-ask 7 days after "maybe later"
-const FIRST_VISIT_DELAY = 20000; // first-time visitor: give them time to get value
-const RETURN_VISIT_DELAY = 8000; // returning visitor (warm lead): ask sooner
+const RETURN_VISIT_DELAY = 8000; // only returning visitors are ever asked
 const SCROLL_THRESHOLD = 0.5; // fire once half the page has been scrolled
 
 // Pages where a feedback nudge would be noise (auth flows, legal text).
@@ -20,30 +20,30 @@ export default function FeedbackPrompt() {
   const pathname = usePathname();
   const [show, setShow] = useState(false);
   const firedRef = useRef(false);
-  const visitsRef = useRef(1);
+  const visitsRef = useRef(0);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
   // Count visits client-side. Umami is cookieless and can't tell new vs
-  // returning visitors, so we keep a per-browser counter in localStorage and
-  // increment it once per session.
+  // returning visitors, so we keep a per-browser counter in localStorage. It is
+  // time-based because sessionStorage is per tab: a second tab is not a new visit.
   useEffect(() => {
     try {
-      if (!sessionStorage.getItem("tr_visit_counted")) {
-        const n = parseInt(localStorage.getItem("tr_visits") || "0", 10) + 1;
-        localStorage.setItem("tr_visits", String(n));
-        sessionStorage.setItem("tr_visit_counted", "1");
-        visitsRef.current = n;
-      } else {
-        visitsRef.current = parseInt(localStorage.getItem("tr_visits") || "1", 10);
-      }
+      const now = Date.now();
+      const visits = parseInt(localStorage.getItem("tr_visits") || "0", 10);
+      const lastVisitAt = parseInt(localStorage.getItem("tr_last_visit") || "0", 10);
+      const n = nextVisitCount(visits, lastVisitAt, now);
+      localStorage.setItem("tr_visits", String(n));
+      localStorage.setItem("tr_last_visit", String(now));
+      visitsRef.current = n;
     } catch {
       /* storage unavailable, treat as first visit */
     }
   }, []);
 
-  // Trigger logic: time + scroll + engagement, tiered by visit count.
+  // Trigger logic: time + scroll + engagement, from the second visit onward.
   useEffect(() => {
     if (firedRef.current) return;
+    if (visitsRef.current < FEEDBACK_MIN_VISITS) return;
     if (EXCLUDED_PREFIXES.some((p) => pathname?.startsWith(p))) return;
     // Screen-recording/screenshot captures (?demoCursor=1, see
     // DemoCursor.tsx) engage with the page on purpose to show off features,
@@ -110,8 +110,7 @@ export default function FeedbackPrompt() {
       fire();
     }
 
-    const delay = visitsRef.current >= 2 ? RETURN_VISIT_DELAY : FIRST_VISIT_DELAY;
-    timer = setTimeout(fire, delay);
+    timer = setTimeout(fire, RETURN_VISIT_DELAY);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("tr:engaged", onEngaged);
 
