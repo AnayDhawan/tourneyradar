@@ -19,7 +19,6 @@ You will need your own Supabase project: set `NEXT_PUBLIC_SUPABASE_URL` and
 `.env.local.example` is optional. Analytics (PostHog, Umami, Google Analytics)
 stays off without its keys, and the Google Maps key is only used by the scraper
 for geocoding.
-The admin panel is not open source. All other routes work locally.
 
 ---
 

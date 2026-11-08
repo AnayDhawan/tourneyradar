@@ -54,11 +54,36 @@ create table public.tournaments (
   id text primary key,
   name text,
   start_date date,
-  status text -- matches the live column; migrations filter on it
+  status text, -- matches the live column; migrations filter on it
+  organizer_id uuid
 );
 alter table public.tournaments enable row level security;
 create policy tournaments_public_read on public.tournaments
   for select to anon, authenticated using (true);
+
+-- ASSUMED: columns of organizers. Policies as read from the live project by
+-- rls_audit.sql on 2026-11-08, before 20261108120000 replaced the insert one.
+create table public.organizers (
+  id uuid primary key default gen_random_uuid(),
+  auth_user_id uuid references auth.users(id)
+);
+alter table public.organizers enable row level security;
+create policy organizers_select_own on public.organizers
+  for select to public
+  using (
+    auth_user_id = auth.uid()
+    or exists (select 1 from public.admins a where a.auth_user_id = auth.uid())
+  );
+create policy organizers_insert_public on public.organizers
+  for insert to public with check (true);
+
+-- ASSUMED: body. Only its grants matter here.
+create function public.record_api_key_use(p_key_id uuid) returns void
+language plpgsql security definer set search_path = '' as $$
+begin
+  null;
+end;
+$$;
 
 -- players as measured on 2026-08-22: four dashboard policies, and an anon
 -- role holding INSERT only (anon select on players raised 42501 by 2026-10-06).
