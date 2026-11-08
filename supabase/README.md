@@ -227,6 +227,15 @@ Found by the RLS tests below. Safe to apply to the live project; it narrows noth
 - **`record_tournament_history`** now pins an empty `search_path` like the other definer functions.
 - **Length limits** on `feedback` and `docs` text, added `NOT VALID` so existing rows are not rescanned.
 
+## 20261108120000_access_tightening.sql
+
+Found by `audit/rls_audit.sql` on the live project and applied by hand on 2026-11-08. The file records it.
+
+- **Fake tournaments.** Any account could create an organizer row for itself and then publish tournaments. Only admins can create organizers now.
+- **`tournament_history`** is no longer publicly readable. It held every version of every row, including hidden ones.
+- **`tournaments_staff_read`** lets organizers and admins read the unpublished rows they can already update.
+- **`record_api_key_use`** can only be called by the service role.
+
 ## Tests and audit
 
 ```bash

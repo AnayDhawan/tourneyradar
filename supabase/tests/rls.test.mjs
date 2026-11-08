@@ -377,12 +377,37 @@ describe("tournaments, history and read-only tables", () => {
     assert.deepEqual((await as("service_role", null, mine)).rows.map((r) => r.id), ["dup1", "pub1"]);
   });
 
-  it("a service-role write is recorded in history, and history is public read-only", async () => {
+  it("an organizer and an admin read hidden rows, other users do not", async () => {
+    const [{ id: org }] = (await su("insert into public.organizers (auth_user_id) values ($1) returning id", [A])).rows;
+    await as("service_role", null, "insert into public.tournaments (id, name, status, organizer_id) values ('own1', 'Draft', 'duplicate', $1)", [org]);
+    const own = "select id from public.tournaments where id = 'own1'";
+    assert.equal((await visible("authenticated", A, own)).length, 1);
+    assert.equal((await visible("authenticated", ADMIN, own)).length, 1);
+    assert.equal((await visible("authenticated", B, own)).length, 0);
+    assert.equal((await visible("anon", null, own)).length, 0);
+  });
+
+  it("only an admin can create an organizer", async () => {
+    const stmt = "insert into public.organizers (auth_user_id) values ($1)";
+    await denied("anon", null, stmt, [B]);
+    await denied("authenticated", B, stmt, [B]);
+    await as("authenticated", ADMIN, stmt, [B]);
+  });
+
+  it("only the service role can call record_api_key_use", async () => {
+    const stmt = "select public.record_api_key_use($1)";
+    await denied("anon", null, stmt, [A]);
+    await denied("authenticated", A, stmt, [A]);
+    await as("service_role", null, stmt, [A]);
+  });
+
+  it("a service-role write is recorded in history, and only the service role reads it", async () => {
     await as("service_role", null, "insert into public.tournaments (id, name) values ('t1', 'Open')");
     await as("service_role", null, "update public.tournaments set name = 'Open 2' where id = 't1'");
-    const rows = await visible("anon", null, "select tournament_id from public.tournament_history where tournament_id = 't1'");
-    assert.equal(rows.length, 2);
+    const history = "select tournament_id from public.tournament_history where tournament_id = 't1'";
+    assert.equal((await as("service_role", null, history)).rows.length, 2);
     for (const [role, sub] of [["anon", null], ["authenticated", A]]) {
+      assert.deepEqual(await visible(role, sub, history), []);
       assert.equal(await affected(role, sub, "update public.tournament_history set snapshot = '{}'"), 0);
       assert.equal(await affected(role, sub, "delete from public.tournament_history"), 0);
     }
@@ -391,7 +416,6 @@ describe("tournaments, history and read-only tables", () => {
   const inserts = {
     scraper_logs: "insert into public.scraper_logs (status) values ('success')",
     fide_rating_history: "insert into public.fide_rating_history (fide_id, period) values ('1', '2026-Jan')",
-    tournament_history: "insert into public.tournament_history (tournament_id, snapshot) values ('x', '{}')",
   };
   for (const [table, stmt] of Object.entries(inserts)) {
     it(`${table}: public read, no client writes`, async () => {
@@ -400,4 +424,10 @@ describe("tournaments, history and read-only tables", () => {
       await denied("authenticated", A, stmt);
     });
   }
+
+  it("tournament_history takes no client writes", async () => {
+    const stmt = "insert into public.tournament_history (tournament_id, snapshot) values ('x', '{}')";
+    await denied("anon", null, stmt);
+    await denied("authenticated", A, stmt);
+  });
 });
