@@ -123,10 +123,10 @@ export default function PlayerLoginPage() {
               )}
 
               <div style={{ marginBottom: "1.5rem" }}>
-                <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                <label htmlFor="login-1" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                   Email
                 </label>
-                <input
+                <input id="login-1"
                   type="email"
                   required
                   className="form-input"
@@ -137,10 +137,10 @@ export default function PlayerLoginPage() {
               </div>
 
               <div style={{ marginBottom: "1rem" }}>
-                <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+                <label htmlFor="login-2" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
                   Password
                 </label>
-                <input
+                <input id="login-2"
                   type="password"
                   required
                   className="form-input"
@@ -222,6 +222,7 @@ export default function PlayerLoginPage() {
               <div style={{ marginBottom: '1.5rem' }}>
                 <input
                   type="email"
+                  aria-label="Email address"
                   className="form-input"
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}

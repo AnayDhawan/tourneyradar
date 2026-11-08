@@ -46,7 +46,8 @@ export async function GET(request: NextRequest) {
     .maybeSingle();
 
   if (playerError) {
-    return NextResponse.json({ error: playerError.message }, { status: 500 });
+    console.error('Error reading player FIDE id:', playerError);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 
   const fideId = (playerRow?.fide_id as string | null)?.trim() || null;
