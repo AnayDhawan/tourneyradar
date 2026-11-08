@@ -2,52 +2,91 @@
 
 import BaseLayout from "@/components/BaseLayout";
 
+const heading = { fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" };
+const body = { color: "var(--text-secondary)", marginBottom: "1.5rem", lineHeight: 1.7 };
+const list = { ...body, paddingLeft: "1.25rem", listStyle: "disc" };
+
 export default function PrivacyPage() {
   return (
-    <BaseLayout 
-      showHero={true} 
+    <BaseLayout
+      showHero={true}
       heroTitle={<>Privacy <span className="highlight">Policy</span></>}
     >
       <section className="tournament-section">
         <div className="section-container" style={{ maxWidth: "800px" }}>
           <div className="card">
             <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
-              Last updated: June 2026
+              Last updated: November 2026
             </p>
 
-            <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>1. Information We Collect</h3>
-            <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem", lineHeight: 1.7 }}>
-              When you create an account, we collect your email, name, and optionally your city and country. We also collect anonymous analytics data about page visits and feature interactions. No personally identifiable information is captured in analytics.
+            <h3 style={heading}>1. Who runs TourneyRadar</h3>
+            <p style={body}>
+              TourneyRadar is run by Anay Dhawan, an individual based in India, who is the data controller for this site. For anything about your data, email dhawansanay@gmail.com.
             </p>
 
-            <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>2. How We Use Your Information</h3>
-            <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem", lineHeight: 1.7 }}>
-              We use your information to provide tournament recommendations and maintain your wishlist. Analytics data helps us understand which features are useful. We do not sell your data to third parties.
+            <h3 style={heading}>2. What we collect</h3>
+            <ul style={list}>
+              <li><strong>Account:</strong> your name, email and password. The password is stored as a hash by our login provider and we cannot read it.</li>
+              <li><strong>Optional profile details:</strong> phone number, FIDE ID, rating, city, country, home country and state, your role, why you use the site, how you heard about us, who referred you, and your email preferences.</li>
+              <li><strong>Saved tournaments:</strong> the tournaments you add to your wishlist.</li>
+              <li><strong>FIDE rating history:</strong> if you add a FIDE ID, we fetch your public rating history from FIDE and store it. It is public data and can be read through this site.</li>
+              <li><strong>Feedback:</strong> your star rating, comment and the page you sent it from, linked to your account only if you are logged in.</li>
+              <li><strong>Usage:</strong> pages visited, features used, browser and device type, your country, and technical errors.</li>
+            </ul>
+
+            <h3 style={heading}>3. Why we use it, and our legal basis</h3>
+            <ul style={list}>
+              <li><strong>Running your account, wishlist and recommendations:</strong> necessary to provide the service you asked for (contract).</li>
+              <li><strong>Weekly tournament emails:</strong> only if you switch them on (consent). Every email has an unsubscribe link, and you can turn them off in your settings.</li>
+              <li><strong>Analytics, error tracking and feedback:</strong> our legitimate interest in knowing which features are useful and keeping the site working. You can object at any time.</li>
+            </ul>
+            <p style={body}>
+              We do not sell your data and we do not show ads.
             </p>
 
-            <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>3. Analytics</h3>
-            <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem", lineHeight: 1.7 }}>
-              We use <strong>Umami Analytics</strong>, a privacy-friendly, cookieless analytics tool. Umami collects no personally identifiable information and does not use cookies. Page view counts and anonymous interaction events (such as clicking &ldquo;Star on GitHub&rdquo;) are recorded to help us improve the product.
+            <h3 style={heading}>4. Analytics</h3>
+            <p style={body}>
+              We use Umami and Vercel Analytics, which do not use cookies, and PostHog, hosted in the EU. PostHog is set up to keep its identifier in memory only, so it stores no cookie or browser data and forgets you when you close the page. If you are logged in, PostHog events are linked to your account ID. Your name and email are not sent to it.
             </p>
 
-            <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>4. Local Storage</h3>
-            <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem", lineHeight: 1.7 }}>
-              We store a small number of anonymous flags in your browser&apos;s local storage to improve your experience, for example remembering whether you have dismissed a prompt. These values contain no personal data, never leave your browser, and can be cleared at any time by clearing your browser&apos;s site data.
+            <h3 style={heading}>5. Cookies and browser storage</h3>
+            <ul style={list}>
+              <li><strong>One cookie:</strong> <code>tr_geo_country</code> holds your country code for one day, so nearby tournaments can be shown first.</li>
+              <li><strong>Login session:</strong> kept in your browser storage while you are logged in.</li>
+              <li><strong>Preferences in local storage:</strong> your theme, a visit counter and the time of your last visit (used to decide when to ask for feedback), prompts you have dismissed, the last update you have seen, and a referral code if you arrived through one.</li>
+            </ul>
+            <p style={body}>
+              The visit counter is included in the analytics event sent when the feedback prompt appears. The rest stays in your browser. You can clear all of it in your browser settings at any time.
             </p>
 
-            <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>5. Data Storage</h3>
-            <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem", lineHeight: 1.7 }}>
-              Account data is stored securely using Supabase, hosted on AWS infrastructure in the US.
+            <h3 style={heading}>6. Who receives your data</h3>
+            <ul style={list}>
+              <li><strong>Supabase:</strong> database and login, hosted on AWS in the US.</li>
+              <li><strong>Vercel:</strong> website hosting and page-view analytics.</li>
+              <li><strong>PostHog and Umami:</strong> analytics.</li>
+              <li><strong>Resend:</strong> sends email, if you switch emails on.</li>
+              <li><strong>OpenStreetMap:</strong> map images load directly from its servers, which see your IP address.</li>
+              <li><strong>FIDE:</strong> receives your FIDE ID when we look up your rating history.</li>
+            </ul>
+
+            <h3 style={heading}>7. Transfers outside the EEA and UK</h3>
+            <p style={body}>
+              Some of these providers process data in the US, and TourneyRadar is run from India, so your data can leave the EEA and UK. We rely on each provider&apos;s data processing terms for these transfers.
             </p>
 
-            <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>6. Your Rights</h3>
-            <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem", lineHeight: 1.7 }}>
-              You can delete your account at any time by contacting us. Upon deletion, all your personal data will be removed from our systems.
+            <h3 style={heading}>8. How long we keep it</h3>
+            <p style={body}>
+              Account details, saved tournaments and rating history are kept until you delete your account. Feedback is kept until it is no longer useful or you ask us to remove it. Analytics data is kept for the retention period set in each analytics tool.
             </p>
 
-            <h3 style={{ fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>7. Contact</h3>
-            <p style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>
-              For privacy concerns, contact us at dhawansanay@gmail.com
+            <h3 style={heading}>9. Your rights</h3>
+            <p style={body}>
+              You can ask us for a copy of your data, to correct it, to delete it, to restrict or object to how we use it, or to send it to you in a portable format. You can withdraw consent at any time. Email dhawansanay@gmail.com and we will respond within one month. Deleting your account removes your account details, saved tournaments and linked analytics. If you are in the EEA or UK, you can also complain to your local data protection authority.
+            </p>
+
+            <h3 style={heading}>10. Tournament listings</h3>
+            <p style={{ ...body, marginBottom: 0 }}>
+              Listings come from public sources such as Chess-Results and can include an organizer&apos;s name. To correct or remove one, email dhawansanay@gmail.com.
             </p>
           </div>
         </div>

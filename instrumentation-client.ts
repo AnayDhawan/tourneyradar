@@ -34,6 +34,8 @@ if (!projectToken || !posthogHost) {
     ui_host: posthogHost,
     defaults: "2026-01-30",
     capture_exceptions: true,
+    // No cookie or browser storage, so no consent banner is needed for it.
+    persistence: "memory",
   });
   posthog.register({ site: "tourneyradar" });
 }
