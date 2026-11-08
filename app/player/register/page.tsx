@@ -283,6 +283,13 @@ export default function PlayerRegisterPage() {
                   {loading ? "Creating Account..." : "Create Account"}
                 </button>
 
+                <p style={{ textAlign: "center", marginTop: "1rem", fontSize: "0.875rem", color: "var(--text-muted)" }}>
+                  By creating an account you agree to our{" "}
+                  <Link href="/legal/terms" style={{ color: "var(--primary)" }}>Terms</Link>
+                  {" "}and confirm you have read our{" "}
+                  <Link href="/legal/privacy" style={{ color: "var(--primary)" }}>Privacy Policy</Link>.
+                </p>
+
                 <p style={{ textAlign: "center", marginTop: "1.5rem", color: "var(--text-secondary)" }}>
                   Already have an account?{" "}
                   <Link href="/player/login" style={{ color: "var(--primary)", fontWeight: 600 }}>
