@@ -245,3 +245,16 @@ npm run test:rls
 `supabase/tests/rls.test.mjs` replays every migration in an in-process Postgres (PGlite) and attacks each table as anon, two users and an admin. It also enforces schema-wide rules (RLS on for every table, no `true` write policies, definer functions pin `search_path`) so a future migration that breaks them fails CI. No Docker or credentials needed.
 
 It can only see what is in this directory. `admins`, `tournaments` and the four `players` policies came from the dashboard, so `supabase/tests/baseline.sql` assumes their shape. To check the assumption against the real project, paste `supabase/audit/rls_audit.sql` into the SQL editor. It is read-only and returns one row per finding; rows flagged `REVIEW` need a look.
+
+## Reviewing tournament submissions
+
+`/submit` (backed by `POST /api/tournaments/submit`) lets organizers send an event that is not on
+Chess-Results.com. It writes a row with `status = 'pending'` and `source = 'submission'` through the
+service-role key, and never anything else, so no RLS policy is needed for the insert. Every public
+read already filters on `status = 'published'`, so a pending row is invisible until you publish it.
+
+To review one, open the `tournaments` table in the Supabase dashboard, filter `status = pending`,
+check the event (the organizer link and email are in the row), add `lat` and `lng` if you want it on
+the map, then set `status` to `published`. To reject one, set it to something other than
+`published` or delete the row. The endpoint stops accepting submissions once 100 rows are pending,
+so an unreviewed queue cannot grow without limit.
