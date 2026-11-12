@@ -21,7 +21,7 @@ const labelStyle: React.CSSProperties = {
 
 export default function PlayerSettingsPage() {
   const router = useRouter();
-  const { user, userType, loading: authLoading, refreshAuth } = useAuth();
+  const { user, userType, loading: authLoading, refreshAuth, logout } = useAuth();
   useThemePreference();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -31,6 +31,10 @@ export default function PlayerSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleteText, setDeleteText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) router.push("/player/login");
@@ -51,6 +55,39 @@ export default function PlayerSettingsPage() {
       prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
     );
     setSuccess(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        setDeleteError("Your session has expired. Sign in again and retry.");
+        return;
+      }
+      const response = await fetch("/api/player/account", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ confirm: true }),
+      });
+      if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as { error?: string } | null;
+        setDeleteError(body?.error ?? "Could not delete your account. Try again later.");
+        return;
+      }
+      await logout();
+      router.push("/");
+    } catch {
+      setDeleteError("Could not delete your account. Check your connection and try again.");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleSave = async () => {
@@ -163,6 +200,59 @@ export default function PlayerSettingsPage() {
             >
               {saving ? "Saving..." : "Save preferences"}
             </button>
+
+            <h2 className="font-display" style={{ fontSize: "1.5rem", fontWeight: 700, margin: "3rem 0 0.5rem", color: "var(--text-primary)" }}>
+              Delete my account
+            </h2>
+            <p style={{ color: "var(--text-secondary)", marginBottom: "1rem" }}>
+              Removes your account details, saved tournaments, rating history and the analytics data linked to you. This cannot be undone.
+            </p>
+            {!confirmingDelete ? (
+              <button type="button" className="btn" onClick={() => setConfirmingDelete(true)}>
+                Delete my account
+              </button>
+            ) : (
+              <div>
+                <label htmlFor="delete-confirm" style={labelStyle}>
+                  Type DELETE to confirm
+                </label>
+                <input
+                  id="delete-confirm"
+                  value={deleteText}
+                  onChange={(e) => setDeleteText(e.target.value)}
+                  autoComplete="off"
+                  style={{ width: "100%", padding: "0.75rem", marginBottom: "1rem" }}
+                />
+                {deleteError && (
+                  <div role="alert" style={{ padding: "1rem", background: "var(--error)", color: "white", borderRadius: "12px", marginBottom: "1rem" }}>
+                    {deleteError}
+                  </div>
+                )}
+                <div style={{ display: "flex", gap: "0.75rem" }}>
+                  <button
+                    type="button"
+                    className="btn"
+                    style={{ opacity: deleteText === "DELETE" && !deleting ? 1 : 0.5 }}
+                    disabled={deleteText !== "DELETE" || deleting}
+                    onClick={handleDeleteAccount}
+                  >
+                    {deleting ? "Deleting..." : "Permanently delete"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={deleting}
+                    onClick={() => {
+                      setConfirmingDelete(false);
+                      setDeleteText("");
+                      setDeleteError(null);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

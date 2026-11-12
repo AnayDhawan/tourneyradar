@@ -82,7 +82,7 @@ export default function PrivacyPage() {
 
             <h3 style={heading}>9. Your rights</h3>
             <p style={body}>
-              You can ask us for a copy of your data, to correct it, to delete it, to restrict or object to how we use it, or to send it to you in a portable format. You can withdraw consent at any time. Email dhawansanay@gmail.com and we will respond within one month. Deleting your account removes your account details, saved tournaments and linked analytics. If you are in the EEA or UK, you can also complain to your local data protection authority.
+              You can ask us for a copy of your data, to correct it, to delete it, to restrict or object to how we use it, or to send it to you in a portable format. You can withdraw consent at any time. Email dhawansanay@gmail.com and we will respond within one month. You can delete your account yourself under Settings, then Delete my account. Deleting your account removes your account details, saved tournaments, rating history and linked analytics. If you are in the EEA or UK, you can also complain to your local data protection authority.
             </p>
 
             <h3 style={heading}>10. Children</h3>

@@ -117,3 +117,45 @@ export async function unsubscribeByToken(token: string): Promise<UnsubscribeResu
   if (!data) return { status: 'not_found' };
   return { status: 'unsubscribed' };
 }
+
+/**
+ * Deletes everything tied to one player: saved tournaments, FIDE rating
+ * history, the players row, then the Supabase auth user. Uses the service-role
+ * client because removing an auth user is an admin API call, so every query is
+ * scoped to the ids of the already-authenticated player passed in, never to a
+ * caller-supplied value. Feedback rows keep their text and lose the link to the
+ * player (player_id is on delete set null).
+ *
+ * Throws on the first failure. Callers delete the PostHog person before this
+ * runs, so a failure here can be retried safely: every step is idempotent.
+ */
+export async function deletePlayerAccount(player: {
+  playerId: string;
+  authUserId: string;
+}): Promise<void> {
+  const admin = serviceRoleClient();
+
+  const favourites = await admin
+    .from('player_favorite_tournaments')
+    .delete()
+    .eq('player_id', player.playerId);
+  if (favourites.error) throw new Error(`favourites: ${favourites.error.message}`);
+
+  const ratings = await admin.from('fide_rating_history').delete().eq('player_id', player.playerId);
+  if (ratings.error) throw new Error(`rating history: ${ratings.error.message}`);
+
+  const feedback = await admin
+    .from('feedback')
+    .update({ player_id: null })
+    .eq('player_id', player.playerId);
+  if (feedback.error) throw new Error(`feedback: ${feedback.error.message}`);
+
+  const row = await admin.from('players').delete().eq('id', player.playerId);
+  if (row.error) throw new Error(`player row: ${row.error.message}`);
+
+  const authUser = await admin.auth.admin.deleteUser(player.authUserId);
+  // A missing user means an earlier attempt already removed it.
+  if (authUser.error && authUser.error.status !== 404) {
+    throw new Error(`auth user: ${authUser.error.message}`);
+  }
+}
