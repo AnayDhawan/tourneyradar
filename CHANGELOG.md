@@ -7,6 +7,7 @@ All notable changes to this project are documented here. Format based on
 ## [Unreleased]
 
 ### Added
+- Self-serve account deletion: `DELETE /api/player/account` and a "Delete my account" action in player settings remove the player's saved tournaments, rating history, player row and auth user, and delete the matching PostHog person first. Needs `POSTHOG_PERSONAL_API_KEY` and `POSTHOG_PROJECT_ID`.
 - Skip-to-content link, `aria-expanded`/`aria-controls` on the mobile menu, and live-region roles on toasts.
 - Per-country social preview image, `POST /api/revalidate` (called after each scrape), and site endpoint docs on the API page.
 - Vitest suite (64 tests) run in CI, plus Playwright specs for country pages and calendar feeds.
