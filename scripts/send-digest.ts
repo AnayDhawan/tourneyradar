@@ -178,8 +178,27 @@ async function main() {
     process.exit(1);
   }
 
-  const weeklyPlayers = (players || []) as DigestPlayer[];
-  console.log(`  ${weeklyPlayers.length} player(s) subscribed to the weekly digest\n`);
+  // Issue #254: an under-16 account gets no email until a parent or guardian
+  // has confirmed it. If this lookup fails the job stops, rather than mailing
+  // people who may not be allowed to receive it.
+  const { data: limited, error: limitedError } = await supabase
+    .from('player_age_checks')
+    .select('player_id')
+    .eq('age_basis', 'parental_consent')
+    .is('guardian_confirmed_at', null);
+
+  if (limitedError) {
+    console.error('Failed to load limited accounts:', limitedError.message);
+    await logDigestFailure(`failed to load limited accounts: ${limitedError.message}`);
+    process.exit(1);
+  }
+
+  const limitedIds = new Set((limited || []).map((r: { player_id: string }) => r.player_id));
+  const weeklyPlayers = ((players || []) as DigestPlayer[]).filter((p) => !limitedIds.has(p.id));
+  console.log(
+    `  ${weeklyPlayers.length} player(s) subscribed to the weekly digest` +
+      ` (${limitedIds.size} limited account(s) not eligible)\n`
+  );
 
   let emailsSent = 0;
   let tournamentsCovered = 0;

@@ -113,3 +113,47 @@ export async function sendDigestEmail(
     throw new Error(`Resend error sending digest: ${redactEmails(error.message)}`);
   }
 }
+
+/**
+ * Asks a parent or guardian to confirm an under-16 account (#254). Throws on
+ * failure so the route can report it instead of telling the child a link was
+ * sent. The recipient is a third party, so the address stays out of the error.
+ */
+export async function sendGuardianConsentEmail(
+  to: string,
+  playerName: string,
+  confirmUrl: string
+): Promise<void> {
+  const resend = getClient();
+  const name = escapeHtml(playerName);
+  const url = escapeHtml(confirmUrl);
+
+  const { error } = await resend.emails.send({
+    from: FROM_ADDRESS,
+    to,
+    subject: `Please confirm a TourneyRadar account for ${playerName.replace(/[\r\n]+/g, ' ')}`,
+    html: `
+    <div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;">
+      <h1 style="font-size:20px;margin:0 0 12px;">Confirm a TourneyRadar account</h1>
+      <p style="color:#444;font-size:14px;line-height:1.6;">
+        ${name} created a TourneyRadar account and said they are under 16 and that you agreed to it.
+        TourneyRadar lists chess tournaments on a map and can email a weekly summary of events.
+      </p>
+      <p style="color:#444;font-size:14px;line-height:1.6;">
+        Until you confirm, the account stays limited: no weekly emails are sent.
+      </p>
+      <p style="margin:24px 0;">
+        <a href="${url}" style="background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Confirm the account</a>
+      </p>
+      <p style="color:#666;font-size:13px;line-height:1.6;">
+        The link works for 14 days. If you did not agree to this account, ignore this email and
+        reply to dhawansanay@gmail.com to have it deleted. See the
+        <a href="https://www.tourneyradar.com/legal/privacy" style="color:#666;">privacy policy</a>.
+      </p>
+    </div>`,
+  });
+
+  if (error) {
+    throw new Error(`Resend error sending guardian email: ${redactEmails(error.message)}`);
+  }
+}

@@ -87,7 +87,7 @@ export default function PrivacyPage() {
 
             <h3 style={heading}>10. Children</h3>
             <p style={body}>
-              If you are under 16, a parent or guardian must agree before you create an account, and we record that you confirmed this at signup. A parent or guardian can ask to see or delete a child&apos;s data by emailing dhawansanay@gmail.com. If we learn that an account was created without that agreement, we delete it.
+              If you are under 16, a parent or guardian must agree before you create an account. At signup you give their email address and we send them a confirmation link, valid for 14 days. Until they confirm, the account is limited: we send no weekly emails and show none of the account&apos;s details to anyone else. We store the age you confirmed, the parent or guardian&apos;s email address and the time they confirmed, and delete them with the account. Accounts created before this check existed are asked the same question at their next login. A parent or guardian can ask to see or delete a child&apos;s data by emailing dhawansanay@gmail.com. If we learn that an account was created without that agreement, we delete it.
             </p>
 
             <h3 style={heading}>11. Tournament listings</h3>
