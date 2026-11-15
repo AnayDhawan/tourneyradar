@@ -7,6 +7,7 @@ All notable changes to this project are documented here. Format based on
 ## [Unreleased]
 
 ### Added
+- Organizer self-submission at `/submit` for tournaments outside Chess-Results.com. Signed-in players send a listing that is stored as `pending` and hidden until a moderator publishes it with `npm run review:submissions` (#238).
 - Skip-to-content link, `aria-expanded`/`aria-controls` on the mobile menu, and live-region roles on toasts.
 - Per-country social preview image, `POST /api/revalidate` (called after each scrape), and site endpoint docs on the API page.
 - Vitest suite (64 tests) run in CI, plus Playwright specs for country pages and calendar feeds.

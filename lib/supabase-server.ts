@@ -16,7 +16,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // anon client above) because most routes in this file never need it and
 // SUPABASE_SERVICE_ROLE_KEY should not be a hard requirement for importing
 // this module at all.
-function serviceRoleClient() {
+export function serviceRoleClient() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceRoleKey) {
     throw new Error('Missing Supabase env var: SUPABASE_SERVICE_ROLE_KEY must be set');
