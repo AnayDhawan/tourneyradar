@@ -50,6 +50,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: Omit<MetadataRoute.Sitemap[number], 'lastModified'>[] = [
     { url: baseUrl, changeFrequency: 'daily', priority: 1 },
     { url: `${baseUrl}/tournaments`, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/submit`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${baseUrl}/stats`, changeFrequency: 'daily', priority: 0.6 },
     { url: `${baseUrl}/dataset`, changeFrequency: 'daily', priority: 0.6 },
     { url: `${baseUrl}/api-docs`, changeFrequency: 'monthly', priority: 0.6 },

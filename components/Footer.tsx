@@ -9,6 +9,7 @@ import DataFreshness from "./DataFreshness";
 // copyright, inline legal links, and social marks.
 const EXPLORE_LINKS = [
   { href: "/tournaments", label: "Browse Tournaments" },
+  { href: "/submit", label: "Submit a Tournament" },
   { href: "/docs", label: "Docs" },
   { href: "/updates", label: "Updates" },
   { href: "/api-docs", label: "API Docs" },

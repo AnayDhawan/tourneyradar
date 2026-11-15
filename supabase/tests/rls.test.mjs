@@ -363,6 +363,67 @@ describe("docs", () => {
   });
 });
 
+describe("tournament_submissions (organizer submissions, #238)", () => {
+  const T = "submitted_test_1";
+
+  before(async () => {
+    await su("insert into public.tournaments (id, name, status) values ($1, 'Club Open', 'pending')", [T]);
+    await su("insert into public.tournament_submissions (tournament_id, submitted_by) values ($1, $2)", [T, pid.a]);
+  });
+
+  it("a pending submission is invisible to anon and to other users", async () => {
+    const q = "select id from public.tournaments where id = 'submitted_test_1'";
+    assert.deepEqual(await visible("anon", null, q), []);
+    assert.deepEqual(await visible("authenticated", A, q), []);
+    assert.deepEqual(await visible("authenticated", B, q), []);
+    assert.equal((await as("service_role", null, q)).rows.length, 1);
+  });
+
+  it("anon and signed-in players can neither read nor write submissions", async () => {
+    for (const [role, sub] of [["anon", null], ["authenticated", A]]) {
+      await denied(role, sub, "select * from public.tournament_submissions");
+      await denied(role, sub, "update public.tournament_submissions set reviewed_at = now()");
+      await denied(role, sub, "delete from public.tournament_submissions");
+      await denied(
+        role,
+        sub,
+        "insert into public.tournament_submissions (tournament_id, submitted_by) values ($1, $2)",
+        [T, pid.b],
+      );
+    }
+  });
+
+  it("a player cannot publish their own submission", async () => {
+    assert.equal(await affected("authenticated", A, "update public.tournaments set status = 'published' where id = $1", [T]), 0);
+    assert.equal(await count("select count(*)::int as n from public.tournaments where id = $1 and status = 'pending'", [T]), 1);
+  });
+
+  it("one submission row per tournament", async () => {
+    await assert.rejects(
+      su("insert into public.tournament_submissions (tournament_id, submitted_by) values ($1, $2)", [T, pid.b]),
+      (e) => e.code === "23505",
+    );
+  });
+
+  it("deleting the submitter keeps the pending row, unlinked", async () => {
+    await su("insert into auth.users (id, email) values ('b9b9b9b9-0000-4000-8000-0000000000b9', 'gone@example.com')");
+    const gone = (await su("select id from public.players where auth_user_id = 'b9b9b9b9-0000-4000-8000-0000000000b9'")).rows[0].id;
+    await su("insert into public.tournaments (id, name, status) values ('submitted_test_2', 'Other', 'pending')");
+    await su("insert into public.tournament_submissions (tournament_id, submitted_by) values ('submitted_test_2', $1)", [gone]);
+
+    await su("delete from public.players where id = $1", [gone]);
+
+    const row = (await su("select submitted_by from public.tournament_submissions where tournament_id = 'submitted_test_2'")).rows[0];
+    assert.equal(row.submitted_by, null);
+  });
+
+  it("deleting the tournament removes the submission record", async () => {
+    await su("delete from public.tournaments where id = 'submitted_test_2'");
+    assert.equal(await count("select count(*)::int as n from public.tournament_submissions where tournament_id = 'submitted_test_2'"), 0);
+  });
+});
+
+
 describe("tournaments, history and read-only tables", () => {
   it("anon cannot write tournaments", async () => {
     await denied("anon", null, "insert into public.tournaments (id, name) values ('t1', 'x')");
