@@ -216,7 +216,7 @@ describe("players", () => {
   it("an admin reads everyone and can delete", async () => {
     const rows = await visible("authenticated", ADMIN, "select id from public.players");
     assert.ok(rows.length >= 3);
-    const id = "ffffffff-0000-4000-8000-00000000000f";
+    const id = "98989898-0000-4000-8000-000000000098";
     await su("insert into auth.users (id, email) values ($1, 'del@example.com')", [id]);
     assert.equal(await affected("authenticated", ADMIN, "delete from public.players where auth_user_id = $1", [id]), 1);
   });
@@ -429,5 +429,73 @@ describe("tournaments, history and read-only tables", () => {
     const stmt = "insert into public.tournament_history (tournament_id, snapshot) values ('x', '{}')";
     await denied("anon", null, stmt);
     await denied("authenticated", A, stmt);
+  });
+});
+
+describe("player_age_checks (guardian consent, #254)", () => {
+  const C = "c1c1c1c1-0000-4000-8000-0000000000c1";
+  const D = "d2d2d2d2-0000-4000-8000-0000000000d2";
+  let cPlayer;
+
+  before(async () => {
+    await su(
+      `insert into auth.users (id, email, raw_user_meta_data) values
+         ($1, 'c@example.com', '{"name":"Cleo","age_basis":"parental_consent","guardian_email":" parent@example.com "}'),
+         ($2, 'd@example.com', '{"name":"Dan","age_basis":"16_or_older","guardian_email":"ignored@example.com"}')`,
+      [C, D],
+    );
+    cPlayer = (await su("select id from public.players where auth_user_id = $1", [C])).rows[0].id;
+  });
+
+  it("signup records the age basis, and a guardian email only for under-16", async () => {
+    const c = (await su("select * from public.player_age_checks where player_id = $1", [cPlayer])).rows[0];
+    assert.equal(c.age_basis, "parental_consent");
+    assert.equal(c.guardian_email, "parent@example.com");
+    assert.equal(c.guardian_confirmed_at, null);
+
+    const d = (await su(
+      "select c.* from public.player_age_checks c join public.players p on p.id = c.player_id where p.auth_user_id = $1",
+      [D],
+    )).rows[0];
+    assert.equal(d.age_basis, "16_or_older");
+    assert.equal(d.guardian_email, null);
+  });
+
+  it("a signup with no age basis, or a made-up one, gets no row", async () => {
+    assert.equal(await count("select count(*)::int as n from public.player_age_checks where player_id = $1", [pid.a]), 0);
+    await su(
+      `insert into auth.users (id, email, raw_user_meta_data)
+       values ('a7a7a7a7-0000-4000-8000-0000000000a7', 'f@example.com', '{"age_basis":"whatever"}')`,
+    );
+    assert.equal(await count("select count(*)::int as n from public.player_age_checks"), 2);
+  });
+
+  it("anon and signed-in players can neither read nor write it", async () => {
+    for (const [role, sub] of [["anon", null], ["authenticated", C]]) {
+      await denied(role, sub, "select * from public.player_age_checks");
+      await denied(role, sub, "update public.player_age_checks set guardian_confirmed_at = now()");
+      await denied(
+        role,
+        sub,
+        "insert into public.player_age_checks (player_id, age_basis) values ($1, '16_or_older')",
+        [pid.b],
+      );
+      await denied(role, sub, "delete from public.player_age_checks");
+    }
+  });
+
+  it("the service role can confirm a guardian", async () => {
+    const n = await affected(
+      "service_role",
+      null,
+      "update public.player_age_checks set guardian_confirmed_at = now() where player_id = $1",
+      [cPlayer],
+    );
+    assert.equal(n, 1);
+  });
+
+  it("deleting the player removes the row", async () => {
+    await su("delete from public.players where id = $1", [cPlayer]);
+    assert.equal(await count("select count(*)::int as n from public.player_age_checks where player_id = $1", [cPlayer]), 0);
   });
 });

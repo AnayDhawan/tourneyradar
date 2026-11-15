@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/lib/AuthContext";
+import AgeCheck from "@/components/AgeCheck";
 import { ToastProvider } from "@/components/Toast";
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { QueryProvider } from "./providers";
@@ -143,6 +144,7 @@ export default function RootLayout({
               {/* Needs to live inside the providers: useAuth resolves player_id,
                   useToast reports submit results. */}
               <FeedbackPrompt />
+              <AgeCheck />
               <UpdatesPopup latestRelease={latestRelease} />
             </ToastProvider>
           </AuthProvider>
