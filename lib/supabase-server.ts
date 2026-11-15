@@ -150,6 +150,15 @@ export async function deletePlayerAccount(player: {
     .eq('player_id', player.playerId);
   if (feedback.error) throw new Error(`feedback: ${feedback.error.message}`);
 
+  // docs.author_player_id is set null by the foreign key, but the author's
+  // display name sits in its own column and would stay behind. Detach it first,
+  // while the link still identifies the rows. The docs themselves stay.
+  const docs = await admin
+    .from('docs')
+    .update({ author_player_id: null, author_display_name: 'Deleted user' })
+    .eq('author_player_id', player.playerId);
+  if (docs.error) throw new Error(`docs: ${docs.error.message}`);
+
   const row = await admin.from('players').delete().eq('id', player.playerId);
   if (row.error) throw new Error(`player row: ${row.error.message}`);
 
