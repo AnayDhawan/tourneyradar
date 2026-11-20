@@ -15,6 +15,7 @@ All notable changes to this project are documented here. Format based on
 - Vitest suite (64 tests) run in CI, plus Playwright specs for country pages and calendar feeds.
 
 ### Changed
+- `/stats` Monthly traffic section: stat tiles for the latest month with change against the month before, a settings row (bars, line, area or table; visitors, page views or both; monthly or running total) and a table view, replacing the fixed bar chart. The logged numbers moved to `lib/traffic.ts`.
 - The dataset export and the player wishlist and dashboard queries only read published tournaments, matching every other read of the table (#239).
 - `/status`, `/status/detail`, `/api-docs`, `/dataset`, `/stats` and `/player/login` have their own canonical URL and Open Graph text instead of inheriting the homepage's (#237).
 - Sitemap lists every static page, pages through all upcoming events, and uses real last-modified dates.
