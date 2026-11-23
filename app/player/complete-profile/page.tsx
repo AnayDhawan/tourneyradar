@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import posthog from "posthog-js";
+import { trackEvent } from "@/lib/track";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/AuthContext";
 import { useThemePreference } from "@/lib/theme";
@@ -101,7 +101,7 @@ export default function CompleteProfilePage() {
 
       if (profileError) throw profileError;
 
-      posthog.capture("player_profile_completed");
+      trackEvent("player_profile_completed");
       await refreshAuth();
       router.push("/player/onboarding");
     } catch (err) {

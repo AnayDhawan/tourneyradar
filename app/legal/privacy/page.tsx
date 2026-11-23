@@ -47,7 +47,7 @@ export default function PrivacyPage() {
 
             <h3 style={heading}>4. Analytics</h3>
             <p style={body}>
-              We use Umami and Vercel Analytics, which do not use cookies, and PostHog, hosted in the EU. PostHog is set up to keep its identifier in memory only, so it stores no cookie or browser data and forgets you when you close the page. If you are logged in, PostHog events are linked to your account ID. Your name and email are not sent to it.
+              We use Umami and Vercel Analytics, which do not use cookies. Events are not linked to your account.
             </p>
 
             <h3 style={heading}>5. Cookies and browser storage</h3>
@@ -64,7 +64,7 @@ export default function PrivacyPage() {
             <ul style={list}>
               <li><strong>Supabase:</strong> database and login, hosted on AWS in the US.</li>
               <li><strong>Vercel:</strong> website hosting and page-view analytics.</li>
-              <li><strong>PostHog and Umami:</strong> analytics.</li>
+              <li><strong>Umami:</strong> analytics.</li>
               <li><strong>Resend:</strong> sends email, if you switch emails on.</li>
               <li><strong>OpenStreetMap:</strong> map images load directly from its servers, which see your IP address.</li>
               <li><strong>FIDE:</strong> receives your FIDE ID when we look up your rating history.</li>

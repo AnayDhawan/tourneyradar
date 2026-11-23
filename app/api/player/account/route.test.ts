@@ -1,13 +1,11 @@
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { getAuthenticatedPlayer, deletePlayerAccount, deletePosthogPerson } = vi.hoisted(() => ({
+const { getAuthenticatedPlayer, deletePlayerAccount } = vi.hoisted(() => ({
   getAuthenticatedPlayer: vi.fn(),
   deletePlayerAccount: vi.fn(),
-  deletePosthogPerson: vi.fn(),
 }));
 vi.mock('@/lib/supabase-server', () => ({ getAuthenticatedPlayer, deletePlayerAccount }));
-vi.mock('@/lib/posthog-server', () => ({ deletePosthogPerson }));
 
 import { DELETE } from './route';
 
@@ -21,7 +19,6 @@ function del(body: unknown = { confirm: true }) {
 beforeEach(() => {
   getAuthenticatedPlayer.mockResolvedValue({ playerId: 'p1', authUserId: 'u1', supabase: {} });
   deletePlayerAccount.mockResolvedValue(undefined);
-  deletePosthogPerson.mockResolvedValue(undefined);
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
   vi.spyOn(console, 'info').mockImplementation(() => undefined);
 });
@@ -30,7 +27,6 @@ afterEach(() => {
   vi.restoreAllMocks();
   getAuthenticatedPlayer.mockReset();
   deletePlayerAccount.mockReset();
-  deletePosthogPerson.mockReset();
 });
 
 describe('DELETE /api/player/account', () => {
@@ -40,7 +36,6 @@ describe('DELETE /api/player/account', () => {
     const response = await DELETE(del());
 
     expect(response.status).toBe(401);
-    expect(deletePosthogPerson).not.toHaveBeenCalled();
     expect(deletePlayerAccount).not.toHaveBeenCalled();
   });
 
@@ -58,25 +53,11 @@ describe('DELETE /api/player/account', () => {
     expect(deletePlayerAccount).not.toHaveBeenCalled();
   });
 
-  it('removes the PostHog person and then the account, using the verified ids', async () => {
+  it('deletes the account using the verified ids, ignoring ids in the body', async () => {
     const response = await DELETE(del({ confirm: true, player_id: 'someone-else' }));
 
     expect(response.status).toBe(200);
-    expect(deletePosthogPerson).toHaveBeenCalledWith('u1');
     expect(deletePlayerAccount).toHaveBeenCalledWith({ playerId: 'p1', authUserId: 'u1' });
-    expect(deletePosthogPerson.mock.invocationCallOrder[0]).toBeLessThan(
-      deletePlayerAccount.mock.invocationCallOrder[0]
-    );
-  });
-
-  it('reports a PostHog failure and deletes nothing', async () => {
-    deletePosthogPerson.mockRejectedValue(new Error('PostHog person delete failed with status 500'));
-
-    const response = await DELETE(del());
-
-    expect(response.status).toBe(502);
-    expect(deletePlayerAccount).not.toHaveBeenCalled();
-    expect(console.error).toHaveBeenCalled();
   });
 
   it('reports a database failure and keeps email addresses out of the log', async () => {

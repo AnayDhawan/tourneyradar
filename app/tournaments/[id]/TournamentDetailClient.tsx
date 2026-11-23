@@ -4,7 +4,7 @@ import Link from "next/link";
 import BaseLayout from "@/components/BaseLayout";
 import SaveButton from "@/components/SaveButton";
 import { downloadTournamentIcs } from "@/lib/ics";
-import posthog from "posthog-js";
+import { trackEvent } from "@/lib/track";
 
 interface Tournament {
   id: string;
@@ -141,7 +141,7 @@ export default function TournamentDetailClient({ tournament }: Props) {
                   end_date: tournament.end_date,
                   location: locationDisplay,
                 });
-                posthog.capture("calendar_downloaded", {
+                trackEvent("calendar_downloaded", {
                   tournament_id: tournament.id,
                 });
               }}

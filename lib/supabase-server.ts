@@ -126,8 +126,8 @@ export async function unsubscribeByToken(token: string): Promise<UnsubscribeResu
  * caller-supplied value. Feedback rows keep their text and lose the link to the
  * player (player_id is on delete set null).
  *
- * Throws on the first failure. Callers delete the PostHog person before this
- * runs, so a failure here can be retried safely: every step is idempotent.
+ * Throws on the first failure. Every step is idempotent, so a failure here can
+ * be retried safely.
  */
 export async function deletePlayerAccount(player: {
   playerId: string;

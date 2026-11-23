@@ -5,7 +5,6 @@ import Link from "next/link";
 import BaseLayout from "@/components/BaseLayout";
 import SaveButton from "@/components/SaveButton";
 import { getCountdown, isNewTournament } from "@/lib/countdown";
-import posthog from "posthog-js";
 import { trackEvent } from "@/lib/track";
 
 interface Tournament {
@@ -65,14 +64,14 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     markEngaged();
     const searchQuery = new FormData(event.currentTarget).get("q");
-    posthog.capture("tournament_search_submitted", {
+    trackEvent("tournament_search_submitted", {
       has_query: typeof searchQuery === "string" && Boolean(searchQuery.trim()),
     });
   };
 
   const handleTournamentDetailOpen = (tournamentId: string) => {
     markEngaged();
-    posthog.capture("tournament_detail_opened", {
+    trackEvent("tournament_detail_opened", {
       tournament_id: tournamentId,
     });
   };
