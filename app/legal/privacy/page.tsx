@@ -28,7 +28,6 @@ export default function PrivacyPage() {
             <ul style={list}>
               <li><strong>Account:</strong> your name, email and password. The password is stored as a hash by our login provider and we cannot read it.</li>
               <li><strong>Optional profile details:</strong> phone number, FIDE ID, rating, city, country, home country and state, your role, why you use the site, how you heard about us, who referred you, and your email preferences.</li>
-              <li><strong>Age confirmation:</strong> whether you confirmed at signup that you are 16 or older, or that a parent or guardian has agreed.</li>
               <li><strong>Saved tournaments:</strong> the tournaments you add to your wishlist.</li>
               <li><strong>FIDE rating history:</strong> if you add a FIDE ID, we fetch your public rating history from FIDE and store it. It is public data and can be read through this site.</li>
               <li><strong>Feedback:</strong> your star rating, comment and the page you sent it from, linked to your account only if you are logged in.</li>
@@ -87,7 +86,7 @@ export default function PrivacyPage() {
 
             <h3 style={heading}>10. Children</h3>
             <p style={body}>
-              If you are under 16, a parent or guardian must agree before you create an account. At signup you give their email address and we send them a confirmation link, valid for 14 days. Until they confirm, the account is limited: we send no weekly emails and show none of the account&apos;s details to anyone else. We store the age you confirmed, the parent or guardian&apos;s email address and the time they confirmed, and delete them with the account. Accounts created before this check existed are asked the same question at their next login. A parent or guardian can ask to see or delete a child&apos;s data by emailing dhawansanay@gmail.com. If we learn that an account was created without that agreement, we delete it.
+              TourneyRadar does not ask for your age. A parent or guardian can ask to see or delete a child&apos;s data by emailing dhawansanay@gmail.com.
             </p>
 
             <h3 style={heading}>11. Tournament listings</h3>

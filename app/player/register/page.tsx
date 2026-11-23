@@ -26,8 +26,6 @@ export default function PlayerRegisterPage() {
     phone: "",
     fide_id: "",
     rating: "",
-    age_basis: "",
-    guardian_email: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,15 +42,6 @@ export default function PlayerRegisterPage() {
 
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters");
-      setLoading(false);
-      return;
-    }
-
-    if (
-      formData.age_basis === "parental_consent" &&
-      formData.guardian_email.trim().toLowerCase() === formData.email.trim().toLowerCase()
-    ) {
-      setError("Use your parent or guardian's email, not your own");
       setLoading(false);
       return;
     }
@@ -77,10 +66,6 @@ export default function PlayerRegisterPage() {
             fide_id: formData.fide_id || null,
             rating: formData.rating || null,
             referred_by: referredBy,
-            // GDPR Art. 8: kept on the auth user as the record of what was confirmed.
-            age_basis: formData.age_basis,
-            // Issue #254: where the confirmation link goes for under-16 accounts.
-            guardian_email: formData.age_basis === "parental_consent" ? formData.guardian_email.trim() : null,
           },
         },
       });
@@ -118,20 +103,6 @@ export default function PlayerRegisterPage() {
       // `?ref=CODE` link (lib/referral.ts) and passed through the metadata. No
       // validation that it belongs to a real player; an unmatched code just
       // never counts toward anyone's referral total.
-
-      // Issue #254: under 16, so the account stays limited until the parent or
-      // guardian clicks the link. With email confirmation on there is no session
-      // yet, so the link is sent from the banner at first login instead.
-      if (formData.age_basis === "parental_consent" && authData.session) {
-        await fetch("/api/player/age-check", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${authData.session.access_token}`,
-          },
-          body: JSON.stringify({ age_basis: "parental_consent" }),
-        }).catch(() => undefined);
-      }
 
       trackEvent("player_registered");
       setSuccess(true);
@@ -302,51 +273,6 @@ export default function PlayerRegisterPage() {
                     />
                   </div>
                 </div>
-
-                <fieldset style={{ border: "none", padding: 0, margin: "0 0 2rem" }}>
-                  <legend style={{ fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
-                    Your age *
-                  </legend>
-                  <label style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
-                    <input
-                      type="radio"
-                      name="age_basis"
-                      required
-                      checked={formData.age_basis === "16_or_older"}
-                      onChange={() => setFormData({ ...formData, age_basis: "16_or_older" })}
-                    />
-                    I am 16 or older
-                  </label>
-                  <label style={{ display: "flex", gap: "0.5rem", color: "var(--text-secondary)" }}>
-                    <input
-                      type="radio"
-                      name="age_basis"
-                      required
-                      checked={formData.age_basis === "parental_consent"}
-                      onChange={() => setFormData({ ...formData, age_basis: "parental_consent" })}
-                    />
-                    I am under 16 and a parent or guardian has agreed to this account
-                  </label>
-                </fieldset>
-
-                {formData.age_basis === "parental_consent" && (
-                  <div style={{ marginBottom: "2rem" }}>
-                    <label htmlFor="reg-guardian" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
-                      Parent or guardian email *
-                    </label>
-                    <input id="reg-guardian"
-                      type="email"
-                      required
-                      className="form-input"
-                      value={formData.guardian_email}
-                      onChange={(e) => setFormData({ ...formData, guardian_email: e.target.value })}
-                      placeholder="parent@example.com"
-                    />
-                    <p style={{ marginTop: "0.5rem", fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                      We email them a link to confirm. Until they do, your account has no weekly emails.
-                    </p>
-                  </div>
-                )}
 
                 <button
                   type="submit"
