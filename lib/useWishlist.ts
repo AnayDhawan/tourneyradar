@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import posthog from "posthog-js";
+import { trackEvent } from "@/lib/track";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/AuthContext";
 
@@ -87,7 +87,7 @@ export function useWishlist() {
             });
 
         if (!res.ok) throw new Error("wishlist update failed");
-        posthog.capture(wasSaved ? "wishlist_removed" : "wishlist_saved", {
+        trackEvent(wasSaved ? "wishlist_removed" : "wishlist_saved", {
           tournament_id: tournamentId,
         });
         return true;

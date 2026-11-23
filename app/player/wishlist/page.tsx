@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import posthog from "posthog-js";
+import { trackEvent } from "@/lib/track";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/AuthContext";
 import Footer from "@/components/Footer";
@@ -96,7 +96,7 @@ export default function WishlistPage() {
       .eq("tournament_id", tournamentId);
 
     if (!error) {
-      posthog.capture("wishlist_removed", {
+      trackEvent("wishlist_removed", {
         tournament_id: tournamentId,
       });
       setTournaments(tournaments.filter(t => t.id !== tournamentId));

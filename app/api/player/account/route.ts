@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { deletePosthogPerson } from '@/lib/posthog-server';
 import { redactEmails } from '@/lib/redact';
 import { deletePlayerAccount, getAuthenticatedPlayer } from '@/lib/supabase-server';
 
@@ -27,23 +26,10 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: 'confirm must be true' }, { status: 400 });
   }
 
-  // Analytics first. If PostHog fails nothing has been deleted yet, so the
-  // player can simply try again and we never report a deletion that left
-  // analytics data behind.
-  try {
-    await deletePosthogPerson(player.authUserId);
-  } catch (error) {
-    console.error('Account deletion stopped at analytics:', describe(error));
-    return NextResponse.json(
-      { error: 'Could not remove analytics data, so nothing was deleted. Try again later.' },
-      { status: 502 }
-    );
-  }
-
   try {
     await deletePlayerAccount({ playerId: player.playerId, authUserId: player.authUserId });
   } catch (error) {
-    console.error('Account deletion failed after analytics were removed:', describe(error));
+    console.error('Account deletion failed:', describe(error));
     return NextResponse.json(
       { error: 'Deleting your account failed part way. Email us and we will finish it.' },
       { status: 500 }

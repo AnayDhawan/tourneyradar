@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import posthog from "posthog-js";
 import { supabase } from "./supabase";
 
 type UserType = "player" | "admin" | null;
@@ -69,7 +68,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .maybeSingle();
 
         if (player && !playerError) {
-          posthog.identify(session.user.id, { user_type: "player" });
           setUser(player as Player);
           setUserType("player");
           setLoading(false);
@@ -88,7 +86,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .maybeSingle();
 
         if (admin && !adminError) {
-          posthog.identify(session.user.id, { user_type: "admin" });
           setUser(admin as Admin);
           setUserType("admin");
           setLoading(false);
@@ -111,7 +108,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     await supabase.auth.signOut();
-    posthog.reset();
     setUser(null);
     setUserType(null);
   };
@@ -133,7 +129,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session) {
         await checkAuth();
       } else {
-        posthog.reset();
         setUser(null);
         setUserType(null);
         setLoading(false);

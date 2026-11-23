@@ -1,21 +1,6 @@
 import type { NextConfig } from "next";
 
-// Defaulted, not required. This project is EU region (see .env.local and the
-// project token). Leaving it env-only meant one unset variable on the
-// deployment silently 404d the whole /ingest proxy and stopped posthog.init()
-// from ever running in production, with nothing in the UI to show for it.
-const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://eu.i.posthog.com";
-
-// PostHog serves its static assets from a sibling host: eu.i.posthog.com pairs
-// with eu-assets.i.posthog.com. Derive it rather than requiring a second
-// variable, because the old code ANDed the two together and returned no
-// rewrites at all if either was missing, which silently 404s the entire
-// /ingest proxy.
-const posthogAssetsHost =
-  process.env.NEXT_PUBLIC_POSTHOG_ASSETS_HOST ??
-  posthogHost?.replace(/^(https:\/\/)([a-z0-9]+)\.i\.posthog\.com/, "$1$2-assets.i.posthog.com");
-
-// Umami is proxied for the same reason PostHog already is: a blocked analytics
+// Umami is proxied because a blocked analytics
 // request is indistinguishable from a visitor who never engaged, so the numbers
 // quietly under-report rather than visibly break.
 //
@@ -42,8 +27,8 @@ const umamiGatewayHost = process.env.UMAMI_GATEWAY_HOST ?? "https://gateway.umam
 // would need its own route with a narrower rule.
 //
 // Origins in use: Supabase (REST and realtime), OpenStreetMap tiles for the map, and
-// Google Analytics when NEXT_PUBLIC_GA_ID is set. PostHog, Umami and Vercel Analytics all
-// go through same-origin paths (/ingest, /relay, /_vercel), so they need no entry.
+// Google Analytics when NEXT_PUBLIC_GA_ID is set. Umami and Vercel Analytics both
+// go through same-origin paths (/relay, /_vercel), so they need no entry.
 // 'unsafe-inline' is needed for the inline theme script and the JSON-LD blocks in the
 // layout; a nonce would remove it but forces every page to render dynamically.
 function supabaseOrigins(): string[] {
@@ -111,23 +96,10 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    const rules = [
+    return [
       { source: "/relay/script.js", destination: `${umamiScriptHost}/script.js` },
       { source: "/relay/api/send", destination: `${umamiGatewayHost}/api/send` },
     ];
-
-    // PostHog stays gated on the host alone: without one there is nowhere to
-    // proxy to. The assets host is derived above and cannot independently
-    // disable this block.
-    if (posthogHost && posthogAssetsHost) {
-      rules.push(
-        { source: "/ingest/static/:path*", destination: `${posthogAssetsHost}/static/:path*` },
-        { source: "/ingest/array/:path*", destination: `${posthogAssetsHost}/array/:path*` },
-        { source: "/ingest/:path*", destination: `${posthogHost}/:path*` },
-      );
-    }
-
-    return rules;
   },
   skipTrailingSlashRedirect: true,
 };
