@@ -9,7 +9,6 @@ All notable changes to this project are documented here. Format based on
 ### Added
 - Self-serve account deletion: `DELETE /api/player/account` and a "Delete my account" action in player settings remove the player's saved tournaments, rating history, player row and auth user.
 - Skip-to-content link, `aria-expanded`/`aria-controls` on the mobile menu, and live-region roles on toasts.
-- Parental confirmation for under-16 accounts: signup asks for a parent or guardian email and sends a confirmation link, the account gets no weekly emails until it is used, the confirmation time is stored, and existing accounts are asked their age at next login (#254).
 - Per-country social preview image, `POST /api/revalidate` (called after each scrape), and site endpoint docs on the API page.
 - Organizer self-submission at `/submit` for tournaments outside Chess-Results.com. Signed-in players send a listing that is stored as `pending` and hidden until a moderator publishes it with `npm run review:submissions` (#238).
 - Vitest suite (64 tests) run in CI, plus Playwright specs for country pages and calendar feeds.
