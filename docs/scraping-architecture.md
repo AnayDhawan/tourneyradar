@@ -29,6 +29,8 @@ Weekly cron: `0 2 * * 0` (Sunday 02:00 UTC) + manual `workflow_dispatch`.
 
 No single FIDE API exposes upcoming open tournaments worldwide. Chess-Results is the de-facto aggregator used by arbiters to publish pairings/results. Every tournament gets a `tnrXXXXXX` page with federation, date, location, organizer, and (if provided) time control and rounds. Scraping federation listing pages (`fed.aspx?fed=CODE`) is more stable than scraping a global search.
 
+Not every row comes from the scraper: signed-in players can send events that are not on Chess-Results through `/submit`. Those are stored as `pending` with `source = 'organizer-submission'` and become public only after `npm run review:submissions -- --approve <id>`. The weekly scrape never touches them.
+
 Source of truth: `scripts/scrape.ts`, the only scraper (`CONTRIBUTING.md` describes how to add a second source under `scripts/scrape-<source>.ts` with a `mysource_` prefixed id).
 
 ## 2. Federation coverage and regional sharding
@@ -135,6 +137,26 @@ The issue description names four tiers; the code splits them across two files:
 **Update (issue #126):** the split described above was true through 2026-08-30 but no longer is. Phase 3 previously had its own separate, simpler `geocode()` (Google-only, no fallback) while `lib/geocoding.ts`'s 4-tier chain sat unused, dead code relative to the live pipeline. Phase 3 now calls `geocodeWithFallback(city, country, country_code)` directly, so all four tiers are live in production, and each result carries a `tier` field recording which one resolved it (`'city_table' | 'country_centroid' | 'google' | 'nominatim'`). A per-run tally is logged to `scraper_logs` via `logGeocodeTierSummary` (message shape `[geocode_tier] city_table:N country_centroid:N google:N nominatim:N unresolved:N`), surfaced on the observability dashboard (see section 7). `geocodeTournaments`/`geocodeSingleCity` remain the entry points for library consumers hydrating older rows outside the scraper's own run.
 
 Nominatim's 1 req/s pacing (`NOMINATIM_DELAY = 1100 ms`) is now a real cost on the scraper's hot path for any city that misses both hardcoded tiers and isn't resolved by Google, not just a theoretical one. Worth watching run duration if a batch of unusual-city tournaments comes through in one run.
+
+## 4b. Running it locally and the clean-up flags
+
+Needs `.env.local` with `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (the script exits with "Missing Supabase environment variables." without them) and `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` for geocoding. `npm run scrape` loads `.env.local` itself.
+
+Run one region without writing to the database:
+
+```bash
+npm run scrape -- --region india --output tournaments-india.json
+```
+
+`--output` writes the JSON file and stops. Leave it off and the run **pushes to the database named in `.env.local`**, so point that at a test project if you are not the maintainer. Valid regions are the keys of `REGION_MAP` in `scripts/scrape.ts` (an unknown name exits with the valid list). `npm run scrape -- --push-from tournaments-india.json` pushes a file you already made, after the cross-region dedup.
+
+Clean-up flags. Each runs on its own instead of a scrape and ignores the others, so pass one at a time. All three take `--dry-run`, which prints what would change and writes nothing. Run the dry run first.
+
+| Flag | What it does |
+|---|---|
+| `--unpublish-implausible` | Sets published rows whose start date is past the sanity limit to `status = 'invalid_date'`. Rows are hidden, never deleted. |
+| `--regeocode-centroids` | Looks up upcoming rows that sit on a country centroid and moves them if the new answer is more precise than country level. Costs Google geocoding calls. |
+| `--dedup-stored` | Finds duplicate groups already stored and unpublishes the extra copies (`duplicate`). Refuses to change more than 100 rows in one run (`MAX_UNPUBLISH_PER_RUN`); check the groups with `--dry-run` first. |
 
 ## 5. Deduplication, persistence, and history
 

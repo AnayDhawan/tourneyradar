@@ -9,19 +9,24 @@ attribution. For the columns, live row count, and download links, see the
 ## What this is
 
 A snapshot of the `tournaments` table: one row per over-the-board chess tournament, worldwide,
-current state only (not the full change history). Same data the map on the site shows, minus a
+current state only (not the full change history), published rows only: rows hidden as `duplicate`,
+`invalid_date` or `pending` are not exported. Same data the map on the site shows, minus a
 handful of internal-only or contact-detail columns. Generated live by
 [`app/api/dataset/route.ts`](app/api/dataset/route.ts) on request (cached up to 1 hour), or via
 [`scripts/export-dataset.ts`](scripts/export-dataset.ts) for a local/CI snapshot on disk.
 
 ## Origin
 
-Every row originates from [Chess-Results.com](https://chess-results.com), scraped, geocoded,
+Almost every row originates from [Chess-Results.com](https://chess-results.com), scraped, geocoded,
 categorized, and deduplicated by the pipeline documented in
 [`docs/scraping-architecture.md`](docs/scraping-architecture.md). TourneyRadar does not organize
 these events, verify them beyond what the source lists, or run registration for any of them, the
 same disclaimer as on the site's [About page](https://www.tourneyradar.com/about): TourneyRadar
 aggregates publicly available information, it does not organize tournaments.
+
+The exception is rows whose `source` is `organizer-submission`: an organizer sent the event
+through the site's `/submit` form and a moderator published it after a manual review. Nothing else
+checks those rows against another source, so filter on `source` if you want Chess-Results data only.
 
 ## License
 
