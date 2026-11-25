@@ -70,7 +70,7 @@ export default async function DatasetPage() {
             <p style={{ ...bodyText, marginBottom: "1.5rem" }}>
               This is the same current-state <code className="inline-code">tournaments</code> table
               that powers the map on this site: worldwide over-the-board chess tournaments scraped from
-              Chess-Results.com, cleaned, geocoded, and deduplicated. See{" "}
+              Chess-Results.com (plus a few organizer-submitted events, marked in the <code className="inline-code">source</code> column), cleaned, geocoded, and deduplicated. See{" "}
               <a href={SCRAPING_ARCHITECTURE_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary)", fontWeight: 600 }}>
                 the scraping architecture writeup
               </a>{" "}
