@@ -38,7 +38,7 @@ export default function DataFreshness() {
   return (
     <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", marginTop: "0.5rem" }}>
       Data last updated: {lastRun ?? "N/A"}{" "}
-      <Link href="/status" style={{ color: "var(--primary)", textDecoration: "none" }}>
+      <Link href="/status" style={{ color: "var(--primary-text)", textDecoration: "underline" }}>
         (scraper status)
       </Link>
     </p>

@@ -12,6 +12,14 @@
       --primary: #2563EB; /* Vibrant Blue */
       --primary-dark: #1D4ED8;
       --primary-light: #3B82F6;
+      /* Contrast tokens (WCAG AA, checked by tests/e2e/a11y.spec.ts).
+         --primary-solid is a fill that carries white text (buttons, badges);
+         --primary-text is blue used as text or a link on the surface colours
+         below. --primary alone is too light for either in the dark theme
+         (white on it is 3.7:1, it on --surface is 4.0:1). */
+      --primary-solid: #2563EB;
+      --primary-solid-hover: #1D4ED8;
+      --primary-text: #2563EB;
       --secondary: #0F172A; /* Rich Dark */
       --accent: #F59E0B; /* Golden Orange */
       /* Hero gradient's dark anchor - deliberately NOT redefined in
@@ -43,6 +51,7 @@
       --primary: #3B82F6;
       --primary-dark: #2563EB;
       --primary-light: #60A5FA;
+      --primary-text: #93C5FD;
       --secondary: #FFFFFF;
       --accent: #FBBF24;
       --background: #0F172A;
@@ -521,15 +530,18 @@
       text-align: center;
       text-decoration: none;
       white-space: nowrap;
+      /* Default text colour for a bare .btn; without it an <a class="btn"> shows
+         the browser's link blue, unreadable on the dark theme surfaces. */
+      color: var(--text-primary);
     }
     
     .btn-primary {
-      background: var(--primary);
+      background: var(--primary-solid);
       color: white;
     }
     
     .btn-primary:hover {
-      background: var(--primary-dark);
+      background: var(--primary-solid-hover);
       transform: translateY(-2px);
       box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
     }
@@ -1047,13 +1059,13 @@
       border-radius: 9999px;
       font-size: 0.75rem;
       font-weight: 600;
-      background: var(--primary);
+      background: var(--primary-solid);
       color: white;
       white-space: nowrap;
     }
 
     .badge-fide {
-      background: #10B981;
+      background: #047857; /* white on the old #10B981 was 2.5:1 */
       color: white;
     }
     
@@ -2186,7 +2198,7 @@ body > div[style*="position: fixed"][style*="bottom"][style*="left"] {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  background: var(--primary);
+  background: var(--primary-solid);
   color: white;
   border: none;
   outline: none;
@@ -2417,6 +2429,7 @@ body > div[style*="position: fixed"][style*="bottom"][style*="left"] {
   --primary: #3B82F6;
   --primary-dark: #2563EB;
   --primary-light: #60A5FA;
+  --primary-text: #93C5FD;
   --secondary: #FFFFFF;
   --accent: #FBBF24;
   --background: #0F172A;
