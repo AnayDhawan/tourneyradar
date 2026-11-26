@@ -395,7 +395,8 @@ export default function TrafficChart({ rows, metrics, kind, valueLabel }: Traffi
               {valueLabel ? `, ${valueLabel.toLowerCase()}` : ""}
             </div>
             <div className="traffic-tooltip-rows">
-              {series.map((s) => (
+              {/* Highest value first, so the rows sit in the same order as the lines on the chart. */}
+              {[...series].sort((a, b) => activeRow[b.key] - activeRow[a.key]).map((s) => (
                 <div key={s.key} className="traffic-tooltip-row">
                   <span
                     className="traffic-swatch-line"
