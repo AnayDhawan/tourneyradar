@@ -45,6 +45,7 @@
     "resend": "^6.39.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@electric-sql/pglite": "^0.5.17",
     "@playwright/test": "^1.65.1",
     "@tailwindcss/postcss": "^4",
