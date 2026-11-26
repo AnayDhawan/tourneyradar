@@ -64,7 +64,7 @@ export default function MapPreviewCard({ tournaments }: MapPreviewCardProps) {
 
       <div className="map-preview-badge">Live data, OpenStreetMap</div>
 
-      <Link href="#tournaments" aria-label="View the live tournament map" className="map-preview-overlay">
+      <Link href="#tournaments" className="map-preview-overlay">
         <span className="map-preview-pill">
           View live map
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">

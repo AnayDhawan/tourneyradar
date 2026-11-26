@@ -293,7 +293,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
                           marginLeft: "auto",
                           fontSize: "0.75rem",
                           fontWeight: 600,
-                          color: "var(--primary)",
+                          color: "var(--primary-text)",
                           background: "var(--surface-elevated)",
                           padding: "0.25rem 0.75rem",
                           borderRadius: "12px"
@@ -372,7 +372,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
                 href="https://github.com/AnayDhawan/tourneyradar"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: "var(--primary)", fontWeight: 700, textDecoration: "none" }}
+                style={{ color: "var(--primary-text)", fontWeight: 700, textDecoration: "none" }}
                 onClick={() => trackEvent("star_link", { src: "tournaments_nudge" })}
               >
                 Star us on GitHub
