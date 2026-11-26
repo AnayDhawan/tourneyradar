@@ -8,6 +8,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { inter, poppins } from "./fonts";
 import FeedbackPrompt from "@/components/FeedbackPrompt";
 import UpdatesPopup from "@/components/UpdatesPopup";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import DemoCursor from "@/components/DemoCursor";
 import { getChangelog } from "@/lib/changelog";
 
@@ -144,6 +145,7 @@ export default function RootLayout({
                   useToast reports submit results. */}
               <FeedbackPrompt />
               <UpdatesPopup latestRelease={latestRelease} />
+              <ServiceWorkerRegister />
             </ToastProvider>
           </AuthProvider>
         </QueryProvider>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#3b82f6">
+  <title>Offline | TourneyRadar</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: #0a0a0f;
+      color: #e5e7eb;
+      text-align: center;
+    }
+    main { max-width: 26rem; }
+    h1 { margin: 0 0 0.75rem; font-size: 1.5rem; }
+    p { margin: 0 0 1.5rem; line-height: 1.5; color: #9ca3af; }
+    button {
+      font: inherit;
+      font-weight: 600;
+      padding: 0.65rem 1.4rem;
+      border: 0;
+      border-radius: 0.5rem;
+      background: #3b82f6;
+      color: #fff;
+      cursor: pointer;
+    }
+    @media (prefers-color-scheme: light) {
+      body { background: #f8fafc; color: #111827; }
+      p { color: #4b5563; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>You are offline</h1>
+    <p>TourneyRadar needs a connection to load tournaments. Check your network and try again.</p>
+    <button type="button" onclick="location.reload()">Try again</button>
+  </main>
+</body>
+</html>
