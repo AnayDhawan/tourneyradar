@@ -31,7 +31,7 @@ export function serviceRoleClient() {
 // Route handlers must never trust a player id supplied by the caller. This
 // builds a request-scoped client bound to the caller's own access token, so
 // every query it makes runs as that user and RLS applies to it.
-function clientForToken(accessToken: string) {
+export function clientForToken(accessToken: string) {
   return createClient(supabaseUrl!, supabaseAnonKey!, {
     db: { schema: 'public' },
     auth: { persistSession: false, autoRefreshToken: false },
@@ -39,7 +39,7 @@ function clientForToken(accessToken: string) {
   });
 }
 
-function bearerToken(request: NextRequest): string | null {
+export function bearerToken(request: NextRequest): string | null {
   const header = request.headers.get('authorization');
   if (!header) return null;
 

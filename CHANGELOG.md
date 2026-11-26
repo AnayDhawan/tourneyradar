@@ -13,6 +13,7 @@ All notable changes to this project are documented here. Format based on
 - Per-country social preview image, `POST /api/revalidate` (called after each scrape), and site endpoint docs on the API page.
 - Organizer self-submission at `/submit` for tournaments outside Chess-Results.com. Signed-in players send a listing that is stored as `pending` and hidden until a moderator publishes it with `npm run review:submissions` (#238).
 - Scraper flags `--unpublish-implausible` (hides published rows with a start date past the limit as `invalid_date`, never deletes) and `--regeocode-centroids` (re-geocodes upcoming rows stuck on a country centroid, skipping country-level answers). Both take `--dry-run`.
+- Moderation dashboard at `/admin/submissions`: admins (the existing `admins` table) approve, reject with a reason, or edit-then-approve pending organizer submissions from the browser, with an audit record of who decided and when. Needs `supabase/migrations/20261126120000_submission_review_audit.sql` applied by hand; `npm run review:submissions` keeps working (#263).
 - Vitest suite (64 tests) run in CI, plus Playwright specs for country pages and calendar feeds.
 - Playwright smoke specs for account deletion and tournament submission, run against a mocked Supabase and mocked API routes so they need no secrets and touch no live service (#284).
 
