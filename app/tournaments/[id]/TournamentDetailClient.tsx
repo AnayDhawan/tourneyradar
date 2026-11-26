@@ -1,9 +1,12 @@
 "use client";
 
+import { useRef, useState } from "react";
 import Link from "next/link";
 import BaseLayout from "@/components/BaseLayout";
 import SaveButton from "@/components/SaveButton";
+import { useToast } from "@/components/Toast";
 import { downloadTournamentIcs } from "@/lib/ics";
+import { browserShareEnvironment, buildTournamentShare, shareTournament } from "@/lib/share";
 import { trackEvent } from "@/lib/track";
 
 interface Tournament {
@@ -67,6 +70,12 @@ function ratingDisplay(min: number | null | undefined, max: number | null | unde
 }
 
 export default function TournamentDetailClient({ tournament }: Props) {
+  const { showToast } = useToast();
+  const [sharing, setSharing] = useState(false);
+  // A ref as well as state: a second tap before the re-render must not open a
+  // second share sheet (iOS rejects that with InvalidStateError).
+  const sharingRef = useRef(false);
+
   if (!tournament) {
     return (
       <BaseLayout>
@@ -87,6 +96,24 @@ export default function TournamentDetailClient({ tournament }: Props) {
     tournament.city || tournament.location,
     tournament.country || tournament.country_code
   ].filter(Boolean).join(", ");
+
+  async function handleShare(t: Tournament) {
+    if (sharingRef.current) return;
+    sharingRef.current = true;
+    setSharing(true);
+    try {
+      const outcome = await shareTournament(buildTournamentShare(t), browserShareEnvironment());
+      // The native sheet is its own feedback, and a dismissed sheet is not an error.
+      if (outcome === "copied") {
+        showToast("Link copied", "success");
+      } else if (outcome === "failed") {
+        showToast("Couldn't share or copy the link, copy it from the address bar instead", "error");
+      }
+    } finally {
+      sharingRef.current = false;
+      setSharing(false);
+    }
+  }
 
   return (
     <BaseLayout showHero heroTitle={tournament.name}>
@@ -149,6 +176,24 @@ export default function TournamentDetailClient({ tournament }: Props) {
               style={{ background: "var(--surface-elevated)", border: "2px solid var(--border)", color: "var(--text-primary)" }}
             >
               Add to Calendar
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleShare(tournament)}
+              disabled={sharing}
+              aria-label="Share this tournament"
+              className="btn"
+              style={{ background: "var(--surface-elevated)", border: "2px solid var(--border)", color: "var(--text-primary)", display: "inline-flex", alignItems: "center", gap: "0.5rem" }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
+                <line x1="15.4" y1="6.5" x2="8.6" y2="10.5" />
+              </svg>
+              Share
             </button>
 
             <Link href="/tournaments" className="btn" style={{ background: "transparent", border: "2px solid var(--border)", color: "var(--text-secondary)" }}>

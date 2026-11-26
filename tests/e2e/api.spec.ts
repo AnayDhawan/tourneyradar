@@ -151,3 +151,31 @@ test.describe("other routes", () => {
     }
   })
 })
+
+// Moderation routes (issue #263). The anonymous cases stop at the admin gate
+// before any database query, so they run with dummy env too. The 403 case (a
+// signed-in non-admin) needs a real Supabase session and is covered by the
+// route and gate unit tests (app/api/admin, lib/admin-server.test.ts).
+test.describe("/api/admin/submissions", () => {
+  test("anonymous GET returns 401", async ({ request }) => {
+    const res = await request.get("/api/admin/submissions")
+    expect(res.status()).toBe(401)
+  })
+
+  test("anonymous POST returns 401", async ({ request }) => {
+    const res = await request.post(
+      "/api/admin/submissions/submitted_123e4567-e89b-12d3-a456-426614174000",
+      { data: { action: "approve" } },
+    )
+    expect(res.status()).toBe(401)
+  })
+
+  test("a garbage bearer token is not an admin", async ({ request }) => {
+    const res = await request.get("/api/admin/submissions", {
+      headers: { Authorization: "Bearer not-a-real-token" },
+    })
+    // 401 against a reachable Supabase. With the dummy env of a local run the
+    // auth check cannot complete, which must still deny: 500, never 200.
+    expect([401, 500]).toContain(res.status())
+  })
+})

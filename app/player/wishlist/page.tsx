@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import { useThemePreference } from "@/lib/theme";
 import MobileNavDrawer from "@/components/MobileNavDrawer";
 import SiteNav from "@/components/SiteNav";
+import WishlistCalendarFeed from "@/components/WishlistCalendarFeed";
 
 type WishlistTournament = {
   id: string;
@@ -127,6 +128,7 @@ export default function WishlistPage() {
 
       <section className="tournament-section">
         <div className="section-container" style={{ maxWidth: "900px" }}>
+          <WishlistCalendarFeed />
           {tournaments.length === 0 ? (
             <div className="card" style={{ textAlign: "center", padding: "3rem" }}>
               <h2 className="font-display" style={{ fontSize: "1.5rem", marginBottom: "1rem", color: "var(--text-primary)" }}>
