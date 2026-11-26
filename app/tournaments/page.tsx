@@ -2,6 +2,7 @@ import { unstable_cache } from 'next/cache';
 import TournamentsClient from './TournamentsClient';
 import type { Metadata } from 'next';
 import { queryTournaments } from '@/lib/tournaments';
+import { parseRatingParam } from '@/lib/rating-filter';
 
 export const metadata: Metadata = {
   title: 'Browse Chess Tournaments',
@@ -12,15 +13,16 @@ export const metadata: Metadata = {
 export default async function TournamentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; q?: string }>;
+  searchParams: Promise<{ page?: string; q?: string; rating?: string | string[] }>;
 }) {
   const sp = await searchParams;
   const page = parseInt(sp.page || '1', 10);
   const q = sp.q || '';
+  const ratingParam = parseRatingParam(sp.rating);
 
   const getTournaments = unstable_cache(
-    async () => queryTournaments({ page, q }),
-    ['tournaments-list', String(page), q || ''],
+    async () => queryTournaments({ page, q, rating: ratingParam.rating }),
+    ['tournaments-list', String(page), q || '', String(ratingParam.rating ?? '')],
     { revalidate: 86400, tags: ['tournaments'] }
   );
 
@@ -33,6 +35,7 @@ export default async function TournamentsPage({
       totalPages={result.totalPages}
       total={result.total}
       q={q}
+      ratingParam={ratingParam}
     />
   );
 }
