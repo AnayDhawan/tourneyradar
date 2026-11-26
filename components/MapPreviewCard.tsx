@@ -57,7 +57,8 @@ export default function MapPreviewCard({ tournaments }: MapPreviewCardProps) {
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <MarkerClusterGroup chunkedLoading>
           {points.map((t) => (
-            <Marker key={t.id} position={[t.lat!, t.lng!]} />
+            // Decorative: the card itself is the link, so the pins are not focusable buttons.
+            <Marker key={t.id} position={[t.lat!, t.lng!]} interactive={false} keyboard={false} />
           ))}
         </MarkerClusterGroup>
       </MapContainer>

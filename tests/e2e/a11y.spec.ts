@@ -55,6 +55,19 @@ async function signInAsPlayer(page: Page, supabaseUrl: string) {
   )
 }
 
+// The homepage map is loaded lazily, so a scan taken right after networkidle can
+// run before any Leaflet marker exists and pass without ever seeing one. When the
+// page lists tournaments, wait until their markers are on screen so axe scans
+// them. An empty database has nothing to wait for and falls through.
+async function waitForMapMarkers(page: Page) {
+  const hasTournaments = (await page.locator('a[href^="/tournaments/"]').count()) > 0
+  if (!hasTournaments) return
+  await expect(
+    page.locator(".leaflet-marker-icon.leaflet-interactive").first(),
+    "the map shows no markers although the page lists tournaments"
+  ).toBeVisible({ timeout: 30_000 })
+}
+
 async function expectNoSeriousViolations(page: Page, label: string) {
   const { violations } = await new AxeBuilder({ page }).analyze()
 
@@ -88,6 +101,7 @@ test.describe("axe accessibility", () => {
       test(`${name} (${path}) has no serious violations in ${theme} theme`, async ({ page }) => {
         const response = await openAs(page, theme, path)
         expect(response?.status()).toBe(200)
+        if (path === "/") await waitForMapMarkers(page)
         await expectNoSeriousViolations(page, `${path} [${theme}]`)
       })
     }
