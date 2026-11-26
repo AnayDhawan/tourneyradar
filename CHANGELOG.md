@@ -22,6 +22,7 @@ All notable changes to this project are documented here. Format based on
 - Tournament countdowns use the viewer's calendar day and render only in the browser; weeks round down, so 8 days reads "In 1 week".
 - Anonymous and signed-in reads of `tournaments` return published rows only (RLS), applied by hand with `supabase/migrations/20261104120000_tournaments_published_rls.sql`.
 - `/status`, `/status/detail`, `/api-docs`, `/dataset`, `/stats` and `/player/login` have their own canonical URL and Open Graph text instead of inheriting the homepage's (#237).
+- `/tournaments`, `/updates` and `/docs` have their own Open Graph and Twitter title, description and URL instead of inheriting the homepage's (#272).
 - Sitemap lists every static page, pages through all upcoming events, and uses real last-modified dates.
 - Unknown `/country/<code>` URLs now return a real 404; cached pages refresh every 30 minutes.
 - 404 page styling moved to CSS classes; animations respect `prefers-reduced-motion`.
