@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { countryCodeToName } from '@/lib/countryMap';
-import { icsEscape, foldLine, dayAfter, icsDate } from '@/lib/ics-feed';
+import { buildCalendar, icsDtstamp, tournamentToVEvent } from '@/lib/ics-feed';
 
 // Never prerender: the feed must reflect the latest scraped tournaments.
 export const dynamic = 'force-dynamic';
@@ -34,47 +34,13 @@ export async function GET(
     return new Response('Internal server error', { status: 500 });
   }
 
-  const dtstamp = new Date()
-    .toISOString()
-    .replace(/[-:]/g, '')
-    .replace(/\.\d{3}/, '');
+  const dtstamp = icsDtstamp(new Date());
+  const events = (data || []).map((t) => tournamentToVEvent(t, { siteUrl: SITE_URL, dtstamp }));
 
-  const events = (data || []).map((t) => {
-    const endDay = dayAfter(t.end_date || t.date);
-    const locationParts = [t.city, t.state, t.country].filter(Boolean);
-    // DESCRIPTION is a TEXT value like SUMMARY and LOCATION, so commas and
-    // semicolons in a place name must be escaped (RFC 5545 section 3.3.11).
-    const description = [
-      `Location: ${icsEscape(locationParts.join(', ')) || 'TBA'}`,
-      `Link: ${SITE_URL}/tournaments/${t.id}`,
-    ].join('\\n');
-
-    return [
-      'BEGIN:VEVENT',
-      `UID:tournament-${t.id}@tourneyradar.com`,
-      `DTSTAMP:${dtstamp}`,
-      `DTSTART;VALUE=DATE:${icsDate(t.date)}`,
-      `DTEND;VALUE=DATE:${icsDate(endDay)}`,
-      `SUMMARY:${icsEscape(t.name)}`,
-      `DESCRIPTION:${description}`,
-      `LOCATION:${icsEscape(locationParts.join(', '))}`,
-      'END:VEVENT',
-    ]
-      .map(foldLine)
-      .join('\r\n');
+  const ics = buildCalendar({
+    calName: `Chess Tournaments - ${countryCodeToName(code)}`,
+    events,
   });
-
-  const ics = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//TourneyRadar//TourneyRadar//EN',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
-    `X-WR-CALNAME:Chess Tournaments - ${countryCodeToName(code)}`,
-    ...events,
-    'END:VCALENDAR',
-    '',
-  ].join('\r\n');
 
   return new Response(ics, {
     headers: {

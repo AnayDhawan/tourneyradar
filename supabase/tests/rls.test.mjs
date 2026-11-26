@@ -424,6 +424,68 @@ describe("tournament_submissions (organizer submissions, #238)", () => {
 });
 
 
+describe("player_calendar_feeds (private wishlist feed tokens)", () => {
+  const TOKEN_A = "A".repeat(43);
+  const TOKEN_B = "B".repeat(43);
+
+  before(async () => {
+    await as("service_role", null, "insert into public.player_calendar_feeds (player_id, token) values ($1, $2), ($3, $4)", [pid.a, TOKEN_A, pid.b, TOKEN_B]);
+  });
+
+  it("no client role can read any token, not even their own", async () => {
+    const stmt = "select token from public.player_calendar_feeds";
+    assert.deepEqual(await visible("anon", null, stmt), []);
+    assert.deepEqual(await visible("authenticated", A, stmt), []);
+    assert.deepEqual(await visible("authenticated", ADMIN, stmt), []);
+  });
+
+  it("no client role can write, replace or delete a token", async () => {
+    const weak = "C".repeat(43);
+    for (const [role, sub] of [["anon", null], ["authenticated", A], ["authenticated", ADMIN]]) {
+      await denied(role, sub, "insert into public.player_calendar_feeds (player_id, token) values ($1, $2)", [pid.admin, weak]);
+      assert.equal(await affected(role, sub, "update public.player_calendar_feeds set token = $1", [weak]), 0);
+      assert.equal(await affected(role, sub, "delete from public.player_calendar_feeds"), 0);
+    }
+    assert.equal(await count("select count(*)::int as n from public.player_calendar_feeds where token = $1", [weak]), 0);
+    assert.equal(await count("select count(*)::int as n from public.player_calendar_feeds"), 2);
+  });
+
+  it("the players row no longer carries a token a client could set", async () => {
+    const { rows } = await su(
+      "select column_name from information_schema.columns where table_schema = 'public' and table_name = 'players' and column_name like '%calendar%'",
+    );
+    assert.deepEqual(rows, []);
+  });
+
+  it("the service role resolves a token to its player", async () => {
+    const { rows } = await as("service_role", null, "select player_id from public.player_calendar_feeds where token = $1", [TOKEN_A]);
+    assert.deepEqual(rows.map((r) => r.player_id), [pid.a]);
+  });
+
+  it("regenerating replaces the token in place: the old one resolves to nothing", async () => {
+    const fresh = "D".repeat(43);
+    await as("service_role", null, "update public.player_calendar_feeds set token = $1, rotated_at = now() where player_id = $2", [fresh, pid.b]);
+    assert.equal((await as("service_role", null, "select 1 from public.player_calendar_feeds where token = $1", [TOKEN_B])).rows.length, 0);
+    assert.equal((await as("service_role", null, "select 1 from public.player_calendar_feeds where token = $1", [fresh])).rows.length, 1);
+  });
+
+  it("tokens are unique, one row per player, and must be 43 url-safe characters", async () => {
+    await assert.rejects(as("service_role", null, "insert into public.player_calendar_feeds (player_id, token) values ($1, $2)", [pid.admin, TOKEN_A]), (e) => e.code === "23505");
+    await assert.rejects(as("service_role", null, "insert into public.player_calendar_feeds (player_id, token) values ($1, $2)", [pid.a, "E".repeat(43)]), (e) => e.code === "23505");
+    for (const bad of ["short", "F".repeat(44), "G".repeat(42) + "="]) {
+      await assert.rejects(as("service_role", null, "insert into public.player_calendar_feeds (player_id, token) values ($1, $2)", [pid.admin, bad]), (e) => e.code === "23514");
+    }
+  });
+
+  it("deleting the player removes their token", async () => {
+    await su("insert into auth.users (id, email) values ('b8b8b8b8-0000-4000-8000-0000000000b8', 'feed-gone@example.com')");
+    const gone = (await su("select id from public.players where auth_user_id = 'b8b8b8b8-0000-4000-8000-0000000000b8'")).rows[0].id;
+    await su("insert into public.player_calendar_feeds (player_id, token) values ($1, $2)", [gone, "H".repeat(43)]);
+    await su("delete from public.players where id = $1", [gone]);
+    assert.equal(await count("select count(*)::int as n from public.player_calendar_feeds where player_id = $1", [gone]), 0);
+  });
+});
+
 describe("tournaments, history and read-only tables", () => {
   it("anon cannot write tournaments", async () => {
     await denied("anon", null, "insert into public.tournaments (id, name) values ('t1', 'x')");

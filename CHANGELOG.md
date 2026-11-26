@@ -7,6 +7,7 @@ All notable changes to this project are documented here. Format based on
 ## [Unreleased]
 
 ### Added
+- Private calendar feed of a player's saved tournaments: subscribe from the wishlist page at an unguessable `/api/calendar/wishlist/<token>.ics` URL, with a Regenerate button that kills the old link. Only published tournaments are included, and the token table needs `supabase/migrations/20261126120000_player_calendar_feeds.sql` applied by hand (#268).
 - Self-serve account deletion: `DELETE /api/player/account` and a "Delete my account" action in player settings remove the player's saved tournaments, rating history, player row and auth user.
 - Skip-to-content link, `aria-expanded`/`aria-controls` on the mobile menu, and live-region roles on toasts.
 - Per-country social preview image, `POST /api/revalidate` (called after each scrape), and site endpoint docs on the API page.
