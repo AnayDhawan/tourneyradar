@@ -8,12 +8,16 @@ All notable changes to this project are documented here. Format based on
 
 ### Added
 - Private calendar feed of a player's saved tournaments: subscribe from the wishlist page at an unguessable `/api/calendar/wishlist/<token>.ics` URL, with a Regenerate button that kills the old link. Only published tournaments are included, and the token table needs `supabase/migrations/20261126120000_player_calendar_feeds.sql` applied by hand (#268).
+- Service worker (`public/sw.js`) so the web manifest gives an installable app, with an offline page. It caches only the app shell and hashed `/_next/static` assets; `/api/*`, Supabase and auth requests and pages always go to the network, and every deploy installs a fresh worker (#261).
+- Share button on tournament pages: the native share sheet where the browser has one, otherwise a copied link. The shared link is the canonical tournament URL with no query string or hash.
 - Self-serve account deletion: `DELETE /api/player/account` and a "Delete my account" action in player settings remove the player's saved tournaments, rating history, player row and auth user.
 - Skip-to-content link, `aria-expanded`/`aria-controls` on the mobile menu, and live-region roles on toasts.
 - Per-country social preview image, `POST /api/revalidate` (called after each scrape), and site endpoint docs on the API page.
 - Organizer self-submission at `/submit` for tournaments outside Chess-Results.com. Signed-in players send a listing that is stored as `pending` and hidden until a moderator publishes it with `npm run review:submissions` (#238).
 - Scraper flags `--unpublish-implausible` (hides published rows with a start date past the limit as `invalid_date`, never deletes) and `--regeocode-centroids` (re-geocodes upcoming rows stuck on a country centroid, skipping country-level answers). Both take `--dry-run`.
+- Moderation dashboard at `/admin/submissions`: admins (the existing `admins` table) approve, reject with a reason, or edit-then-approve pending organizer submissions from the browser, with an audit record of who decided and when. Needs `supabase/migrations/20261126120000_submission_review_audit.sql` applied by hand; `npm run review:submissions` keeps working (#263).
 - Vitest suite (64 tests) run in CI, plus Playwright specs for country pages and calendar feeds.
+- Playwright smoke specs for account deletion and tournament submission, run against a mocked Supabase and mocked API routes so they need no secrets and touch no live service (#284).
 
 ### Changed
 - `/stats` Monthly traffic section: stat tiles for the latest month with change against the month before, a settings row (bars, line, area or table; visitors, page views or both; monthly or running total) and a table view, replacing the fixed bar chart. The logged numbers moved to `lib/traffic.ts`.
@@ -23,6 +27,7 @@ All notable changes to this project are documented here. Format based on
 - Tournament countdowns use the viewer's calendar day and render only in the browser; weeks round down, so 8 days reads "In 1 week".
 - Anonymous and signed-in reads of `tournaments` return published rows only (RLS), applied by hand with `supabase/migrations/20261104120000_tournaments_published_rls.sql`.
 - `/status`, `/status/detail`, `/api-docs`, `/dataset`, `/stats` and `/player/login` have their own canonical URL and Open Graph text instead of inheriting the homepage's (#237).
+- `/tournaments`, `/updates` and `/docs` have their own Open Graph and Twitter title, description and URL instead of inheriting the homepage's (#272).
 - Sitemap lists every static page, pages through all upcoming events, and uses real last-modified dates.
 - Unknown `/country/<code>` URLs now return a real 404; cached pages refresh every 30 minutes.
 - 404 page styling moved to CSS classes; animations respect `prefers-reduced-motion`.

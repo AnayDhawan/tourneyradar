@@ -10,11 +10,16 @@
 // and scraped_at (so the weekly digest picks the event up). Rejecting sets
 // status 'rejected'; the row stays for the record.
 //
+// The CLI runs with the service role key and has no signed-in user, so its audit
+// record has no reviewer and says review_source 'cli'. The browser dashboard
+// (/admin/submissions, issue #263) records the admin instead.
+//
 // Look for a duplicate of the event from the scraper before approving. Nothing
 // here checks for one.
 
 import { createClient } from '@supabase/supabase-js';
 import { geocodeSingleCity } from '../lib/geocoding';
+import { buildReviewRecord } from '../lib/moderation';
 import { redactEmails } from '../lib/redact';
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -55,6 +60,11 @@ async function list() {
   console.log(`\n${data.length} pending. Approve: --approve <id>   Reject: --reject <id>`);
 }
 
+// Postgres 42703 (undefined_column) or PostgREST PGRST204 (column not in schema cache).
+function isMissingColumn(error: { code?: string }): boolean {
+  return error.code === '42703' || error.code === 'PGRST204';
+}
+
 async function finish(id: string, status: 'published' | 'rejected', extra: Record<string, unknown>, note?: string) {
   const { data, error } = await supabase
     .from('tournaments')
@@ -66,10 +76,23 @@ async function finish(id: string, status: 'published' | 'rejected', extra: Recor
   if (error) fail(`Could not update ${id}: ${error.message}`);
   if (!data?.length) fail(`${id} is not a pending submission.`);
 
-  const { error: logError } = await supabase
-    .from('tournament_submissions')
-    .update({ reviewed_at: new Date().toISOString(), review_note: note ?? null })
-    .eq('tournament_id', id);
+  const record = buildReviewRecord({
+    decision: status === 'published' ? 'approved' : 'rejected',
+    reviewedBy: null,
+    source: 'cli',
+    note: note ?? null,
+    now: new Date(),
+  });
+  let { error: logError } = await supabase.from('tournament_submissions').update(record).eq('tournament_id', id);
+  if (logError && isMissingColumn(logError)) {
+    // 20261126120000_submission_review_audit.sql has not been applied yet. Keep
+    // working with the columns that existed before it.
+    console.warn('Audit columns are missing; run the 20261126120000 migration. Recording reviewed_at and the note only.');
+    ({ error: logError } = await supabase
+      .from('tournament_submissions')
+      .update({ reviewed_at: record.reviewed_at, review_note: record.review_note })
+      .eq('tournament_id', id));
+  }
   if (logError) fail(`${id} is ${status}, but recording the review failed: ${logError.message}`);
   console.log(`${id}: ${status}`);
 }

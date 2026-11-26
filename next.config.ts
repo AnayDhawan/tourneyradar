@@ -80,8 +80,15 @@ function contentSecurityPolicy(): string {
     .join("; ");
 }
 
+// Identifies this build to the service worker (components/ServiceWorkerRegister.tsx
+// puts it in the worker's URL, so each deploy installs a fresh worker and shell
+// cache). Vercel's commit SHA is stable per deploy; elsewhere fall back to the
+// build time, which still differs for every build. Inlined at build time.
+const buildId = process.env.VERCEL_GIT_COMMIT_SHA ?? String(Date.now());
+
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  env: { NEXT_PUBLIC_BUILD_ID: buildId },
   async headers() {
     return [
       {
