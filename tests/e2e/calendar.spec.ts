@@ -39,3 +39,18 @@ test.describe("/api/calendar/[country]", () => {
     expect(res.headers()["content-type"]).toContain("text/calendar")
   })
 })
+
+// Private wishlist feed (issue #268). A malformed token is rejected before any
+// database access, so this runs without Supabase credentials.
+test.describe("/api/calendar/wishlist/[token]", () => {
+  test("a malformed token returns an uncacheable 404", async ({ request }) => {
+    const res = await request.get("/api/calendar/wishlist/not-a-token.ics")
+    expect(res.status()).toBe(404)
+    expect(res.headers()["cache-control"]).toContain("no-store")
+  })
+
+  test("the player feed management API requires a session", async ({ request }) => {
+    const res = await request.get("/api/player/calendar-feed")
+    expect(res.status()).toBe(401)
+  })
+})
