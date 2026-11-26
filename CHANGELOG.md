@@ -7,6 +7,7 @@ All notable changes to this project are documented here. Format based on
 ## [Unreleased]
 
 ### Added
+- Service worker (`public/sw.js`) so the web manifest gives an installable app, with an offline page. It caches only the app shell and hashed `/_next/static` assets; `/api/*`, Supabase and auth requests and pages always go to the network, and every deploy installs a fresh worker (#261).
 - Self-serve account deletion: `DELETE /api/player/account` and a "Delete my account" action in player settings remove the player's saved tournaments, rating history, player row and auth user.
 - Skip-to-content link, `aria-expanded`/`aria-controls` on the mobile menu, and live-region roles on toasts.
 - Per-country social preview image, `POST /api/revalidate` (called after each scrape), and site endpoint docs on the API page.
