@@ -77,7 +77,7 @@ export default function Footer() {
             <h3 className="font-display" style={{
               fontSize: "1.5rem",
               fontWeight: 800,
-              color: "var(--primary)",
+              color: "var(--primary-text)",
               margin: 0,
             }}>
               TourneyRadar
@@ -99,7 +99,7 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackEvent("star_link", { src: "footer_text" })}
-              style={{ color: "var(--primary)", fontSize: "0.8125rem", fontWeight: 700, textDecoration: "none" }}
+              style={{ color: "var(--primary-text)", fontSize: "0.8125rem", fontWeight: 700, textDecoration: "none" }}
             >
               Star on GitHub
             </a>
@@ -134,7 +134,7 @@ export default function Footer() {
                 width: "36px",
                 height: "36px",
                 borderRadius: "50%",
-                background: "var(--primary)",
+                background: "var(--primary-solid)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

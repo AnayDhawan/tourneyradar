@@ -157,7 +157,7 @@ export default function PlayerLoginPage() {
                   style={{
                     background: "none",
                     border: "none",
-                    color: "var(--primary)",
+                    color: "var(--primary-text)",
                     fontSize: "0.875rem",
                     fontWeight: 600,
                     cursor: "pointer",
@@ -179,7 +179,7 @@ export default function PlayerLoginPage() {
 
               <p style={{ textAlign: "center", marginTop: "1.5rem", color: "var(--text-secondary)" }}>
                 Don&apos;t have an account?{" "}
-                <Link href="/player/register" style={{ color: "var(--primary)", fontWeight: 600 }}>
+                <Link href="/player/register" style={{ color: "var(--primary-text)", fontWeight: 600 }}>
                   Register here
                 </Link>
               </p>
