@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import { scoreTournamentForPlayer, type PlayerRankingPreferences } from './ranking';
 import { MAX_PAGE_LIMIT } from './api-params';
+import { ratingEligibilityFilters } from './rating-filter';
 
 // Listings hide tournaments starting within the next `days` days: players need
 // lead time to register and travel, so anything too imminent is noise. Returns
@@ -222,6 +223,8 @@ export interface TournamentQuery {
   limit?: number;
   country?: string | null;
   q?: string | null;
+  /** Only tournaments a player with this rating may enter (see lib/rating-filter.ts). */
+  rating?: number | null;
 }
 
 export interface TournamentPage {
@@ -242,6 +245,7 @@ export async function queryTournaments({
   limit = TOURNAMENT_DEFAULT_LIMIT,
   country,
   q,
+  rating,
 }: TournamentQuery = {}): Promise<TournamentPage> {
   const safeLimit =
     Number.isInteger(limit) && limit > 0
@@ -273,6 +277,13 @@ export async function queryTournaments({
     query = query.or(
       `name.ilike.%${term}%,location.ilike.%${term}%,city.ilike.%${term}%,state.ilike.%${term}%,country.ilike.%${term}%,organizer_name.ilike.%${term}%`
     );
+  }
+
+  if (typeof rating === 'number') {
+    // Two chained .or() calls AND together: (no min or min <= rating) and
+    // (no max or max >= rating). Rows with neither bound always pass.
+    const [minOk, maxOk] = ratingEligibilityFilters(rating);
+    query = query.or(minOk).or(maxOk);
   }
 
   const { data, error, count } = await query;

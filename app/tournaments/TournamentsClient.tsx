@@ -1,11 +1,14 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import BaseLayout from "@/components/BaseLayout";
 import SaveButton from "@/components/SaveButton";
 import { getCountdown, isNewTournament } from "@/lib/countdown";
 import { trackEvent } from "@/lib/track";
+import { useAuth } from "@/lib/AuthContext";
+import { MAX_FILTER_RATING, MIN_FILTER_RATING, savedRatingOf, type RatingParam } from "@/lib/rating-filter";
 import { formatDistance, sortByDistance } from "@/lib/distance";
 import { useNearestSort } from "@/lib/useNearestSort";
 
@@ -35,6 +38,7 @@ interface Props {
   totalPages: number;
   total: number;
   q: string;
+  ratingParam: RatingParam;
 }
 
 function formatDate(dateStr: string): string {
@@ -56,8 +60,12 @@ function useIsClient(): boolean {
   return useSyncExternalStore(noopSubscribe, () => true, () => false);
 }
 
-export default function TournamentsClient({ initialTournaments, page, totalPages, total, q }: Props) {
+export default function TournamentsClient({ initialTournaments, page, totalPages, total, q, ratingParam }: Props) {
   const isClient = useIsClient();
+  const router = useRouter();
+  const { user, userType, loading: authLoading } = useAuth();
+  const { rating } = ratingParam;
+
   const nearest = useNearestSort();
   // Sorts only the rows of the current page (see PR notes); date order otherwise.
   const rows: { item: Tournament; distanceKm: number | null }[] = nearest.origin
@@ -89,9 +97,26 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
     const params = new URLSearchParams();
     if (q.trim()) params.set("q", q.trim());
     if (targetPage > 1) params.set("page", String(targetPage));
+    // `rating=` stays in the URL, even empty, once the visitor has chosen:
+    // absent means "default to my saved rating", empty means "show everything".
+    if (ratingParam.present) params.set("rating", rating === null ? "" : String(rating));
     const qs = params.toString();
     return qs ? `/tournaments?${qs}` : "/tournaments";
   };
+
+  // A signed-in player with a saved rating lands on their own eligibility view.
+  // Runs once: after it, `rating` is in the URL and the visitor can change or
+  // clear it freely.
+  const savedRating = userType === "player" ? savedRatingOf(user) : null;
+  const defaulted = useRef(false);
+  useEffect(() => {
+    if (ratingParam.present || authLoading || savedRating === null || defaulted.current) return;
+    defaulted.current = true;
+    const params = new URLSearchParams();
+    if (q.trim()) params.set("q", q.trim());
+    params.set("rating", String(savedRating));
+    router.replace(`/tournaments?${params.toString()}`, { scroll: false });
+  }, [ratingParam.present, authLoading, savedRating, q, router]);
 
   return (
     <BaseLayout
@@ -108,6 +133,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
               onSubmit={handleSearchSubmit}
               style={{ position: "relative", maxWidth: "600px", margin: "0 auto" }}
             >
+              {ratingParam.present && <input type="hidden" name="rating" value={rating ?? ""} />}
               <input
                 type="text"
                 name="q"
@@ -135,7 +161,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
               </span>
               {q && (
                 <Link
-                  href="/tournaments"
+                  href={ratingParam.present ? `/tournaments?rating=${rating ?? ""}` : "/tournaments"}
                   aria-label="Clear search"
                   onClick={markEngaged}
                   style={{
@@ -155,6 +181,52 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
               )}
             </form>
 
+            <form
+              method="get"
+              action="/tournaments"
+              onSubmit={markEngaged}
+              style={{ maxWidth: "600px", margin: "1rem auto 0", display: "flex", flexWrap: "wrap", alignItems: "flex-end", gap: "0.75rem" }}
+            >
+              {q.trim() && <input type="hidden" name="q" value={q.trim()} />}
+              <div className="filter-group" style={{ flex: "1 1 12rem" }}>
+                <label htmlFor="rating-filter">Your rating</label>
+                <input
+                  key={rating ?? "none"}
+                  id="rating-filter"
+                  type="number"
+                  name="rating"
+                  inputMode="numeric"
+                  min={MIN_FILTER_RATING}
+                  max={MAX_FILTER_RATING}
+                  step={1}
+                  defaultValue={rating ?? ""}
+                  placeholder="e.g. 1450"
+                  aria-describedby="rating-filter-help"
+                  aria-invalid={ratingParam.invalid || undefined}
+                  className="form-input"
+                />
+              </div>
+              <button type="submit" className="btn btn-primary">Apply</button>
+              {ratingParam.present && (
+                <Link
+                  href={`/tournaments?${new URLSearchParams({ ...(q.trim() ? { q: q.trim() } : {}), rating: "" }).toString()}`}
+                  className="btn"
+                  onClick={markEngaged}
+                >
+                  Show all
+                </Link>
+              )}
+              <p
+                id="rating-filter-help"
+                role={ratingParam.invalid ? "alert" : undefined}
+                style={{ flexBasis: "100%", margin: 0, fontSize: "0.8125rem", color: ratingParam.invalid ? "var(--error)" : "var(--text-secondary)" }}
+              >
+                {ratingParam.invalid
+                  ? `"Your rating" must be a whole number from ${MIN_FILTER_RATING} to ${MAX_FILTER_RATING}, so no rating filter is applied.`
+                  : "Only show tournaments you can enter at this rating. Events with no rating limit always show. Leave empty to see all."}
+              </p>
+            </form>
+
             <p
               aria-live="polite"
               role="status"
@@ -165,7 +237,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
                 fontSize: "0.875rem",
               }}
             >
-              {total} tournament{total !== 1 ? "s" : ""} found{q ? ` for "${q}"` : ""}
+              {total} tournament{total !== 1 ? "s" : ""} found{q ? ` for "${q}"` : ""}{rating !== null ? ` open to rating ${rating}` : ""}
             </p>
 
             {initialTournaments.length > 0 && (
@@ -192,7 +264,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
 
           {initialTournaments.length === 0 ? (
             <div className="loading-message">
-              {q ? `No tournaments found for "${q}"` : "No tournaments found."}
+              {q ? `No tournaments found for "${q}"` : "No tournaments found."}{rating !== null ? ` None are open to rating ${rating}.` : ""}
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 350px), 1fr))", gap: "1.5rem" }}>
