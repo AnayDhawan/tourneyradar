@@ -9,6 +9,8 @@ import { getCountdown, isNewTournament } from "@/lib/countdown";
 import { trackEvent } from "@/lib/track";
 import { useAuth } from "@/lib/AuthContext";
 import { MAX_FILTER_RATING, MIN_FILTER_RATING, savedRatingOf, type RatingParam } from "@/lib/rating-filter";
+import { formatDistance, sortByDistance } from "@/lib/distance";
+import { useNearestSort } from "@/lib/useNearestSort";
 
 interface Tournament {
   id: string;
@@ -26,6 +28,8 @@ interface Tournament {
   external_link?: string;
   organizer_name?: string;
   created_at?: string;
+  lat?: number | null;
+  lng?: number | null;
 }
 
 interface Props {
@@ -62,6 +66,11 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
   const { user, userType, loading: authLoading } = useAuth();
   const { rating } = ratingParam;
 
+  const nearest = useNearestSort();
+  // Sorts only the rows of the current page (see PR notes); date order otherwise.
+  const rows: { item: Tournament; distanceKm: number | null }[] = nearest.origin
+    ? sortByDistance(initialTournaments, nearest.origin)
+    : initialTournaments.map((item) => ({ item, distanceKm: null }));
   // Signal FeedbackPrompt that the user got value (searched / opened a tournament).
   const markEngaged = () => {
     if (typeof window !== "undefined") {
@@ -230,6 +239,27 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
             >
               {total} tournament{total !== 1 ? "s" : ""} found{q ? ` for "${q}"` : ""}{rating !== null ? ` open to rating ${rating}` : ""}
             </p>
+
+            {initialTournaments.length > 0 && (
+              <div style={{ textAlign: "center", marginTop: "1rem" }}>
+                <button
+                  type="button"
+                  className={`btn ${nearest.status === "active" ? "btn-primary" : "btn-outline-muted"}`}
+                  aria-pressed={nearest.status === "active" || nearest.status === "locating"}
+                  onClick={nearest.toggle}
+                >
+                  {nearest.status === "locating" ? "Finding your location…" : "Nearest first"}
+                </button>
+                <p role="status" style={{ marginTop: "0.5rem", color: "var(--text-secondary)", fontSize: "0.875rem" }}>
+                  {nearest.status === "active" &&
+                    `Sorted by distance from you${totalPages > 1 ? " within this page" : ""}. Your location stays in your browser.`}
+                  {nearest.status === "denied" &&
+                    "Location permission was denied, so tournaments stay in date order. You can allow it for this site in your browser settings and try again."}
+                  {nearest.status === "unavailable" &&
+                    "Your location is not available right now, so tournaments stay in date order."}
+                </p>
+              </div>
+            )}
           </div>
 
           {initialTournaments.length === 0 ? (
@@ -238,7 +268,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 350px), 1fr))", gap: "1.5rem" }}>
-              {initialTournaments.map((tournament: Tournament) => (
+              {rows.map(({ item: tournament, distanceKm }) => (
                 <div key={tournament.id} className="card" style={{ display: "flex", flexDirection: "column", position: "relative" }}>
                   <SaveButton tournamentId={tournament.id} style={{ position: "absolute", top: "1.25rem", right: "1.25rem" }} />
                   <div style={{ marginBottom: "1rem" }}>
@@ -287,6 +317,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-secondary)", fontSize: "0.9375rem" }}>
                       <span>Location:</span>
                       <span>{tournament.city || tournament.location || 'Unknown'}{tournament.country_code ? `, ${tournament.country_code}` : (tournament.state ? `, ${tournament.state}` : '')}</span>
+                      {distanceKm !== null && <span>({formatDistance(distanceKm)} away)</span>}
                     </div>
 
                     {tournament.organizer_name && (

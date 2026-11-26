@@ -1,14 +1,14 @@
 import { unstable_cache } from 'next/cache';
 import TournamentsClient from './TournamentsClient';
-import type { Metadata } from 'next';
 import { queryTournaments } from '@/lib/tournaments';
 import { parseRatingParam } from '@/lib/rating-filter';
+import { generateStaticPageMetadata } from '@/app/lib/metadata';
 
-export const metadata: Metadata = {
-  title: 'Browse Chess Tournaments',
-  description: 'Browse and filter 1,000+ upcoming chess tournaments worldwide. Filter by country, format, date, and FIDE rating status.',
-  alternates: { canonical: 'https://www.tourneyradar.com/tournaments' },
-};
+export const metadata = generateStaticPageMetadata(
+  '/tournaments',
+  'Browse Chess Tournaments',
+  'Browse and filter 1,000+ upcoming chess tournaments worldwide. Filter by country, format, date, and FIDE rating status.',
+);
 
 export default async function TournamentsPage({
   searchParams,

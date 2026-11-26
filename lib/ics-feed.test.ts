@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { icsEscape, foldLine, dayAfter, icsDate } from './ics-feed';
+import {
+  buildCalendar,
+  dayAfter,
+  foldLine,
+  icsDate,
+  icsDtstamp,
+  icsEscape,
+  tournamentToVEvent,
+} from './ics-feed';
 
 describe('icsEscape', () => {
   it('escapes backslash, semicolon, comma and newline, backslash first', () => {
@@ -84,5 +92,34 @@ describe('an assembled event', () => {
       .join('\r\n');
     expect(vevent).toContain('UID:tournament-t1@tourneyradar.com');
     expect(vevent).toContain('SUMMARY:Nuremberg Open\\; "A"');
+  });
+});
+
+describe('tournamentToVEvent and buildCalendar', () => {
+  const t = {
+    id: 'x1',
+    name: 'Open',
+    date: '2027-01-30',
+    end_date: null,
+    city: null,
+    state: null,
+    country: null,
+  };
+
+  it('says TBA in the description when no location is known', () => {
+    const event = tournamentToVEvent(t, { siteUrl: 'https://s.test', dtstamp: '20261126T100000Z' });
+    expect(event).toContain('DESCRIPTION:Location: TBA\\nLink: https://s.test/tournaments/x1');
+    expect(event).toContain('LOCATION:\r\n');
+  });
+
+  it('escapes the calendar name and appends extra headers before the events', () => {
+    const ics = buildCalendar({ calName: 'A, B', events: ['BEGIN:VEVENT\r\nEND:VEVENT'], extraHeaders: ['X-FOO:1'] });
+    expect(ics).toContain('X-WR-CALNAME:A\\, B\r\nX-FOO:1\r\nBEGIN:VEVENT');
+  });
+});
+
+describe('icsDtstamp', () => {
+  it('drops separators and milliseconds', () => {
+    expect(icsDtstamp(new Date('2026-11-26T10:00:00.123Z'))).toBe('20261126T100000Z');
   });
 });
