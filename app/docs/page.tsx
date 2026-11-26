@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 import type { Doc } from "@/lib/docs";
+import { generateStaticPageMetadata } from "@/app/lib/metadata";
 import DocsPageClient from "./DocsPageClient";
 
-export const metadata: Metadata = {
-  title: "Docs",
-  description: "Guides for using TourneyRadar, written by maintainers and players.",
-  alternates: { canonical: "https://www.tourneyradar.com/docs" },
-};
+export const metadata = generateStaticPageMetadata(
+  "/docs",
+  "Docs",
+  "Guides for using TourneyRadar, written by maintainers and players.",
+);
 
 export default async function DocsPage() {
   const { data } = await supabase
