@@ -68,7 +68,11 @@ export default function MapComponent({ tournaments }: Props) {
     );
 
     validTournaments.forEach((tournament) => {
-      const marker = L.marker([tournament.lat!, tournament.lng!]);
+      // title/alt give the focusable marker button an accessible name.
+      const marker = L.marker([tournament.lat!, tournament.lng!], {
+        title: tournament.name,
+        alt: tournament.name,
+      });
       
       const popupContent = `
         <div style="min-width: 200px;">

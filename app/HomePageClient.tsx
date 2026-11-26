@@ -404,7 +404,7 @@ export default function HomePageClient({ initialTournaments, stats }: Props) {
                   {filtered
                     .filter((t) => Number.isFinite(t.lat) && Number.isFinite(t.lng))
                     .map((t) => (
-                      <Marker key={t.id} position={[t.lat!, t.lng!]} icon={markerIcon ?? undefined}>
+                      <Marker key={t.id} position={[t.lat!, t.lng!]} icon={markerIcon ?? undefined} title={t.name} alt={t.name}>
                         <Popup>
                           <div style={{ minWidth: 220, padding: "4px" }}>
                             <div style={{ fontWeight: 700, color: "#1a1a1a", marginBottom: 8, fontSize: 14, lineHeight: 1.3 }}>
