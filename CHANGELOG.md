@@ -7,6 +7,7 @@ All notable changes to this project are documented here. Format based on
 ## [Unreleased]
 
 ### Added
+- Share button on tournament pages: the native share sheet where the browser has one, otherwise a copied link. The shared link is the canonical tournament URL with no query string or hash.
 - Self-serve account deletion: `DELETE /api/player/account` and a "Delete my account" action in player settings remove the player's saved tournaments, rating history, player row and auth user.
 - Skip-to-content link, `aria-expanded`/`aria-controls` on the mobile menu, and live-region roles on toasts.
 - Per-country social preview image, `POST /api/revalidate` (called after each scrape), and site endpoint docs on the API page.
