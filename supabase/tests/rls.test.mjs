@@ -417,6 +417,34 @@ describe("tournament_submissions (organizer submissions, #238)", () => {
     assert.equal(row.submitted_by, null);
   });
 
+  it("the audit columns (#263) are service-role only, even for an admin", async () => {
+    const audit = "update public.tournament_submissions set decision = 'approved', reviewed_by = $1";
+    for (const [role, sub] of [["anon", null], ["authenticated", A], ["authenticated", ADMIN]]) {
+      await denied(role, sub, "select decision, reviewed_by, review_source from public.tournament_submissions");
+      await denied(role, sub, audit, [ADMIN]);
+    }
+    const res = await as("service_role", null, `${audit} where tournament_id = $2`, [ADMIN, T]);
+    assert.equal(res.affectedRows, 1);
+  });
+
+  it("decision and review_source only accept the known values", async () => {
+    await assert.rejects(su("update public.tournament_submissions set decision = 'maybe' where tournament_id = $1", [T]), (e) => e.code === "23514");
+    await assert.rejects(su("update public.tournament_submissions set review_source = 'email' where tournament_id = $1", [T]), (e) => e.code === "23514");
+  });
+
+  it("deleting the reviewing admin keeps the audit row and clears the reviewer", async () => {
+    const R = "d1d1d1d1-0000-4000-8000-0000000000d1";
+    await su("insert into auth.users (id, email) values ($1, 'reviewer@example.com')", [R]);
+    await su("insert into public.tournaments (id, name, status) values ('submitted_test_3', 'Third', 'published')");
+    await su("insert into public.tournament_submissions (tournament_id, submitted_by, reviewed_at, decision, reviewed_by, review_source) values ('submitted_test_3', $1, now(), 'approved', $2, 'dashboard')", [pid.a, R]);
+
+    await su("delete from public.players where auth_user_id = $1", [R]);
+    await su("delete from auth.users where id = $1", [R]);
+
+    const row = (await su("select decision, reviewed_by, review_source from public.tournament_submissions where tournament_id = 'submitted_test_3'")).rows[0];
+    assert.deepEqual({ ...row }, { decision: "approved", reviewed_by: null, review_source: "dashboard" });
+  });
+
   it("deleting the tournament removes the submission record", async () => {
     await su("delete from public.tournaments where id = 'submitted_test_2'");
     assert.equal(await count("select count(*)::int as n from public.tournament_submissions where tournament_id = 'submitted_test_2'"), 0);
