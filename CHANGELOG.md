@@ -14,6 +14,7 @@ All notable changes to this project are documented here. Format based on
 - Organizer self-submission at `/submit` for tournaments outside Chess-Results.com. Signed-in players send a listing that is stored as `pending` and hidden until a moderator publishes it with `npm run review:submissions` (#238).
 - Scraper flags `--unpublish-implausible` (hides published rows with a start date past the limit as `invalid_date`, never deletes) and `--regeocode-centroids` (re-geocodes upcoming rows stuck on a country centroid, skipping country-level answers). Both take `--dry-run`.
 - Vitest suite (64 tests) run in CI, plus Playwright specs for country pages and calendar feeds.
+- Playwright smoke specs for account deletion and tournament submission, run against a mocked Supabase and mocked API routes so they need no secrets and touch no live service (#284).
 
 ### Changed
 - `/stats` Monthly traffic section: stat tiles for the latest month with change against the month before, a settings row (bars, line, area or table; visitors, page views or both; monthly or running total) and a table view, replacing the fixed bar chart. The logged numbers moved to `lib/traffic.ts`.
