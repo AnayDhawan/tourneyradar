@@ -7,6 +7,7 @@ All notable changes to this project are documented here. Format based on
 ## [Unreleased]
 
 ### Added
+- "Nearest first" button on `/tournaments` sorts the current page by distance from the viewer. The browser location is requested only after the click and stays in the page (no server, analytics, URL or storage); rows without coordinates sort last (#267).
 - Private calendar feed of a player's saved tournaments: subscribe from the wishlist page at an unguessable `/api/calendar/wishlist/<token>.ics` URL, with a Regenerate button that kills the old link. Only published tournaments are included, and the token table needs `supabase/migrations/20261126120000_player_calendar_feeds.sql` applied by hand (#268).
 - Service worker (`public/sw.js`) so the web manifest gives an installable app, with an offline page. It caches only the app shell and hashed `/_next/static` assets; `/api/*`, Supabase and auth requests and pages always go to the network, and every deploy installs a fresh worker (#261).
 - Share button on tournament pages: the native share sheet where the browser has one, otherwise a copied link. The shared link is the canonical tournament URL with no query string or hash.
