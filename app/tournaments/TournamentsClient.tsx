@@ -352,7 +352,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
               {page > 1 ? (
                 <Link href={buildHref(page - 1)} className="btn">← Previous</Link>
               ) : (
-                <span className="btn" style={{ opacity: 0.5, pointerEvents: "none" }}>← Previous</span>
+                <span className="btn" role="link" aria-disabled="true" style={{ opacity: 0.5, pointerEvents: "none" }}>← Previous</span>
               )}
               <span style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>
                 Page {page} of {totalPages}
@@ -360,7 +360,7 @@ export default function TournamentsClient({ initialTournaments, page, totalPages
               {page < totalPages ? (
                 <Link href={buildHref(page + 1)} className="btn">Next →</Link>
               ) : (
-                <span className="btn" style={{ opacity: 0.5, pointerEvents: "none" }}>Next →</span>
+                <span className="btn" role="link" aria-disabled="true" style={{ opacity: 0.5, pointerEvents: "none" }}>Next →</span>
               )}
             </nav>
           )}
